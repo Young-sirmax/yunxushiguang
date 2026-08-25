@@ -1,0 +1,96 @@
+const API = require('../../api/api.js');
+const { formatDate, showToast } = require('../../utils/util.js');
+
+Page({
+  data: {
+    list: [],
+    page: 1,
+    pageSize: 20,
+    total: 0,
+    loading: false
+  },
+
+  onShow() {
+    this.setData({ page: 1, list: [] });
+    this.loadList();
+  },
+
+  async loadList() {
+    const openid = wx.getStorageSync('openid');
+    if (!openid) {
+      showToast('请先登录');
+      return;
+    }
+
+    this.setData({ loading: true });
+    try {
+      const res = await API.getFavoriteList({
+        page: this.data.page,
+        pageSize: this.data.pageSize
+      });
+
+      const newList = (res.data || []).map(item => ({
+        ...item,
+        timeText: formatDate(item.createTime)
+      }));
+
+      this.setData({
+        list: this.data.page === 1 ? newList : this.data.list.concat(newList),
+        total: res.total || 0,
+        loading: false
+      });
+    } catch (err) {
+      console.error('加载收藏列表失败:', err);
+      this.setData({ loading: false });
+      showToast('加载失败');
+    }
+  },
+
+  goDetail(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    wx.navigateTo({
+      url: `/pages/commodity_detail/commodity_detail?id=${id}`
+    });
+  },
+
+  goHome() {
+    wx.switchTab({ url: '/pages/commodity_list/commodity_list' });
+  },
+
+  removeFavorite(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '取消收藏',
+      content: '确定要取消收藏这件商品吗？',
+      confirmColor: '#ff4d4f',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            await API.removeFavorite(id);
+            showToast('已取消收藏');
+            this.setData({ page: 1, list: [] });
+            this.loadList();
+          } catch (err) {
+            showToast('操作失败');
+          }
+        }
+      }
+    });
+  },
+
+  onReachBottom() {
+    if (this.data.loading) return;
+    if (this.data.list.length >= this.data.total) return;
+
+    this.setData({ page: this.data.page + 1 });
+    this.loadList();
+  },
+
+  onPullDownRefresh() {
+    this.setData({ page: 1, list: [] });
+    this.loadList().then(() => {
+      wx.stopPullDownRefresh();
+    });
+  }
+});

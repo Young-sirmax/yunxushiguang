@@ -1,0 +1,45 @@
+<!--pages/home_release/home_release.wxml-->
+<view class="page-container">
+  <view class="section-title">我的发布</view>
+  <view class="commodity-list" wx:if="{{list.length > 0}}">
+    <view class="item-card card" wx:for="{{list}}" wx:key="_id">
+      <image class="item-img" src="{{item.images[0] || '/images/default-goods.png'}}" mode="aspectFill"/>
+      <view class="item-info">
+        <text class="item-title">{{item.title}}</text>
+        <text class="item-price" wx:if="{{item.type !== 'want'}}">¥{{item.price}}</text>
+        <text class="item-price want" wx:else>{{item.rewardAmount > 0 ? '¥' + item.rewardAmount + ' 悬赏' : '求购中'}}</text>
+        <view class="item-status-row">
+          <text class="item-status {{item.status === 'onSale' ? 'onsale' : 'sold'}}">{{item.status === 'onSale' ? (item.type === 'want' ? '求购中' : '出售中') : '已结束'}}</text>
+          <view class="verified-mini" wx:if="{{item.isVerified}}">✓ 已认证</view>
+        </view>
+      </view>
+      <view class="item-actions">
+        <text class="action-edit" bindtap="editItem" data-id="{{item._id}}">编辑</text>
+        <text class="action-delete" bindtap="deleteItem" data-id="{{item._id}}">删除</text>
+      </view>
+    </view>
+  </view>
+  <view class="empty" wx:if="{{list.length === 0 && deletedList.length === 0}}">
+    <text>你还没有发布过信息</text>
+  </view>
+
+  <view class="section-title" wx:if="{{deletedList.length > 0}}">
+    已删除信息
+    <text class="section-hint">（可恢复或编辑后重新发布）</text>
+  </view>
+  <view class="commodity-list" wx:if="{{deletedList.length > 0}}">
+    <view class="item-card card deleted" wx:for="{{deletedList}}" wx:key="_id">
+      <image class="item-img" src="{{item.images[0] || '/images/default-goods.png'}}" mode="aspectFill"/>
+      <view class="item-info">
+        <text class="item-title">{{item.title}}</text>
+        <text class="item-price" wx:if="{{item.type !== 'want'}}">¥{{item.price}}</text>
+        <text class="item-price want" wx:else>求购信息</text>
+        <text class="item-status deleted-status">已删除</text>
+      </view>
+      <view class="item-actions">
+        <text class="action-restore" bindtap="restoreItem" data-id="{{item._id}}">恢复</text>
+        <text class="action-edit" bindtap="editDeletedItem" data-id="{{item._id}}">编辑重发</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,103 @@
+<!--pages/commodity_detail/commodity_detail.wxml-->
+<view class="page-container" wx:if="{{commodity}}">
+  <!-- 图片轮播 -->
+  <swiper class="image-swiper" indicator-dots autoplay circular>
+    <swiper-item wx:for="{{commodity.images}}" wx:key="*this">
+      <image src="{{item}}" mode="aspectFill" class="swiper-img" bindtap="previewImage" data-url="{{item}}"/>
+    </swiper-item>
+    <swiper-item wx:if="{{commodity.images.length === 0}}">
+      <image src="/images/default-goods.png" mode="aspectFill" class="swiper-img"/>
+    </swiper-item>
+  </swiper>
+
+  <!-- 价格与标题 -->
+  <view class="info-section card">
+    <view class="price-row">
+      <block wx:if="{{commodity.type === 'want'}}">
+        <text class="price want" wx:if="{{commodity.rewardAmount > 0}}">¥{{commodity.rewardAmount}}</text>
+        <text class="price want" wx:else>求购</text>
+        <text class="reward-label" wx:if="{{commodity.rewardAmount > 0}}">悬赏金</text>
+      </block>
+      <block wx:else>
+        <text class="price">¥{{commodity.price}}</text>
+        <text class="original-price" wx:if="{{commodity.originalPrice}}">原价 ¥{{commodity.originalPrice}}</text>
+      </block>
+    </view>
+    <text class="title">{{commodity.title}}</text>
+    <view class="meta-row">
+      <text class="meta-tag condition" wx:if="{{commodity.condition}}">{{commodity.condition}}</text>
+      <text class="meta-tag duration" wx:if="{{commodity.type !== 'want'}}">数量：{{commodity.quantity || 1}}</text>
+      <text class="meta-tag" wx:if="{{commodity.type === 'want'}}">求购信息</text>
+      <text class="meta-time">{{timeText}}</text>
+    </view>
+    <view class="priv-row" wx:if="{{commodity.privileges && commodity.privileges.length > 0}}">
+      <text class="priv-tag urgent" wx:if="{{commodity.privileges.indexOf('urgent') !== -1}}">🔥 急出</text>
+      <text class="priv-tag top" wx:if="{{commodity.privileges.indexOf('top') !== -1}}">📌 置顶</text>
+      <text class="priv-tag multi" wx:if="{{commodity.privileges.indexOf('multiImg') !== -1}}">🖼 多图</text>
+      <text class="priv-tag precision" wx:if="{{commodity.privileges.indexOf('precision') !== -1}}">🎯 精准推送</text>
+    </view>
+  </view>
+
+  <!-- 卖家信息 -->
+  <view class="seller-section card">
+    <view class="seller-header">{{commodity.type === 'want' ? '求购人信息' : '卖家信息'}}</view>
+    <view class="seller-info">
+      <image class="seller-avatar" src="{{commodity.sellerAvatar || '/images/default-avatar.png'}}"/>
+      <view class="seller-meta">
+        <view class="seller-name-row">
+          <text class="seller-name">{{commodity.sellerName || '匿名用户'}}</text>
+          <view class="verified-badge" wx:if="{{commodity.isVerified}}">✓ 已认证</view>
+        </view>
+        <text class="seller-contact" wx:if="{{!isOwner}}">联系方式：{{commodity.sellerContact || '未填写'}}</text>
+        <text class="seller-contact" wx:if="{{isOwner}}">联系方式：{{commodity.sellerContact || '未填写'}}</text>
+      </view>
+      <view class="copy-contact-btn" wx:if="{{!isOwner && commodity.sellerContact}}" bindtap="copyContact">
+        <text>复制</text>
+      </view>
+    </view>
+    <view class="seller-tip" wx:if="{{!isOwner}}">
+      <text class="tip-text" wx:if="{{commodity.type === 'want'}}">想出售此物？复制联系方式后在微信联系求购者</text>
+      <text class="tip-text" wx:else>复制联系方式后，可在微信添加好友私聊约定面交</text>
+    </view>
+  </view>
+
+  <!-- 取货地点 -->
+  <view class="location-section card" wx:if="{{commodity.type !== 'want'}}">
+    <view class="section-title">📍 取货地点</view>
+    <text class="location-text">{{commodity.tradeLocation || '待定'}}</text>
+  </view>
+
+  <!-- 商品描述 -->
+  <view class="desc-section card">
+    <view class="section-title">📝 {{commodity.type === 'want' ? '求购描述' : '商品描述'}}</view>
+    <text class="desc-text">{{commodity.description || (commodity.type === 'want' ? '求购者暂未填写详细描述' : '卖家暂未填写描述')}}</text>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar safe-bottom">
+    <view class="bottom-left">
+      <view class="action-btn {{isFavorited ? 'favorited' : ''}}" bindtap="toggleFavorite">
+        <text class="action-icon">{{isFavorited ? '❤️' : '🤍'}}</text>
+        <text class="action-text">{{isFavorited ? '已收藏' : '收藏'}}</text>
+      </view>
+      <view class="action-btn chat-btn" wx:if="{{!isOwner}}" bindtap="goChat">
+        <text class="action-icon">💬</text>
+        <text class="action-text">聊一聊</text>
+      </view>
+      <view class="action-btn" bindtap="goHome">
+        <text class="action-icon">🏠</text>
+        <text class="action-text">首页</text>
+      </view>
+      <button class="action-btn share-btn" open-type="share">
+        <text class="action-icon">📤</text>
+        <text class="action-text">分享</text>
+      </button>
+    </view>
+    <button class="trade-btn btn-primary" wx:if="{{!isOwner && commodity.sellerContact}}" bindtap="copyContact">
+      复制联系方式
+    </button>
+    <button class="trade-btn btn-default" wx:if="{{isOwner}}" bindtap="editCommodity">
+      编辑商品
+    </button>
+  </view>
+</view>

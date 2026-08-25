@@ -1,0 +1,22 @@
+<!--pages/privacy/privacy.wxml-->
+<view class="page-container">
+  <view class="content-card card">
+    <view class="title">隐私政策</view>
+    <view class="section">
+      <view class="section-title">1. 信息收集</view>
+      <text class="section-text">我们收集你的昵称、头像、姓名、学号、手机号及所在学校，姓名和学号用于人工核验身份，手机号用于交易联系。</text>
+    </view>
+    <view class="section">
+      <view class="section-title">2. 信息使用</view>
+      <text class="section-text">对外仅展示昵称和头像。姓名、学号不对其他用户公开，手机号仅向交易对方展示，不会用于其他商业用途。</text>
+    </view>
+    <view class="section">
+      <view class="section-title">3. 信息保护</view>
+      <text class="section-text">我们采用加密存储，严格保护你的个人信息安全。</text>
+    </view>
+    <view class="section">
+      <view class="section-title">4. 联系方式</view>
+      <text class="section-text">如有疑问，请通过小程序客服反馈。</text>
+    </view>
+  </view>
+</view>

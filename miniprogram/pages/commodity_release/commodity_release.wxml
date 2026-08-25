@@ -1,0 +1,402 @@
+<!--pages/commodity_release/commodity_release.wxml-->
+<view class="release-page">
+  <!-- 顶部渐变头区 -->
+  <view class="release-header">
+    <view class="header-bg-grad"></view>
+    <view class="header-content">
+      <view class="header-title">{{isEdit ? '编辑信息' : '发布信息'}}</view>
+      <view class="header-tip">{{isEdit ? '修改信息内容' : '免费发布，精准触达'}}</view>
+    </view>
+    <!-- 模式切换 -->
+    <view class="mode-switch">
+      <view class="mode-item {{mode === 'sell' ? 'active' : ''}}" bindtap="switchMode" data-mode="sell">
+        <text class="mode-icon">📦</text>
+        <text class="mode-label">出售闲置</text>
+      </view>
+      <view class="mode-item {{mode === 'want' ? 'active' : ''}}" bindtap="switchMode" data-mode="want">
+        <text class="mode-icon">🔍</text>
+        <text class="mode-label">求购信息</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 表单主体 -->
+  <view class="release-body">
+
+    <!-- 图片上传区 -->
+    <view class="form-card" wx:if="{{mode === 'sell'}}">
+      <view class="card-head">
+        <text class="card-title">商品图片</text>
+        <text class="card-sub">已添加 {{images.length}} 张</text>
+      </view>
+      <view class="image-grid">
+        <view class="image-cell" wx:for="{{images}}" wx:key="index" wx:for-item="img" wx:for-index="idx">
+          <image src="{{img}}" mode="aspectFill" class="thumb-img" bindtap="previewImage" data-index="{{idx}}"/>
+          <view class="img-badge" wx:if="{{idx === 0}}">主图</view>
+          <view class="img-del" catchtap="deleteImage" data-index="{{idx}}">
+            <text class="del-icon">×</text>
+          </view>
+        </view>
+        <view class="image-cell add-cell" bindtap="chooseImage">
+          <view class="add-inner">
+            <text class="add-plus">+</text>
+            <text class="add-label">添加图片</text>
+          </view>
+        </view>
+      </view>
+      <view class="card-hint">支持从相册或相机选择，建议上传 3 张以上以提高曝光</view>
+    </view>
+
+    <!-- 求购图片（可选） -->
+    <view class="form-card" wx:if="{{mode === 'want'}}">
+      <view class="card-head">
+        <text class="card-title">参考图片（可选）</text>
+      </view>
+      <view class="want-image-hint">
+        <text class="hint-icon">💡</text>
+        <text class="hint-text">可上传想要购买的物品参考图，帮助卖家快速识别</text>
+      </view>
+      <view class="image-grid">
+        <view class="image-cell" wx:for="{{images}}" wx:key="index" wx:for-item="img" wx:for-index="idx">
+          <image src="{{img}}" mode="aspectFill" class="thumb-img" bindtap="previewImage" data-index="{{idx}}"/>
+          <view class="img-del" catchtap="deleteImage" data-index="{{idx}}">
+            <text class="del-icon">×</text>
+          </view>
+        </view>
+        <view class="image-cell add-cell" bindtap="chooseImage">
+          <view class="add-inner">
+            <text class="add-plus">+</text>
+            <text class="add-label">添加图片</text>
+          </view>
+        </view>
+      </view>
+      <!-- 悬赏金选项 -->
+      <view class="reward-row">
+        <text class="reward-label">悬赏金（选填）</text>
+        <view class="reward-options">
+          <view class="reward-chip {{rewardAmount === 0 ? 'active' : ''}}" bindtap="setReward" data-value="0">免费</view>
+          <view class="reward-chip {{rewardAmount === 5 ? 'active' : ''}}" bindtap="setReward" data-value="5">¥5 悬赏</view>
+          <view class="reward-chip {{rewardAmount === 10 ? 'active' : ''}}" bindtap="setReward" data-value="10">¥10 悬赏</view>
+        </view>
+      </view>
+      <view class="reward-tip" wx:if="{{rewardAmount > 0}}">
+        <text class="tip-icon">💰</text>
+        <text>匹配成功扣¥2撮合费退还¥{{rewardAmount - 2}}，未匹配全额退还</text>
+      </view>
+      <view class="reward-tip free" wx:else>
+        <text class="tip-icon">📌</text>
+        <text>免费求购帖仅基础曝光，付费曝光特权请至服务中心</text>
+      </view>
+      <view class="want-publish-fee">
+        <view class="fee-row">
+          <text class="fee-label">发布求购费</text>
+          <text class="fee-value">{{rewardAmount > 0 ? '¥0（含在悬赏金中）' : '¥1/条'}}</text>
+        </view>
+      </view>
+      <view class="fee-tip">💡 求购者通常比卖家更急迫，付费曝光意愿更强</view>
+    </view>
+
+    <!-- 基本信息 -->
+    <view class="form-card">
+      <view class="card-head">
+        <text class="card-title">{{mode === 'sell' ? '基本信息' : '求购信息'}}</text>
+      </view>
+
+      <!-- 标题 -->
+      <view class="field-row">
+        <text class="field-label">{{mode === 'sell' ? '标题' : '想要'}}</text>
+        <view class="field-input-wrap">
+          <input class="field-input" placeholder="{{mode === 'sell' ? '简明扼要，让买家一眼动心' : '描述你想找的物品'}}" value="{{title}}" bindinput="onTitleInput" maxlength="30"/>
+          <text class="field-counter">{{title.length}}/30</text>
+        </view>
+      </view>
+
+      <!-- 分类选择 -->
+      <view class="field-row">
+        <text class="field-label">分类</text>
+        <picker mode="selector" range="{{categoryList}}" range-key="name" bindchange="onCategoryChange">
+          <view class="field-picker {{selectedCategory ? '' : 'placeholder'}}">
+            <text>{{selectedCategory ? selectedCategory.name : '选择分类'}}</text>
+            <text class="picker-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 成色/需求 -->
+      <view class="field-row column" wx:if="{{mode === 'sell'}}">
+        <text class="field-label">成色</text>
+        <view class="condition-chips">
+          <view 
+            class="chip {{condition === item ? 'active' : ''}}" 
+            wx:for="{{conditionOptions}}" 
+            wx:key="*this"
+            bindtap="onConditionTap"
+            data-value="{{item}}"
+          >{{item}}</view>
+        </view>
+      </view>
+
+      <view class="field-row column" wx:if="{{mode === 'want'}}">
+        <text class="field-label">需求成色</text>
+        <view class="condition-chips">
+          <view 
+            class="chip {{condition === item ? 'active' : ''}}" 
+            wx:for="{{conditionOptions}}" 
+            wx:key="*this"
+            bindtap="onConditionTap"
+            data-value="{{item}}"
+          >{{item}}</view>
+        </view>
+      </view>
+
+      <!-- 交易地点 / 取货地 -->
+      <view class="field-row">
+        <text class="field-label">{{mode === 'sell' ? '取货地' : '交易地点'}}</text>
+        <view class="field-input-wrap">
+          <input class="field-input" placeholder="如：3号宿舍楼 / 东区食堂" value="{{tradeLocation}}" bindinput="onLocationInput"/>
+        </view>
+      </view>
+
+      <!-- 联系方式 -->
+      <view class="field-row">
+        <text class="field-label">联系方式</text>
+        <view class="field-input-wrap">
+          <input class="field-input" placeholder="微信号/手机号" value="{{contact}}" bindinput="onContactInput"/>
+        </view>
+      </view>
+    </view>
+
+    <!-- 价格设置（仅出售模式） -->
+    <view class="form-card" wx:if="{{mode === 'sell'}}">
+      <view class="card-head">
+        <text class="card-title">价格设置</text>
+      </view>
+
+      <!-- 售价 -->
+      <view class="field-row">
+        <text class="field-label">售价</text>
+        <view class="price-wrap">
+          <text class="price-symbol">¥</text>
+          <input class="price-input" type="digit" placeholder="0.00" value="{{price}}" bindinput="onPriceInput"/>
+        </view>
+      </view>
+
+      <!-- 原价 -->
+      <view class="field-row">
+        <text class="field-label">原价</text>
+        <view class="price-wrap">
+          <text class="price-symbol">¥</text>
+          <input class="price-input" type="digit" placeholder="选填" value="{{originalPrice}}" bindinput="onOriginalPriceInput"/>
+          <view class="discount-tag" wx:if="{{price && originalPrice}}">
+            <text class="discount-text">{{discountText}}折</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 数量 -->
+      <view class="field-row">
+        <text class="field-label">数量</text>
+        <view class="stepper">
+          <view class="step-btn" bindtap="decreaseQty">−</view>
+          <input class="step-input" type="number" value="{{quantity}}" bindinput="onQuantityInput"/>
+          <view class="step-btn" bindtap="increaseQty">+</view>
+        </view>
+      </view>
+
+      <!-- 智能定价提示 -->
+      <view class="smart-tip" wx:if="{{suggestedPrice}}">
+        <view class="smart-icon">💡</view>
+        <view class="smart-body">
+          <text class="smart-title">智能参考价</text>
+          <text class="smart-value">¥{{suggestedPrice}}</text>
+          <text class="smart-desc">基于同类商品成交均价计算</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 商品描述 -->
+    <view class="form-card">
+      <view class="card-head">
+        <text class="card-title">{{mode === 'sell' ? '商品描述' : '需求描述'}}</text>
+        <text class="card-sub">{{description.length}}/500</text>
+      </view>
+      <textarea 
+        class="desc-area"
+        placeholder="{{mode === 'sell' ? '详细描述品牌、型号、购买时间、使用情况、成色等信息...' : '详细描述你想要的物品、预算、成色要求等...'}}"
+        value="{{description}}"
+        bindinput="onDescInput"
+        maxlength="500"
+      />
+      <!-- 快捷标签 -->
+      <view class="tag-group" wx:if="{{description.length < 10}}">
+        <text class="tag-hint">快速添加：</text>
+        <block wx:if="{{mode === 'sell'}}">
+          <view class="quick-tag" bindtap="appendDesc" data-text="全新未拆封">全新</view>
+          <view class="quick-tag" bindtap="appendDesc" data-text="仅使用几次">几乎全新</view>
+          <view class="quick-tag" bindtap="appendDesc" data-text="原价买入">有购买记录</view>
+          <view class="quick-tag" bindtap="appendDesc" data-text="包邮">包邮</view>
+        </block>
+        <block wx:if="{{mode === 'want'}}">
+          <view class="quick-tag" bindtap="appendDesc" data-text="诚心收">诚心收</view>
+          <view class="quick-tag" bindtap="appendDesc" data-text="预算可面议">预算可面议</view>
+          <view class="quick-tag" bindtap="appendDesc" data-text="见面交易">见面交易</view>
+          <view class="quick-tag" bindtap="appendDesc" data-text="长期收">长期收</view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 信任认证（免费） -->
+    <view class="form-card">
+      <view class="card-head">
+        <text class="card-title">信任认证</text>
+        <view class="auth-status">
+          <view class="status-pill {{isVerified ? 'verified' : 'unverified'}}">
+            <text wx:if="{{isVerified}}">✓ 已认证</text>
+            <text wx:else>点击认证</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="auth-desc">
+        <text class="auth-icon">🛡️</text>
+        <view class="auth-text">
+          <text class="auth-title">免费学生认证</text>
+          <text class="auth-sub">上传学生证/校园卡，审核通过后帖子带"已认证"标识</text>
+        </view>
+      </view>
+
+      <view class="auth-advantages">
+        <view class="adv-item">
+          <text class="adv-num">3×</text>
+          <text class="adv-text">平均浏览量提升</text>
+        </view>
+        <view class="adv-item">
+          <text class="adv-num">免费</text>
+          <text class="adv-text">不收取任何费用</text>
+        </view>
+        <view class="adv-item">
+          <text class="adv-num">快审</text>
+          <text class="adv-text">24小时内审核</text>
+        </view>
+      </view>
+
+      <!-- 开关 -->
+      <view class="auth-toggle-row">
+        <text class="toggle-label">开启学生认证</text>
+        <switch class="auth-switch" checked="{{needVerify}}" bindchange="toggleVerify" color="#07c160"/>
+      </view>
+
+      <!-- 学生证上传 -->
+      <view class="auth-upload" wx:if="{{needVerify}}">
+        <view class="upload-hint">请上传学生证或校园卡照片（隐去敏感信息）</view>
+        <view class="auth-image-grid">
+          <view class="auth-img-cell" wx:if="{{verifyImage}}" bindtap="previewVerifyImage">
+            <image src="{{verifyImage}}" mode="aspectFill" class="auth-thumb"/>
+            <view class="auth-img-del" catchtap="deleteVerifyImage">×</view>
+          </view>
+          <view class="auth-img-cell add" bindtap="chooseVerifyImage" wx:else>
+            <text class="auth-add-icon">+</text>
+            <text class="auth-add-label">上传证件</text>
+          </view>
+        </view>
+        <view class="auth-privacy">🔒 证件仅用于审核，严格保密</view>
+      </view>
+      <!-- 认证状态提示 -->
+      <view class="auth-process" wx:if="{{needVerify && verifyImage}}">
+        <view class="process-step {{verifyStatus === 'pending' ? 'active' : (verifyStatus === 'approved' ? 'done' : '')}}">
+          <text class="step-dot">1</text>
+          <text class="step-text">提交审核</text>
+        </view>
+        <view class="process-line"></view>
+        <view class="process-step {{verifyStatus === 'approved' ? 'done' : ''}}">
+          <text class="step-dot">2</text>
+          <text class="step-text">审核通过</text>
+        </view>
+        <view class="process-line"></view>
+        <view class="process-step done">
+          <text class="step-dot">3</text>
+          <text class="step-text">认证标识</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 曝光特权（付费） -->
+    <view class="form-card" wx:if="{{mode === 'sell'}}">
+      <view class="card-head">
+        <text class="card-title">曝光特权</text>
+        <view class="privilege-badge">{{selectedPrivileges.length}} 项已选</view>
+      </view>
+
+      <view class="privilege-desc">
+        <text class="priv-icon">⚡</text>
+        <text class="priv-text">花几块钱买"时间"，当天出清</text>
+      </view>
+
+      <!-- 特权选项 -->
+      <view class="privilege-list">
+        <view class="privilege-item {{item.checked ? 'active' : ''}}" wx:for="{{privilegeOptions}}" wx:key="id" bindtap="togglePrivilege" data-id="{{item.id}}">
+          <view class="priv-check">
+            <text wx:if="{{item.checked}}">✓</text>
+          </view>
+          <view class="priv-info">
+            <view class="priv-name-row">
+              <text class="priv-name">{{item.name}}</text>
+              <text class="priv-price">¥{{item.price}}</text>
+            </view>
+            <text class="priv-desc">{{item.desc}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 费用合计 -->
+      <view class="privilege-total" wx:if="{{totalPrivilegeCost > 0}}">
+        <text class="total-label">特权费用合计</text>
+        <text class="total-value">¥{{totalPrivilegeCost}}</text>
+      </view>
+
+      <view class="privilege-guide">
+        <text class="guide-title">📋 开通方式</text>
+        <text class="guide-step">1. 选择特权后发布信息</text>
+        <text class="guide-step">2. 添加运营者微信支付对应费用</text>
+        <text class="guide-step">3. 运营者手动开通特权</text>
+      </view>
+    </view>
+
+    <!-- 安全提示 -->
+    <view class="safe-tips">
+      <view class="tip-item">
+        <text class="tip-dot"></text>
+        <text class="tip-text">建议当面交易，保障双方权益</text>
+      </view>
+      <view class="tip-item">
+        <text class="tip-dot"></text>
+        <text class="tip-text">如实描述，减少交易纠纷</text>
+      </view>
+      <view class="tip-item">
+        <text class="tip-dot"></text>
+        <text class="tip-text">本平台为信息撮合，不参与交易</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部发布按钮 -->
+  <view class="bottom-action safe-bottom">
+    <view class="cost-summary" wx:if="{{totalPrivilegeCost > 0 || (mode === 'want' && rewardAmount > 0)}}">
+      <text class="cost-label">{{mode === 'want' ? '悬赏金' : '特权费用'}}</text>
+      <text class="cost-value">¥{{mode === 'want' ? rewardAmount : totalPrivilegeCost}}</text>
+      <text class="cost-note">（运营者微信开通）</text>
+    </view>
+    <view class="action-hint" wx:if="{{!canSubmit}}">至少填写一项信息即可发布</view>
+    <button 
+      class="publish-btn {{canSubmit ? 'active' : ''}}" 
+      bindtap="submitForm" 
+      disabled="{{!canSubmit || isSubmitting}}"
+    >
+      <text wx:if="{{isSubmitting}}">发布中...</text>
+      <text wx:elif="{{isEdit}}">保存修改</text>
+      <text wx:elif="{{mode === 'want'}}">发布求购</text>
+      <text wx:else>立即发布</text>
+    </button>
+    <view class="free-tag" wx:if="{{mode === 'sell'}}">✓ 免费发布 · 不收取任何上架费</view>
+  </view>
+</view>

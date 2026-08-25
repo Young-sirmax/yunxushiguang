@@ -1,0 +1,233 @@
+<!--pages/business/business.wxml-->
+<view class="page-container">
+  <!-- 顶部标题 -->
+  <view class="service-header">
+    <view class="header-bg"></view>
+    <view class="header-content">
+      <text class="header-title">校园信息服务站</text>
+    </view>
+  </view>
+
+  <!-- Tab 切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 'pack' ? 'active' : ''}}" bindtap="switchTab" data-tab="pack">
+      <text class="tab-icon">📝</text>
+      <text class="tab-label">信息精装</text>
+    </view>
+    <view class="tab-item {{activeTab === 'boost' ? 'active' : ''}}" bindtap="switchTab" data-tab="boost">
+      <text class="tab-icon">⚡</text>
+      <text class="tab-label">信息加速</text>
+    </view>
+    <view class="tab-item {{activeTab === 'match' ? 'active' : ''}}" bindtap="switchTab" data-tab="match">
+      <text class="tab-icon">🎯</text>
+      <text class="tab-label">悬赏撮合</text>
+    </view>
+  </view>
+
+  <!-- 第一层：信息精装服务 -->
+  <view class="tab-content" wx:if="{{activeTab === 'pack'}}">
+    <!-- 服务套餐 -->
+    <view class="service-list">
+      <view class="service-card card" wx:for="{{packServices}}" wx:key="id">
+        <view class="service-top">
+          <view class="service-name-row">
+            <text class="service-name">{{item.name}}</text>
+            <text class="service-price">¥{{item.price}}<text class="service-unit">/{{item.unit}}</text></text>
+          </view>
+          <text class="service-desc">{{item.desc}}</text>
+        </view>
+        <view class="service-features">
+          <view class="feature-tag" wx:for="{{item.features}}" wx:for-item="feat" wx:key="*this">✓ {{feat}}</view>
+        </view>
+        <view class="service-cta" bindtap="applyService" data-id="{{item.id}}" data-type="pack">
+          <text class="cta-text">立即申请</text>
+          <text class="cta-arrow">›</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="pay-guide card">
+      <view class="guide-title">📋 开通方式</view>
+      <view class="guide-step">
+        <text class="step-num">1</text>
+        <text class="step-text">把素材通过微信发给运营者（照片+描述）</text>
+      </view>
+      <view class="guide-step">
+        <text class="step-num">2</text>
+        <text class="step-text">扫码支付对应费用</text>
+      </view>
+      <view class="guide-step">
+        <text class="step-num">3</text>
+        <text class="step-text">运营者批量精修后发布推送</text>
+      </view>
+    </view>
+    <button class="btn-primary submit-btn" bindtap="copyWechat">复制运营者微信</button>
+  </view>
+
+  <!-- 第二层：信息加速服务 -->
+  <view class="tab-content" wx:if="{{activeTab === 'boost'}}">
+    <view class="section-hint">
+      <text class="hint-main">信息加速服务，自助曝光特权，</text>
+      <text class="hint-sub">给予你<text class="hint-highlight">非人</text>的卖出速度</text>
+    </view>
+
+    <view class="privilege-list">
+      <view class="privilege-card card" wx:for="{{boostServices}}" wx:key="id">
+        <view class="priv-check-badge">
+          <text class="check-icon">{{item.icon}}</text>
+        </view>
+        <view class="priv-info">
+          <view class="priv-head">
+            <text class="priv-name">{{item.name}}</text>
+            <text class="priv-price">¥{{item.price}}</text>
+          </view>
+          <text class="priv-desc">{{item.desc}}</text>
+        </view>
+        <view class="priv-action" bindtap="applyService" data-id="{{item.id}}" data-type="boost">
+          <text class="action-text">开通</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="pay-guide card">
+      <view class="guide-title">📋 开通方式</view>
+      <view class="guide-step">
+        <text class="step-num">1</text>
+        <text class="step-text">发布信息时勾选所需特权</text>
+      </view>
+      <view class="guide-step">
+        <text class="step-num">2</text>
+        <text class="step-text">添加运营者微信支付对应费用</text>
+      </view>
+      <view class="guide-step">
+        <text class="step-num">3</text>
+        <text class="step-text">运营者手动开通特权权限</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 第三层：信息悬赏撮合 -->
+  <view class="tab-content" wx:if="{{activeTab === 'match'}}">
+    <view class="section-hint">
+      <text>第三层盈利：信息悬赏撮合</text>
+      <text class="hint-sub">求购者发布需求 · 我们全网匹配 · 你买确定性</text>
+    </view>
+
+    <view class="match-hero card">
+      <view class="hero-icon">🎯</view>
+      <view class="hero-body">
+        <text class="hero-title">找不到想要的东西？</text>
+        <text class="hero-desc">预付¥5悬赏金，我们利用信息库和社群资源帮你匹配</text>
+      </view>
+      <view class="hero-arrow">›</view>
+    </view>
+
+    <!-- 两种模式 -->
+    <view class="match-modes">
+      <view class="mode-card card">
+        <view class="mode-header">
+          <text class="mode-icon">💰</text>
+          <text class="mode-name">悬赏匹配</text>
+        </view>
+        <view class="mode-prices">
+          <view class="price-chip">
+            <text class="chip-label">预付悬赏</text>
+            <text class="chip-value">¥5</text>
+          </view>
+        </view>
+        <view class="mode-rules">
+          <view class="rule-line success">
+            <text class="rule-dot"></text>
+            <text>匹配成功：收¥2撮合费，退还¥3</text>
+          </view>
+          <view class="rule-line neutral">
+            <text class="rule-dot"></text>
+            <text>未匹配：¥5全额退还，零风险</text>
+          </view>
+        </view>
+        <view class="mode-note">💡 5分钟完成：搜库→推微信→拉小群</view>
+      </view>
+
+      <view class="mode-card card">
+        <view class="mode-header">
+          <text class="mode-icon">📝</text>
+          <text class="mode-name">求购发布</text>
+        </view>
+        <view class="mode-prices">
+          <view class="price-chip">
+            <text class="chip-label">发布费</text>
+            <text class="chip-value">¥1/条</text>
+          </view>
+        </view>
+        <view class="mode-rules">
+          <view class="rule-line success">
+            <text class="rule-dot"></text>
+            <text>基础曝光，无额外推送</text>
+          </view>
+          <view class="rule-line neutral">
+            <text class="rule-dot"></text>
+            <text>可叠加购买加速特权</text>
+          </view>
+        </view>
+        <view class="mode-note">💡 求购者通常比卖家更急迫，付费意愿更强</view>
+      </view>
+    </view>
+
+    <view class="action-row">
+      <view class="action-main" bindtap="goRelease">
+        <text class="action-icon">📢</text>
+        <text class="action-text">立即发布求购</text>
+      </view>
+      <view class="action-sub" bindtap="copyWechat">
+        <text class="sub-icon">💬</text>
+        <text class="sub-text">微信联系运营者</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 复合收入：被动化 -->
+  <view class="passive-section">
+    <view class="section-header">
+      <text class="section-emoji">🏪</text>
+      <text class="section-title">其余权益</text>
+    </view>
+
+    <view class="passive-cards">
+      <view class="passive-card card">
+        <view class="passive-icon">🏠</view>
+        <text class="passive-name">校园生活圈</text>
+        <text class="passive-desc">周边商家图文展示位</text>
+        <view class="passive-price">
+          <text class="passive-amount">¥100-300</text>
+          <text class="passive-unit">/月</text>
+        </view>
+        <view class="passive-tag"></view>
+      </view>
+
+      <view class="passive-card card highlight">
+        <view class="passive-icon">🛡️</view>
+        <text class="passive-name">信任认证</text>
+        <text class="passive-desc">学生身份真实性背书</text>
+        <view class="passive-price">
+          <text class="passive-amount free">免费</text>
+          <text class="passive-unit">不收费</text>
+        </view>
+        <view class="passive-tag highlight">认证帖浏览量×3 · 免费开放</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部运营者联系方式 -->
+  <view class="operator-card card">
+    <view class="operator-row">
+      <view class="operator-info">
+        <text class="operator-label">运营者微信</text>
+        <text class="operator-wechat">{{operatorWechat}}</text>
+      </view>
+      <button class="copy-btn" bindtap="copyWechat">复制微信号</button>
+    </view>
+    <view class="operator-tip">
+      <text>所有收费均对应具体可感知的单项服务 · 不是平台抽成 · 不是过路费</text>
+    </view>
+  </view>
+</view>

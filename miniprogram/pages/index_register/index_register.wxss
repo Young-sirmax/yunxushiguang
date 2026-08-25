@@ -1,0 +1,146 @@
+/* pages/index_register/index_register.wxss */
+.register-page {
+  padding-top: 40rpx;
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 48rpx;
+}
+
+.register-title {
+  display: block;
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.register-desc {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.register-form {
+  padding: 40rpx;
+}
+
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.required {
+  color: #ff4d4f;
+}
+
+.form-input, .picker-value {
+  height: 88rpx;
+  line-height: 88rpx;
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.picker-value {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.picker-value.placeholder {
+  color: #bbb;
+}
+
+.arrow {
+  color: #ccc;
+  font-size: 32rpx;
+}
+
+.avatar-item {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-item .form-label {
+  margin-bottom: 0;
+  width: 160rpx;
+  flex-shrink: 0;
+}
+
+.avatar-upload {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.avatar-img {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 2rpx solid #eee;
+}
+
+.avatar-placeholder {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: #f8f8f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx dashed #ddd;
+}
+
+.avatar-icon {
+  font-size: 48rpx;
+  color: #999;
+}
+
+.error-text {
+  display: block;
+  font-size: 24rpx;
+  color: #ff4d4f;
+  margin-top: 8rpx;
+}
+
+.hint-text {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.privacy-agree {
+  display: flex;
+  align-items: flex-start;
+  margin: 40rpx 0 32rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.privacy-agree checkbox {
+  transform: scale(0.7);
+  margin-right: 8rpx;
+}
+
+.privacy-text {
+  line-height: 1.6;
+}
+
+.link {
+  color: #07c160;
+}
+
+.submit-btn {
+  width: 100%;
+}

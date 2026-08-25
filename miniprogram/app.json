@@ -1,0 +1,49 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/index_register/index_register",
+    "pages/commodity_list/commodity_list",
+    "pages/commodity_search/commodity_search",
+    "pages/commodity_release/commodity_release",
+    "pages/commodity_detail/commodity_detail",
+    "pages/home/home",
+    "pages/home_about/home_about",
+    "pages/home_release/home_release",
+    "pages/home_user_info/home_user_info",
+    "pages/home_feedback/home_feedback",
+    "pages/home_favorite/home_favorite",
+    "pages/home_message/home_message",
+    "pages/privacy/privacy",
+    "pages/business/business",
+    "pages/chat/chat"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#07c160",
+    "navigationBarTitleText": "云叙石光",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f5f7fa"
+  },
+  "tabBar": {
+    "color": "#9999aa",
+    "selectedColor": "#07c160",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/commodity_list/commodity_list",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/business/business",
+        "text": "服务"
+      },
+      {
+        "pagePath": "pages/home/home",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

@@ -1,0 +1,40 @@
+<view class="page-container">
+  <view class="page-header">
+    <text class="page-title">我的收藏</text>
+    <text class="page-count" wx:if="{{total > 0}}">共 {{total}} 条</text>
+  </view>
+
+  <view class="favorite-list" wx:if="{{list.length > 0}}">
+    <view class="favorite-card" wx:for="{{list}}" wx:key="_id">
+      <image class="item-img" src="{{item.commodityImage || '/images/default-goods.png'}}" mode="aspectFill" bindtap="goDetail" data-id="{{item.commodityId}}"/>
+      <view class="item-info">
+        <text class="item-title">{{item.commodityTitle}}</text>
+        <view class="item-price-row">
+          <text class="item-price want" wx:if="{{item.commodityType === 'want'}}">{{item.commodityRewardAmount > 0 ? '¥' + item.commodityRewardAmount + ' 悬赏' : '求购中'}}</text>
+          <text class="item-price" wx:else>¥{{item.commodityPrice}}</text>
+          <text class="item-original-price" wx:if="{{item.commodityOriginalPrice && item.commodityType !== 'want'}}">¥{{item.commodityOriginalPrice}}</text>
+        </view>
+        <view class="item-meta-row">
+          <text class="item-condition" wx:if="{{item.commodityCondition && item.commodityType !== 'want'}}">{{item.commodityCondition}}</text>
+          <text class="item-condition" wx:if="{{item.commodityType === 'want'}}">求购信息</text>
+          <view class="verified-mini" wx:if="{{item.commodityIsVerified}}">✓ 已认证</view>
+        </view>
+        <text class="item-time">{{item.timeText}}</text>
+      </view>
+      <view class="item-actions">
+        <view class="action-btn go-btn" bindtap="goDetail" data-id="{{item.commodityId}}">查看</view>
+        <view class="action-btn remove-btn" bindtap="removeFavorite" data-id="{{item._id}}">取消</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{list.length === 0 && !loading}}">
+    <text class="empty-icon">🤍</text>
+    <text class="empty-text">还没有收藏任何信息</text>
+    <text class="empty-hint">快去首页发现心仪物品吧</text>
+    <view class="empty-btn btn-primary" bindtap="goHome">去逛逛</view>
+  </view>
+
+  <view class="loading-tip" wx:if="{{loading}}">加载中...</view>
+  <view class="no-more" wx:if="{{!loading && list.length > 0 && list.length >= total}}">没有更多了</view>
+</view>

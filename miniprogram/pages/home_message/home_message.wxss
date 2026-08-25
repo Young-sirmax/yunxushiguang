@@ -1,0 +1,222 @@
+/* pages/home_message/home_message.wxss */
+page {
+  background: #f5f7fa;
+}
+
+.page-container {
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+.msg-list {
+  background: #fff;
+}
+
+.msg-item {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid #f5f5fa;
+  transition: background 0.15s;
+}
+
+.msg-item:active {
+  background: #f5f7fa;
+}
+
+.msg-item:last-child {
+  border-bottom: none;
+}
+
+.msg-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 16rpx;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+  background: #f0f0f5;
+}
+
+.msg-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.msg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.msg-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a2e;
+  max-width: 360rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-time {
+  font-size: 22rpx;
+  color: #9999aa;
+  flex-shrink: 0;
+}
+
+.msg-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.msg-preview {
+  font-size: 26rpx;
+  color: #666;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 16rpx;
+}
+
+.msg-badge {
+  min-width: 36rpx;
+  height: 36rpx;
+  background: #ff4d4f;
+  color: #fff;
+  font-size: 22rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10rpx;
+  font-weight: 500;
+}
+
+.msg-product-tag {
+  display: inline-flex;
+  align-items: center;
+  background: #f0f7f3;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  margin-top: 6rpx;
+  align-self: flex-start;
+  max-width: 400rpx;
+}
+
+.tag-icon {
+  font-size: 22rpx;
+  margin-right: 6rpx;
+}
+
+.tag-text {
+  font-size: 22rpx;
+  color: #07c160;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 240rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
+}
+
+.empty-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin-bottom: 16rpx;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #9999aa;
+  margin-bottom: 48rpx;
+}
+
+.empty-btn {
+  background: linear-gradient(135deg, #07c160, #00d97e);
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 48rpx;
+  padding: 0 64rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.3);
+}
+
+.empty-btn::after {
+  border: none;
+}
+
+/* 商品条目（卖家视角） */
+.product-entry {
+  background: linear-gradient(135deg, #fffef0 0%, #fff 40%);
+}
+
+.product-entry:active {
+  background: linear-gradient(135deg, #fff8e0 0%, #f5f7fa 40%);
+}
+
+.msg-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  max-width: 400rpx;
+  overflow: hidden;
+}
+
+.seller-tag {
+  font-size: 20rpx;
+  color: #ff6b35;
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.tag-price {
+  font-size: 22rpx;
+  color: #ff4d4f;
+  margin-left: 12rpx;
+  font-weight: 600;
+}
+
+.tag-thumb {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 6rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.buyer-tag {
+  color: #07c160;
+  background: linear-gradient(135deg, #e8f8ef, #d4f1e0);
+}
+
+.msg-product-tag {
+  display: inline-flex;
+  align-items: center;
+  background: #f0f7f3;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  margin-top: 6rpx;
+  align-self: flex-start;
+  max-width: 440rpx;
+}

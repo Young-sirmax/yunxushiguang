@@ -1,0 +1,70 @@
+<!--pages/commodity_list/commodity_list.wxml-->
+<view class="page-container">
+  <!-- 渐变头部 + 搜索栏 -->
+  <view class="hero-header">
+    <view class="hero-bg"></view>
+    <view class="hero-content">
+      <view class="hero-title-row">
+        <text class="hero-title">云叙石光</text>
+        <text class="hero-slogan">校园物品信息流服务站</text>
+      </view>
+      <view class="search-input-box" bindtap="goSearch">
+        <text class="search-icon">🔍</text>
+        <text class="search-placeholder">搜索闲置物品 / 求购信息</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 分类标签 -->
+  <scroll-view class="category-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="category-list">
+      <view class="category-item {{currentCategory === '' ? 'active' : ''}}" bindtap="switchCategory" data-id="">
+        全部
+      </view>
+      <view 
+        class="category-item {{currentCategory === item._id ? 'active' : ''}}" 
+        wx:for="{{categoryList}}" 
+        wx:key="_id"
+        bindtap="switchCategory"
+        data-id="{{item._id}}"
+      >
+        {{item.name}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 物理圆形商品画布 -->
+  <view class="canvas-container">
+    <canvas 
+      type="2d" 
+      id="commodityCanvas" 
+      class="commodity-canvas"
+      bindtouchstart="onTouchStart"
+      bindtouchmove="onTouchMove"
+      bindtouchend="onTouchEnd"
+      bindtouchcancel="onTouchEnd"
+    ></canvas>
+    
+    <!-- 加载状态 -->
+    <view class="load-more" wx:if="{{commodityList.length > 0}}">
+      <text wx:if="{{hasMore}}">上拉加载更多...</text>
+      <text wx:else>已经到底啦 ~</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{commodityList.length === 0 && !isRefreshing}}">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">暂无信息</text>
+      <text class="empty-sub">快来发布第一条信息吧！</text>
+    </view>
+  </view>
+
+  <!-- 发布浮动按钮 -->
+  <view class="publish-float" bindtap="goRelease">
+    <view class="publish-float-glow"></view>
+    <view class="publish-float-inner">
+      <text class="publish-icon">＋</text>
+      <text class="publish-text">发布信息</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,8 @@
+{
+  "name": "campus-trade-miniprogram",
+  "version": "1.0.0",
+  "description": "云叙石光 - 校园二手交易平台",
+  "dependencies": {
+    "@babel/runtime": "^7.23.0"
+  }
+}

@@ -1,0 +1,120 @@
+<!--pages/home_feedback/home_feedback.wxml-->
+<view class="page-container">
+  <view class="form-section">
+    <view class="section-title">
+      <text class="title-text">反馈类型</text>
+    </view>
+    <view class="type-list">
+      <view 
+        class="type-item {{currentType === item.value ? 'active' : ''}}" 
+        wx:for="{{typeOptions}}" 
+        wx:key="value"
+        bindtap="onTypeChange"
+        data-value="{{item.value}}"
+      >
+        <text class="type-icon">{{item.icon}}</text>
+        <text class="type-name">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-title">
+      <text class="title-text">反馈内容</text>
+      <text class="title-count">{{content.length}}/{{maxLength}}</text>
+    </view>
+    <view class="textarea-wrap">
+      <textarea 
+        class="feedback-textarea"
+        placeholder="请详细描述您的问题或建议，我们会认真对待每一条反馈"
+        value="{{content}}"
+        bindinput="onContentInput"
+        maxlength="{{maxLength}}"
+        auto-height
+      />
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-title">
+      <text class="title-text">联系方式（选填）</text>
+    </view>
+    <view class="input-wrap">
+      <input 
+        class="contact-input"
+        placeholder="手机号或微信，方便我们回复您"
+        value="{{contact}}"
+        bindinput="onContactInput"
+      />
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="section-title">
+      <text class="title-text">上传截图（选填，最多3张）</text>
+    </view>
+    <view class="image-list">
+      <view 
+        class="image-item" 
+        wx:for="{{images}}" 
+        wx:key="*this"
+      >
+        <image class="feedback-img" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-index="{{index}}"/>
+        <view class="image-delete" bindtap="deleteImage" data-index="{{index}}">×</view>
+      </view>
+      <view class="image-add" wx:if="{{images.length < 3}}" bindtap="chooseImage">
+        <text class="add-icon">+</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-action-bar safe-bottom">
+    <view class="action-tip" wx:if="{{!canSubmit}}">
+      <text>请输入至少5个字的反馈内容</text>
+    </view>
+    <view class="action-tip" wx:else>
+      <text>感谢您的反馈，我们会在1-3个工作日内处理</text>
+    </view>
+    <button 
+      class="submit-btn {{canSubmit ? '' : 'disabled'}}" 
+      bindtap="submitFeedback"
+      disabled="{{isSubmitting || !canSubmit}}"
+      hover-class="submit-btn-hover"
+      hover-stay-time="80"
+    >
+      <text wx:if="{{isSubmitting}}" class="btn-loading">
+        <text class="loading-icon"></text>
+        <text>提交中...</text>
+      </text>
+      <text wx:else>提交反馈</text>
+    </button>
+  </view>
+
+  <view class="history-section" wx:if="{{historyList.length > 0}}">
+    <view class="section-title">
+      <text class="title-text">我的历史反馈</text>
+    </view>
+    <view class="history-list">
+      <view class="history-card" wx:for="{{historyList}}" wx:key="_id">
+        <view class="history-header">
+          <text class="history-type">{{item.typeName}}</text>
+          <text class="history-status status-{{item.status}}">{{item.statusText}}</text>
+        </view>
+        <view class="history-content">{{item.content}}</view>
+        <view class="history-footer">
+          <text class="history-time">{{item.timeText}}</text>
+          <view class="history-actions">
+            <text class="urge-count" wx:if="{{item.urgeCount > 0 && item.status !== 'resolved' && item.status !== 'rejected'}}">已催{{item.urgeCount}}次</text>
+            <view 
+              class="urge-btn" 
+              wx:if="{{item.status === 'pending' || item.status === 'processing'}}"
+              bindtap="onUrge"
+              data-id="{{item._id}}"
+              data-index="{{index}}"
+            >催一催</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

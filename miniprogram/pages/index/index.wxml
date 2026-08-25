@@ -1,0 +1,36 @@
+<!--pages/index/index.wxml-->
+<view class="login-container">
+  <view class="login-bg">
+    <image class="bg-image" src="/images/bg-login.jpg" mode="aspectFill"/>
+    <view class="bg-mask"/>
+  </view>
+
+  <view class="login-content">
+    <view class="logo-area">
+      <view class="logo-icon">🏫</view>
+      <view class="logo-title">云叙石光</view>
+      <view class="logo-subtitle">校园物品信息流服务站</view>
+    </view>
+
+    <view class="login-card">
+      <view class="welcome-text">欢迎回来</view>
+      <view class="welcome-desc">登录后即可浏览和发布校园闲置物品</view>
+
+      <button class="login-btn btn-primary" bindtap="handleLogin">
+        微信一键登录
+      </button>
+
+      <view class="agreement-row">
+        <checkbox checked="{{agreed}}" bindtap="toggleAgree"/>
+        <view class="agreement-text">
+          我已阅读并同意
+          <text class="link" bindtap="goPrivacy">《隐私政策》</text>
+          和
+          <text class="link" bindtap="goPrivacy">《用户协议》</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="footer-text">不碰货 · 不垫资 · 不仓储</view>
+  </view>
+</view>

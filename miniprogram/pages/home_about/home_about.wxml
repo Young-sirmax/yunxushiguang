@@ -1,0 +1,21 @@
+<!--pages/home_about/home_about.wxml-->
+<view class="page-container">
+  <!-- 品牌头部 -->
+  <view class="brand-header">
+    <view class="brand-bg"></view>
+    <view class="brand-content">
+      <view class="brand-logo">🏫</view>
+      <view class="brand-name">云叙石光</view>
+      <view class="brand-sub">校园物品信息流服务站</view>
+      <view class="brand-slogan">不碰货、不垫资、不仓储</view>
+    </view>
+  </view>
+
+  <!-- 一句话介绍 -->
+  <view class="intro-card">
+    <view class="intro-quote">💡</view>
+    <view class="intro-text">我们是校园物品信息的编辑部和广播站，把粗糙信息加工成精装信息推送给精准人群。</view>
+  </view>
+
+  <view class="version">Version 5.0 · 信息服务站版</view>
+</view>

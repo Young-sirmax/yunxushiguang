@@ -1,0 +1,32 @@
+<!--pages/commodity_search/commodity_search.wxml-->
+<view class="page-container">
+  <view class="search-bar">
+    <view class="search-box">
+      <text class="search-icon">🔍</text>
+      <input placeholder="搜索物品 / 求购信息" value="{{keyword}}" focus="{{focusInput}}" bindfocus="onInputFocus" bindblur="onInputBlur" bindinput="onInput" confirm-type="search" bindconfirm="doSearch"/>
+      <text class="clear-btn" wx:if="{{keyword}}" bindtap="clearKeyword">×</text>
+    </view>
+    <text class="cancel-btn" bindtap="goBack">取消</text>
+  </view>
+
+  <view class="result-list" wx:if="{{results.length > 0}}">
+    <view class="commodity-card" wx:for="{{results}}" wx:key="_id" bindtap="goDetail" data-id="{{item._id}}">
+      <image class="card-img" src="{{item.images[0] || '/images/default-goods.png'}}" mode="aspectFill"/>
+      <view class="card-info">
+        <text class="card-title">{{item.title}}</text>
+        <view class="price-group">
+          <text class="card-price want" wx:if="{{item.type === 'want'}}">{{item.rewardAmount > 0 ? '¥' + item.rewardAmount + ' 悬赏' : '求购中'}}</text>
+          <text class="card-price" wx:else>¥{{item.price}}</text>
+          <text class="original-price" wx:if="{{item.originalPrice && item.type !== 'want'}}">¥{{item.originalPrice}}</text>
+        </view>
+        <view class="card-tags" wx:if="{{item.isVerified}}">
+          <text class="verified-tag">✓ 已认证</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{searched && results.length === 0}}">
+    <text>未找到相关信息</text>
+  </view>
+</view>

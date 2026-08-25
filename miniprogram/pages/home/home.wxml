@@ -1,0 +1,98 @@
+<!--pages/home/home.wxml-->
+<view class="page-container">
+  <!-- 渐变头部 -->
+  <view class="home-header">
+    <view class="header-bg-grad"></view>
+    <view class="user-info">
+      <image class="user-avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}"/>
+      <view class="user-meta">
+        <text class="user-name">{{userInfo.nickName || '未登录'}}</text>
+        <text class="user-school">{{userInfo.universityName || ''}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据统计 - 玻璃态卡片 -->
+  <view class="stats-card">
+    <view class="stat-item" bindtap="goMyRelease">
+      <text class="stat-num">{{stats.release}}</text>
+      <text class="stat-label">我发布的</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item" bindtap="goMyFavorite">
+      <text class="stat-num">{{stats.favorite}}</text>
+      <text class="stat-label">我的收藏</text>
+    </view>
+  </view>
+
+  <!-- 功能列表 -->
+  <view class="menu-section">
+    <view class="menu-item" bindtap="goUserInfo">
+      <view class="menu-icon-wrap icon-blue"><text class="menu-icon">👤</text></view>
+      <text class="menu-text">个人信息</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goMyFavorite">
+      <view class="menu-icon-wrap icon-red"><text class="menu-icon">❤️</text></view>
+      <text class="menu-text">我的收藏</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goMyRelease">
+      <view class="menu-icon-wrap icon-orange"><text class="menu-icon">📦</text></view>
+      <text class="menu-text">我发布的信息</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goMessage">
+      <view class="menu-icon-wrap icon-green"><text class="menu-icon">💬</text></view>
+      <text class="menu-text">我的消息</text>
+      <view class="menu-badge" wx:if="{{unreadMessageCount > 0}}">{{unreadMessageCount}}</view>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goService">
+      <view class="menu-icon-wrap icon-purple"><text class="menu-icon">⚡</text></view>
+      <text class="menu-text">服务中心</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="menu-section">
+    <view class="menu-item" bindtap="goFeedback">
+      <view class="menu-icon-wrap icon-yellow"><text class="menu-icon">📝</text></view>
+      <text class="menu-text">意见反馈</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goPrivacy">
+      <view class="menu-icon-wrap icon-gray"><text class="menu-icon">🔒</text></view>
+      <text class="menu-text">隐私政策</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goAbout">
+      <view class="menu-icon-wrap icon-cyan"><text class="menu-icon">ℹ️</text></view>
+      <text class="menu-text">关于我们</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 校园生活圈 - 信息位租赁 -->
+  <view class="plaza-section">
+    <view class="plaza-header">
+      <view class="plaza-title-row">
+        <text class="plaza-emoji">🏪</text>
+        <text class="plaza-title">校园生活圈</text>
+        <view class="plaza-tag">周边好店</view>
+      </view>
+      <text class="plaza-desc">周边商家信息展示位 · 按月租赁</text>
+    </view>
+    <scroll-view class="plaza-scroll" scroll-x="{{true}}" enable-flex="{{true}}">
+      <view class="plaza-card" wx:for="{{lifePlaza}}" wx:key="id" bindtap="openPlaza" data-id="{{item.id}}">
+        <image class="plaza-img" src="{{item.image}}" mode="aspectFill"/>
+        <view class="plaza-info">
+          <text class="plaza-name">{{item.name}}</text>
+          <text class="plaza-tag-line">{{item.tag}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <button class="logout-btn" bindtap="logout">退出登录</button>
+</view>
