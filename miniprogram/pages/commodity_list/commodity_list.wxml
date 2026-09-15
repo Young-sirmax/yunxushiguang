@@ -6,11 +6,18 @@
     <view class="hero-content">
       <view class="hero-title-row">
         <text class="hero-title">云叙石光</text>
-        <text class="hero-slogan">校园物品信息流服务站</text>
+        <text class="hero-slogan">校园物品信息服务站</text>
       </view>
       <view class="search-input-box" bindtap="goSearch">
         <text class="search-icon">🔍</text>
         <text class="search-placeholder">搜索闲置物品 / 求购信息</text>
+      </view>
+
+      <!-- 类型筛选：全部 / 闲置 / 求购 -->
+      <view class="type-filter">
+        <view class="type-item {{currentType === '' ? 'active' : ''}}" data-type="" bindtap="switchType">全部</view>
+        <view class="type-item sell {{currentType === 'sell' ? 'active' : ''}}" data-type="sell" bindtap="switchType">📦 闲置</view>
+        <view class="type-item want {{currentType === 'want' ? 'active' : ''}}" data-type="want" bindtap="switchType">🔍 求购</view>
       </view>
     </view>
   </view>
@@ -53,9 +60,9 @@
 
     <!-- 空状态 -->
     <view class="empty-state" wx:if="{{commodityList.length === 0 && !isRefreshing}}">
-      <text class="empty-icon">📭</text>
-      <text class="empty-text">暂无信息</text>
-      <text class="empty-sub">快来发布第一条信息吧！</text>
+      <text class="empty-icon">{{currentType === 'want' ? '🔍' : (currentType === 'sell' ? '📦' : '📭')}}</text>
+      <text class="empty-text">{{currentType === 'want' ? '暂无求购信息' : (currentType === 'sell' ? '暂无闲置信息' : '暂无信息')}}</text>
+      <text class="empty-sub">{{currentType === 'want' ? '发布一条求购，让闲置主动来找你' : '快来发布第一条信息吧！'}}</text>
     </view>
   </view>
 

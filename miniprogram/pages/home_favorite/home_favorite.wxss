@@ -1,7 +1,7 @@
 .page-container {
   padding: 24rpx;
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 .page-header {
@@ -15,12 +15,12 @@
 .page-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--text);
 }
 
 .page-count {
   font-size: 26rpx;
-  color: #999;
+  color: var(--text-light);
 }
 
 .favorite-list {
@@ -32,10 +32,11 @@
 .favorite-card {
   display: flex;
   align-items: center;
-  background: #fff;
-  border-radius: 20rpx;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
   padding: 24rpx;
-  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
+  border: 1rpx solid var(--border);
   transition: transform 0.2s ease;
 }
 
@@ -46,9 +47,9 @@
 .item-img {
   width: 160rpx;
   height: 160rpx;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   margin-right: 24rpx;
-  background: #f0f0f0;
+  background: #f1f5f9;
   flex-shrink: 0;
 }
 
@@ -61,7 +62,7 @@
 
 .item-title {
   font-size: 28rpx;
-  color: #333;
+  color: var(--text);
   font-weight: 500;
   margin-bottom: 10rpx;
   display: -webkit-box;
@@ -79,13 +80,13 @@
 
 .item-price {
   font-size: 32rpx;
-  color: #ff4d4f;
-  font-weight: bold;
+  color: var(--accent);
+  font-weight: 700;
   margin-right: 12rpx;
 }
 
 .item-price.want {
-  color: #07c160;
+  color: var(--primary);
 }
 
 .item-meta-row {
@@ -97,32 +98,34 @@
 
 .verified-mini {
   font-size: 20rpx;
-  color: #07c160;
-  background: #e6f7ed;
-  padding: 4rpx 12rpx;
-  border-radius: 20rpx;
+  color: var(--primary);
+  background: var(--primary-soft);
+  padding: 4rpx 14rpx;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
 }
 
 .item-original-price {
   font-size: 22rpx;
-  color: #bbb;
+  color: var(--text-light);
   text-decoration: line-through;
 }
 
 .item-condition {
   font-size: 22rpx;
-  color: #07c160;
-  background: #e6f7ed;
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
+  color: var(--primary);
+  background: var(--primary-soft);
+  padding: 4rpx 14rpx;
+  border-radius: var(--radius-pill);
   display: inline-block;
   align-self: flex-start;
   margin-bottom: 4rpx;
+  font-weight: 500;
 }
 
 .item-time {
   font-size: 22rpx;
-  color: #bbb;
+  color: var(--text-light);
   margin-top: 4rpx;
 }
 
@@ -147,15 +150,19 @@
 }
 
 .go-btn {
-  background: linear-gradient(135deg, #07c160, #00d97e);
-  color: #fff;
-  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.3);
+  background: var(--primary-grad);
+  color: var(--white);
+  box-shadow: 0 4rpx 12rpx rgba(0, 193, 126, 0.3);
 }
 
 .remove-btn {
-  background: #fff;
-  color: #ff4d4f;
-  border: 2rpx solid #ff4d4f;
+  background: var(--white);
+  color: var(--danger);
+  border: 2rpx solid rgba(244, 63, 94, 0.5);
+}
+
+.remove-btn:active {
+  background: var(--danger-soft);
 }
 
 .empty-state {
@@ -172,13 +179,13 @@
 
 .empty-text {
   font-size: 32rpx;
-  color: #333;
+  color: var(--text);
   margin-bottom: 12rpx;
 }
 
 .empty-hint {
   font-size: 26rpx;
-  color: #999;
+  color: var(--text-light);
   margin-bottom: 48rpx;
 }
 
@@ -199,5 +206,5 @@
   text-align: center;
   padding: 32rpx 0;
   font-size: 26rpx;
-  color: #999;
+  color: var(--text-light);
 }

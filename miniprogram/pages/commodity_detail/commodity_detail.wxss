@@ -24,35 +24,47 @@
 
 .price {
   font-size: 48rpx;
-  font-weight: bold;
-  color: #ff4d4f;
+  font-weight: 800;
+  color: var(--accent);
   margin-right: 16rpx;
+  letter-spacing: 1rpx;
 }
 
 .price.want {
-  color: #07c160;
+  color: var(--primary);
 }
 
 .reward-label {
   font-size: 22rpx;
-  color: #fff;
-  background: linear-gradient(135deg, #07c160, #00b86b);
+  color: var(--white);
+  background: var(--primary-grad);
   padding: 4rpx 16rpx;
-  border-radius: 20rpx;
+  border-radius: var(--radius-pill);
   font-weight: 500;
   margin-left: 8rpx;
+  box-shadow: var(--shadow-primary);
 }
 
 .original-price {
   font-size: 26rpx;
-  color: #bbb;
+  color: var(--text-light);
   text-decoration: line-through;
+}
+
+.price-note {
+  font-size: 22rpx;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  background: #f6f8fb;
+  border-radius: var(--radius);
+  padding: 14rpx 20rpx;
+  margin-top: 12rpx;
 }
 
 .title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--text);
   line-height: 1.5;
   margin-bottom: 16rpx;
   display: block;
@@ -66,25 +78,26 @@
 
 .meta-tag {
   font-size: 22rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 8rpx;
+  padding: 6rpx 18rpx;
+  border-radius: var(--radius-pill);
   margin-right: 12rpx;
   margin-bottom: 8rpx;
+  font-weight: 500;
 }
 
 .meta-tag.condition {
-  background: #e6f7ed;
-  color: #07c160;
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 .meta-tag.duration {
-  background: #e6f4ff;
-  color: #1890ff;
+  background: var(--info-soft);
+  color: var(--info);
 }
 
 .meta-time {
   font-size: 22rpx;
-  color: #bbb;
+  color: var(--text-light);
 }
 
 .priv-row {
@@ -102,8 +115,8 @@
 }
 
 .priv-tag.urgent {
-  background: linear-gradient(135deg, #ff6b6b, #ff4d4f);
-  color: #fff;
+  background: linear-gradient(135deg, #ff7a8a, #f43f5e);
+  color: var(--white);
 }
 
 .priv-tag.top {
@@ -129,12 +142,12 @@
 
 .verified-badge {
   font-size: 20rpx;
-  color: #fff;
-  background: linear-gradient(135deg, #07c160, #00d97e);
+  color: var(--white);
+  background: var(--primary-grad);
   padding: 4rpx 14rpx;
-  border-radius: 20rpx;
+  border-radius: var(--radius-pill);
   font-weight: 500;
-  box-shadow: 0 2rpx 8rpx rgba(7, 193, 96, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba(0, 193, 126, 0.3);
 }
 
 .seller-section, .location-section, .desc-section {
@@ -144,7 +157,7 @@
 .seller-header, .section-title {
   font-size: 30rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--text);
   margin-bottom: 20rpx;
 }
 
@@ -168,19 +181,19 @@
 
 .seller-name {
   font-size: 28rpx;
-  color: #333;
+  color: var(--text);
   font-weight: 500;
 }
 
 .seller-contact {
   font-size: 24rpx;
-  color: #999;
+  color: var(--text-light);
   margin-top: 4rpx;
 }
 
 .location-text, .desc-text {
   font-size: 28rpx;
-  color: #555;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
@@ -189,13 +202,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20rpx);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12rpx 20rpx;
   padding-bottom: calc(12rpx + env(safe-area-inset-bottom));
-  box-shadow: 0 -2rpx 12rpx rgba(0,0,0,0.06);
+  box-shadow: 0 -4rpx 24rpx rgba(15, 27, 45, 0.08);
+  border-top: 1rpx solid var(--border);
   z-index: 100;
 }
 
@@ -226,10 +241,6 @@
   animation: pop 0.4s ease;
 }
 
-.action-btn.chat-btn .action-icon {
-  color: #07c160;
-}
-
 @keyframes pop {
   0% { transform: scale(1); }
   50% { transform: scale(1.4); }
@@ -255,7 +266,7 @@
 
 .action-text {
   font-size: 20rpx;
-  color: #666;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -275,11 +286,12 @@
 .copy-contact-btn {
   margin-left: auto;
   padding: 10rpx 24rpx;
-  background: #07c160;
-  color: #fff;
+  background: var(--primary);
+  color: var(--white);
   font-size: 24rpx;
-  border-radius: 24rpx;
+  border-radius: var(--radius-pill);
   flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(0, 193, 126, 0.25);
 }
 
 .copy-contact-btn:active {
@@ -288,13 +300,13 @@
 
 .seller-tip {
   margin-top: 16rpx;
-  padding: 16rpx 20rpx;
-  background: #f6ffed;
-  border-radius: 8rpx;
+  padding: 18rpx 22rpx;
+  background: var(--primary-soft);
+  border-radius: var(--radius);
 }
 
 .tip-text {
   font-size: 22rpx;
-  color: #52c41a;
+  color: var(--primary-dark);
   line-height: 1.5;
 }

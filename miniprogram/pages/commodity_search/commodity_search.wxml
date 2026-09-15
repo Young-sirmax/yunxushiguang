@@ -15,7 +15,7 @@
       <view class="card-info">
         <text class="card-title">{{item.title}}</text>
         <view class="price-group">
-          <text class="card-price want" wx:if="{{item.type === 'want'}}">{{item.rewardAmount > 0 ? '¥' + item.rewardAmount + ' 悬赏' : '求购中'}}</text>
+          <text class="card-price want" wx:if="{{item.type === 'want'}}">求购中</text>
           <text class="card-price" wx:else>¥{{item.price}}</text>
           <text class="original-price" wx:if="{{item.originalPrice && item.type !== 'want'}}">¥{{item.originalPrice}}</text>
         </view>

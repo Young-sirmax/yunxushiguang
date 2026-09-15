@@ -1,7 +1,155 @@
 /* pages/privacy/privacy.wxss */
-.page-container { padding: 24rpx; }
-.content-card { padding: 40rpx; }
-.title { font-size: 36rpx; font-weight: bold; text-align: center; margin-bottom: 40rpx; color: #333; }
-.section { margin-bottom: 32rpx; }
-.section-title { font-size: 30rpx; font-weight: 600; color: #333; margin-bottom: 12rpx; }
-.section-text { font-size: 28rpx; color: #666; line-height: 1.6; display: block; }
+.page-container {
+  padding: 32rpx;
+}
+
+.content-card {
+  padding: 48rpx 40rpx;
+}
+
+.title {
+  font-size: 38rpx;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text);
+  margin-bottom: 16rpx;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.title::after {
+  content: '';
+  width: 64rpx;
+  height: 6rpx;
+  border-radius: 3rpx;
+  background: var(--primary-grad);
+  margin-top: 16rpx;
+}
+
+.update-date {
+  text-align: center;
+  font-size: 24rpx;
+  color: #aaa;
+  margin-bottom: 40rpx;
+}
+
+.section {
+  margin-bottom: 40rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+}
+
+.section-title::before {
+  content: '';
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: var(--primary-grad);
+  margin-right: 14rpx;
+  flex-shrink: 0;
+}
+
+.section-text {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.section-text.footnote {
+  font-size: 24rpx;
+  color: #aaa;
+  font-style: italic;
+}
+
+.section-list {
+  background: #f8f9fb;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+}
+
+.list-item {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.8;
+  padding: 6rpx 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.list-dot {
+  color: var(--primary);
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.contact-card {
+  background: #f8f9fb;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.contact-item-text {
+  font-size: 26rpx;
+  color: #555;
+}
+
+.agreement-tip {
+  background: #fff8e1;
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  border-left: 6rpx solid #ffb74d;
+  margin-top: 20rpx;
+}
+
+.tip-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #e65100;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.tip-content {
+  font-size: 24rpx;
+  color: #bf360c;
+  line-height: 1.7;
+}
+
+/* === 新增：小节子标题（2.1 / 2.2 等） === */
+.sub-block {
+  margin-top: 20rpx;
+}
+
+.sub-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12rpx;
+  display: flex;
+  align-items: center;
+}
+
+.sub-title::before {
+  content: '';
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: var(--primary-grad);
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}

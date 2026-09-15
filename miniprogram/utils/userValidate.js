@@ -31,13 +31,19 @@ const validateContact = (value) => {
 
 const isRegistrationComplete = (userInfo) => {
   if (!userInfo) return false;
-  const { universityId, realName, studentId, contact } = userInfo;
-  if (!universityId || !realName || !studentId || !contact) return false;
-  return validateStudentId(studentId).valid && validateContact(contact).valid;
+  const { contact } = userInfo;
+  if (!contact) return false;
+  return validateContact(contact).valid;
+};
+
+const isStudentVerified = (userInfo) => {
+  if (!userInfo) return false;
+  return !!userInfo.isStudentVerified;
 };
 
 module.exports = {
   validateStudentId,
   validateContact,
-  isRegistrationComplete
+  isRegistrationComplete,
+  isStudentVerified
 };

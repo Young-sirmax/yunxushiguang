@@ -14,7 +14,19 @@
 
     <view class="login-card">
       <view class="welcome-text">欢迎回来</view>
-      <view class="welcome-desc">登录后即可浏览和发布校园闲置物品</view>
+      <view class="welcome-desc">登录后可发布信息、收藏、联系交易</view>
+
+      <view class="school-input-wrap">
+        <text class="school-input-icon">🏫</text>
+        <input
+          class="school-input"
+          placeholder="请输入你的学校名称"
+          placeholder-class="school-input-placeholder"
+          value="{{universityName}}"
+          maxlength="30"
+          bindinput="onUniversityInput"
+        />
+      </view>
 
       <button class="login-btn btn-primary" bindtap="handleLogin">
         微信一键登录
@@ -29,6 +41,11 @@
           <text class="link" bindtap="goPrivacy">《用户协议》</text>
         </view>
       </view>
+    </view>
+
+    <view class="browse-entry" bindtap="goBrowse">
+      <text class="browse-text">先逛逛</text>
+      <text class="browse-arrow">›</text>
     </view>
 
     <view class="footer-text">不碰货 · 不垫资 · 不仓储</view>

@@ -10,13 +10,15 @@ const COLOR_PALETTE = [
   '#20B2AA', '#FF8C00', '#DA70D6', '#32CD32', '#1E90FF'
 ];
 
-// 物理常量
-const GRAVITY = -0.015; // 轻微上浮，模拟水中气泡浮力
-const FRICTION = 0.992; // 接近1，让浮动缓慢衰减不停止
-const BOUNCE_DAMPING = 0.55; // 碰撞反弹力，模拟弹性壁
-const CONSTRAINT_ITERATIONS = 6;
-const TOUCH_RADIUS = 80;
-const FLOAT_NOISE = 0.025; // 每帧随机扰动幅度（模拟水中微粒扰动）
+// 物理常量（七彩正圆泡泡：轻飘飘 · 一点点重力 · 碰撞轻轻反弹）
+const GRAVITY = 0.05;      // 一点点重力（向下）：泡泡有轻微沉坠感
+const DAMPING = 0.965;     // 空气阻尼：动作轻盈，但会自然渐缓不失控
+const RESTITUTION = 0.7;   // 泡泡间碰撞弹性：轻轻反弹
+const SPRING_K = 0.0035;   // 回“悬浮点”的柔力：轻盈悬浮，避免沉底/扎堆
+const TOUCH_RADIUS = 90;   // 手指影响的半径
+const WIND_PROB = 0.02;    // 微风触发概率（每帧）
+const WIND_FORCE = 0.18;   // 微风脉冲强度（偶尔上飘，制造轻飘飘感）
+const MAX_SPEED = 2.4;     // 速度软上限（px/帧）
 
 // 圆堆积算法 - 生成不重叠的圆形布局
 function computePacking(circles, containerW, containerH) {
@@ -63,215 +65,102 @@ function computePacking(circles, containerW, containerH) {
   return circles;
 }
 
-// 为圆形初始化物理粒子（边界质点）
-function initPhysics(circle, segmentCount = 24) {
-  circle.particles = [];
-  circle.constraints = [];
-  const radius = circle.radius;
-
-  // 微小随机初速度，模拟气泡在水中的起始浮动
-  const initVX = (Math.random() - 0.5) * 0.7;
-  const initVY = (Math.random() - 0.5) * 0.7 - 0.25;
-  circle.initVX = initVX;
-  circle.initVY = initVY;
-
-  for (let i = 0; i < segmentCount; i++) {
-    const angle = (i / segmentCount) * Math.PI * 2;
-    const px = circle.x + Math.cos(angle) * radius;
-    const py = circle.y + Math.sin(angle) * radius;
-    // 边界粒子也同步初速度
-    circle.particles.push({
-      x: px,
-      y: py,
-      oldX: px - initVX,
-      oldY: py - initVY,
-      originalAngle: angle,
-      originalRadius: radius
-    });
-  }
-
-  // 中心粒子
-  circle.center = {
-    x: circle.x,
-    y: circle.y,
-    oldX: circle.x - initVX,
-    oldY: circle.y - initVY
-  };
-  
-  // 连接中心与边界粒子的约束
-  for (let i = 0; i < segmentCount; i++) {
-    circle.constraints.push({
-      p1: circle.center,
-      p2: circle.particles[i],
-      length: radius,
-      type: 'radial'
-    });
-  }
-  
-  // 相邻边界粒子的约束（保持周长）
-  for (let i = 0; i < segmentCount; i++) {
-    const next = (i + 1) % segmentCount;
-    const dx = circle.particles[i].x - circle.particles[next].x;
-    const dy = circle.particles[i].y - circle.particles[next].y;
-    const length = Math.sqrt(dx * dx + dy * dy);
-    circle.constraints.push({
-      p1: circle.particles[i],
-      p2: circle.particles[next],
-      length: length,
-      type: 'circumference'
-    });
-  }
-  
-  // 对角约束（增加结构稳定性）
-  for (let i = 0; i < segmentCount; i++) {
-    const opposite = (i + Math.floor(segmentCount / 2)) % segmentCount;
-    const dx = circle.particles[i].x - circle.particles[opposite].x;
-    const dy = circle.particles[i].y - circle.particles[opposite].y;
-    const length = Math.sqrt(dx * dx + dy * dy);
-    circle.constraints.push({
-      p1: circle.particles[i],
-      p2: circle.particles[opposite],
-      length: length,
-      type: 'diagonal'
-    });
-  }
-  
-  circle.segmentCount = segmentCount;
+// 为圆形初始化物理（正圆泡泡：圆心 + 速度 + 悬浮锚点）
+function initPhysics(circle) {
+  circle.center = { x: circle.x, y: circle.y };
+  // 入场时给一点随机初速度，让画面一开始就自然轻盈
+  circle.vx = (Math.random() - 0.5) * 0.6;
+  circle.vy = (Math.random() - 0.5) * 0.6 - 0.15;
+  // 悬浮锚点：泡泡被拨开/撞开后，会轻轻“飘”回自己的位置，形成悬浮云团效果
+  circle.rx = circle.x;
+  circle.ry = circle.y;
+  circle.particles = []; // 空数组兼容旧代码；渲染已改为绝对正圆
 }
 
-// Verlet积分物理更新
+// 正圆泡泡物理更新（轻飘飘 · 一点重力 · 碰撞软弹 · 悬浮不扎堆）
 function physicsUpdate(circles, containerW, containerH) {
-  // Verlet积分更新位置（含水中浮动微扰）
+  // 1) 速度与位置积分
   for (const circle of circles) {
-    // 每帧随机微小扰动：模拟水中微粒冲撞，保持气泡不停止浮动
-    const nx = (Math.random() - 0.5) * FLOAT_NOISE;
-    const ny = (Math.random() - 0.5) * FLOAT_NOISE;
+    if (!circle.center) continue;
+    const c = circle.center;
+    let vx = (circle.vx || 0) * DAMPING;
+    let vy = (circle.vy || 0) * DAMPING + GRAVITY;
 
-    const center = circle.center;
-    const vx = (center.x - center.oldX) * FRICTION;
-    const vy = (center.y - center.oldY) * FRICTION;
-    center.oldX = center.x;
-    center.oldY = center.y;
-    center.x += vx + nx;
-    center.y += vy + GRAVITY + ny;
+    // 微风：偶尔轻推一下（含轻微上扬），制造“轻飘飘”的呼吸感
+    if (Math.random() < WIND_PROB) {
+      vx += (Math.random() - 0.5) * WIND_FORCE;
+      vy -= Math.random() * WIND_FORCE * 0.9;
+    }
 
-    for (const p of circle.particles) {
-      const pvx = (p.x - p.oldX) * FRICTION;
-      const pvy = (p.y - p.oldY) * FRICTION;
-      p.oldX = p.x;
-      p.oldY = p.y;
-      p.x += pvx + nx;
-      p.y += pvy + GRAVITY * 0.3 + ny;
+    // 悬浮柔力：被拨开/撞开后轻轻飘回自己的位置
+    vx -= SPRING_K * (c.x - circle.rx);
+    vy -= SPRING_K * (c.y - circle.ry);
+
+    // 速度软上限，防止失控弹跳
+    const sp2 = vx * vx + vy * vy;
+    if (sp2 > MAX_SPEED * MAX_SPEED) {
+      const s = MAX_SPEED / Math.sqrt(sp2);
+      vx *= s;
+      vy *= s;
+    }
+
+    c.x += vx;
+    c.y += vy;
+    circle.vx = vx;
+    circle.vy = vy;
+  }
+
+  // 2) 泡泡两两碰撞：先推开消除重叠，再沿法线方向“轻轻反弹”
+  for (let i = 0; i < circles.length; i++) {
+    for (let j = i + 1; j < circles.length; j++) {
+      const A = circles[i];
+      const B = circles[j];
+      if (!A.center || !B.center) continue;
+      const ax = A.center.x, ay = A.center.y;
+      const bx = B.center.x, by = B.center.y;
+      const dx = bx - ax, dy = by - ay;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const minDist = A.radius + B.radius;
+
+      if (dist > 0 && dist < minDist) {
+        const nx = dx / dist, ny = dy / dist;
+        const overlap = minDist - dist;
+        A.center.x -= nx * overlap / 2;
+        A.center.y -= ny * overlap / 2;
+        B.center.x += nx * overlap / 2;
+        B.center.y += ny * overlap / 2;
+
+        // 相对速度沿法线的分量 < 0 表示相互接近，此时才反弹
+        const rel = (B.vx - A.vx) * nx + (B.vy - A.vy) * ny;
+        if (rel < 0) {
+          const impulse = -(1 + RESTITUTION) * rel / 2;
+          A.vx -= impulse * nx;
+          A.vy -= impulse * ny;
+          B.vx += impulse * nx;
+          B.vy += impulse * ny;
+        }
+      }
     }
   }
 
-  // 满足约束
-  for (let iter = 0; iter < CONSTRAINT_ITERATIONS; iter++) {
-    // 内部约束
-    for (const circle of circles) {
-      for (const c of circle.constraints) {
-        const dx = c.p2.x - c.p1.x;
-        const dy = c.p2.y - c.p1.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist === 0) continue;
-
-        const diff = (dist - c.length) / dist;
-        const offsetX = dx * 0.5 * diff;
-        const offsetY = dy * 0.5 * diff;
-
-        c.p1.x += offsetX;
-        c.p1.y += offsetY;
-        c.p2.x -= offsetX;
-        c.p2.y -= offsetY;
-      }
+  // 3) 容器边界：软性反弹
+  for (const circle of circles) {
+    if (!circle.center) continue;
+    const c = circle.center;
+    const r = circle.radius;
+    if (c.x < r) {
+      c.x = r;
+      circle.vx = Math.abs(circle.vx) * 0.6;
+    } else if (c.x > containerW - r) {
+      c.x = containerW - r;
+      circle.vx = -Math.abs(circle.vx) * 0.6;
     }
-
-    // 圆形间碰撞检测（弹性壁碰撞：推开 + 反向回弹速度）
-    for (let i = 0; i < circles.length; i++) {
-      for (let j = i + 1; j < circles.length; j++) {
-        const c1 = circles[i];
-        const c2 = circles[j];
-
-        const dxC = c2.center.x - c1.center.x;
-        const dyC = c2.center.y - c1.center.y;
-        const distC = Math.sqrt(dxC * dxC + dyC * dyC);
-        const minDist = c1.radius + c2.radius + 4;
-
-        if (distC < minDist && distC > 0) {
-          const overlap = minDist - distC;
-          const nx = dxC / distC;
-          const ny = dyC / distC;
-          const pushRate = 0.25;
-
-          // 位置推开
-          c1.center.x -= nx * overlap * pushRate;
-          c1.center.y -= ny * overlap * pushRate;
-          c2.center.x += nx * overlap * pushRate;
-          c2.center.y += ny * overlap * pushRate;
-
-          // 给 oldX/oldY 反向偏移产生"回弹"速度（弹性壁效果）
-          const bounce = overlap * BOUNCE_DAMPING * 0.6;
-          c1.center.oldX += nx * bounce;
-          c1.center.oldY += ny * bounce;
-          c2.center.oldX -= nx * bounce;
-          c2.center.oldY -= ny * bounce;
-
-          // 同步更新边界粒子
-          for (const p of c1.particles) {
-            p.x -= nx * overlap * pushRate;
-            p.y -= ny * overlap * pushRate;
-            p.oldX += nx * bounce;
-            p.oldY += ny * bounce;
-          }
-          for (const p of c2.particles) {
-            p.x += nx * overlap * pushRate;
-            p.y += ny * overlap * pushRate;
-            p.oldX -= nx * bounce;
-            p.oldY -= ny * bounce;
-          }
-        }
-      }
-    }
-    
-    // 边界约束
-    for (const circle of circles) {
-      // 中心约束
-      if (circle.center.x < circle.radius) {
-        circle.center.x = circle.radius;
-        circle.center.oldX = circle.center.x + (circle.center.x - circle.center.oldX) * BOUNCE_DAMPING;
-      }
-      if (circle.center.x > containerW - circle.radius) {
-        circle.center.x = containerW - circle.radius;
-        circle.center.oldX = circle.center.x + (circle.center.x - circle.center.oldX) * BOUNCE_DAMPING;
-      }
-      if (circle.center.y < circle.radius) {
-        circle.center.y = circle.radius;
-        circle.center.oldY = circle.center.y + (circle.center.y - circle.center.oldY) * BOUNCE_DAMPING;
-      }
-      if (circle.center.y > containerH - circle.radius) {
-        circle.center.y = containerH - circle.radius;
-        circle.center.oldY = circle.center.y + (circle.center.y - circle.center.oldY) * BOUNCE_DAMPING;
-      }
-      
-      // 边界粒子约束
-      for (const p of circle.particles) {
-        if (p.x < 5) {
-          p.x = 5;
-          p.oldX = p.x + (p.x - p.oldX) * BOUNCE_DAMPING;
-        }
-        if (p.x > containerW - 5) {
-          p.x = containerW - 5;
-          p.oldX = p.x + (p.x - p.oldX) * BOUNCE_DAMPING;
-        }
-        if (p.y < 5) {
-          p.y = 5;
-          p.oldY = p.y + (p.y - p.oldY) * BOUNCE_DAMPING;
-        }
-        if (p.y > containerH - 5) {
-          p.y = containerH - 5;
-          p.oldY = p.y + (p.y - p.oldY) * BOUNCE_DAMPING;
-        }
-      }
+    if (c.y < r) {
+      c.y = r;
+      circle.vy = Math.abs(circle.vy) * 0.6;
+    } else if (c.y > containerH - r) {
+      c.y = containerH - r;
+      circle.vy = -Math.abs(circle.vy) * 0.6;
     }
   }
 }
@@ -308,50 +197,40 @@ function renderCircles(ctx, circles, containerW, containerH, expandState) {
 
 // 绘制普通圆形（带物理变形）
 function drawSingleCircle(ctx, circle) {
-    // 绘制变形圆形主体
-    ctx.beginPath();
-    const particles = circle.particles;
-    ctx.moveTo(
-      (particles[0].x + particles[particles.length - 1].x) / 2,
-      (particles[0].y + particles[particles.length - 1].y) / 2
-    );
+  // ===== 绝对正圆的七彩泡泡 =====
+  const cx = circle.center.x;
+  const cy = circle.center.y;
+  const r = circle.radius;
+  const baseColor = circle.color;
 
-    for (let i = 0; i < particles.length; i++) {
-      const next = (i + 1) % particles.length;
-      const cx = particles[i].x;
-      const cy = particles[i].y;
-      const nx = (particles[i].x + particles[next].x) / 2;
-      const ny = (particles[i].y + particles[next].y) / 2;
-      ctx.quadraticCurveTo(cx, cy, nx, ny);
-    }
-    ctx.closePath();
+  // 正圆主体 + 立体渐变（清透泡泡质感）
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  const fillGradient = ctx.createRadialGradient(
+    cx - r * 0.35, cy - r * 0.35, r * 0.08,
+    cx, cy, r * 1.1
+  );
+  fillGradient.addColorStop(0, lightenColor(baseColor, 45));
+  fillGradient.addColorStop(0.5, lightenColor(baseColor, 6));
+  fillGradient.addColorStop(1, darkenColor(baseColor, 16));
+  ctx.fillStyle = fillGradient;
+  ctx.fill();
 
-    // 填充渐变
-    const fillRadius = circle.radius * 1.2;
-    const fillGradient = ctx.createRadialGradient(
-      circle.center.x - circle.radius * 0.3,
-      circle.center.y - circle.radius * 0.3,
-      circle.radius * 0.1,
-      circle.center.x,
-      circle.center.y,
-      fillRadius
-    );
+  // 一圈清透的高光边，像薄薄的泡泡膜
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
 
-    const baseColor = circle.color;
-    fillGradient.addColorStop(0, lightenColor(baseColor, 30));
-    fillGradient.addColorStop(0.7, baseColor);
-    fillGradient.addColorStop(1, darkenColor(baseColor, 20));
+  // 左上角小高光，增强立体感
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx - r * 0.34, cy - r * 0.38, r * 0.13, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.fill();
+  ctx.restore();
 
-    ctx.fillStyle = fillGradient;
-    ctx.fill();
-
-    // 边框
-    ctx.strokeStyle = lightenColor(baseColor, 40);
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // 绘制内容
-    drawCircleContent(ctx, circle);
+  // 内容（商品图 / 求购标识 / 文字）
+  drawCircleContent(ctx, circle);
 }
 
 // 绘制展开中的圆形（从原位置移到屏幕中心，再向四周扩大撑满屏幕）
@@ -434,9 +313,9 @@ function drawExpandingCircle(ctx, circle, es, containerW, containerH) {
   ctx.fillText(titleText, cx, cy + contentR * 0.15);
 
   const priceFontSize = Math.max(14, r * 0.12);
-  ctx.fillStyle = '#FFD700';
+  ctx.fillStyle = circle.type === 'want' ? '#2dd8c0' : '#FFD700';
   ctx.font = `bold ${priceFontSize}px sans-serif`;
-  ctx.fillText('¥' + circle.price, cx, cy + contentR * 0.5);
+  ctx.fillText(circle.type === 'want' ? '求购中' : '¥' + circle.price, cx, cy + contentR * 0.5);
 
   ctx.font = `${Math.max(10, r * 0.07)}px sans-serif`;
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
@@ -452,7 +331,6 @@ function drawCircleContent(ctx, circle) {
   const contentR = r * 0.75;
   
   const isWant = circle.type === 'want';
-  const hasPrivileges = circle.privileges && circle.privileges.length > 0;
   const isVerified = circle.isVerified;
   
   ctx.save();
@@ -513,12 +391,8 @@ function drawCircleContent(ctx, circle) {
   ctx.font = `bold ${priceFontSize}px sans-serif`;
   
   if (isWant) {
-    ctx.fillStyle = '#4ECDC4';
-    if (circle.rewardAmount > 0) {
-      ctx.fillText('¥' + circle.rewardAmount + ' 悬赏', cx, priceY);
-    } else {
-      ctx.fillText('求购中', cx, priceY);
-    }
+    ctx.fillStyle = '#00b3a6';
+    ctx.fillText('求购中', cx, priceY);
   } else {
     ctx.fillStyle = '#FFD700';
     ctx.fillText('¥' + circle.price, cx, priceY);
@@ -534,10 +408,6 @@ function drawCircleContent(ctx, circle) {
   } else {
     tagText = circle.condition || '';
   }
-  if (hasPrivileges) {
-    if (circle.privileges.indexOf('urgent') !== -1) tagText += ' 🔥急出';
-    if (circle.privileges.indexOf('top') !== -1) tagText += ' 📌置顶';
-  }
   if (isVerified) tagText += ' ✓已认证';
   ctx.fillText(tagText, cx, tagY);
   
@@ -546,8 +416,8 @@ function drawCircleContent(ctx, circle) {
 
 function drawWantFallback(ctx, cx, cy, r) {
   const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-  gradient.addColorStop(0, '#E8F8F5');
-  gradient.addColorStop(1, '#4ECDC4');
+  gradient.addColorStop(0, '#e0f7f5');
+  gradient.addColorStop(1, '#00a8a0');
   ctx.fillStyle = gradient;
   ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
   
@@ -600,6 +470,7 @@ Page({
   data: {
     categoryList: [],
     currentCategory: '',
+    currentType: '', // 类型筛选：'' 全部 | 'sell' 闲置 | 'want' 求购
     commodityList: [],
     page: 1,
     pageSize: 20,
@@ -620,7 +491,20 @@ Page({
   positionCache: null, // 保存圆形布局 {id -> {x, y}}
 
   onLoad() {
+    // 开启右上角菜单的“转发给朋友 / 分享到朋友圈”，否则微信不会显示分享入口
+    wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] });
     this.loadCategoryList();
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '云叙石光 · 校园物品信息服务站｜闲置转让 & 求购',
+      path: '/pages/commodity_list/commodity_list'
+    };
+  },
+
+  onShareTimeline() {
+    return { title: '云叙石光 · 校园物品信息服务站', query: '' };
   },
 
   onReady() {
@@ -701,6 +585,7 @@ Page({
     try {
       const res = await API.getCommodityList({
         categoryId: this.data.currentCategory,
+        type: this.data.currentType,
         page: this.data.page,
         pageSize: this.data.pageSize
       });
@@ -741,6 +626,7 @@ Page({
     try {
       const res = await API.getCommodityList({
         categoryId: this.data.currentCategory,
+        type: this.data.currentType,
         page: 1,
         pageSize: this.data.pageSize
       });
@@ -807,7 +693,7 @@ Page({
       const radius = minR + normalizedPrice * (maxR - minR);
       let color = oldLayoutMap[item._id] ? oldLayoutMap[item._id].color : null;
       if (!color) {
-        color = item.type === 'want' ? '#4ECDC4' : COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
+        color = item.type === 'want' ? '#00a8a0' : COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
       }
       let cachedPos = oldLayoutMap[item._id];
       let x = cachedPos ? cachedPos.x : 0;
@@ -824,7 +710,7 @@ Page({
         images: item.images,
         type: item.type || 'sell',
         privileges: item.privileges || [],
-        isVerified: item.isVerified || false,
+        isVerified: item.isStudentVerified || false,
         rewardAmount: item.rewardAmount || 0,
         radius: radius,
         color: color,
@@ -966,16 +852,11 @@ Page({
         
         if (cdist < TOUCH_RADIUS && cdist > 0) {
           const force = (TOUCH_RADIUS - cdist) / TOUCH_RADIUS;
-          const pushX = (cdx / cdist) * force * 2.5 + dx * 0.1;
-          const pushY = (cdy / cdist) * force * 2.5 + dy * 0.1;
-          
-          circle.center.oldX = circle.center.x - pushX;
-          circle.center.oldY = circle.center.y - pushY;
-          
-          for (const p of circle.particles) {
-            p.oldX = p.x - pushX;
-            p.oldY = p.y - pushY;
-          }
+          // 手指掠过时给泡泡一个轻快的速度冲量
+          const pushX = (cdx / cdist) * force * 0.5 + dx * 0.15;
+          const pushY = (cdy / cdist) * force * 0.5 + dy * 0.15;
+          circle.vx = (circle.vx || 0) + pushX;
+          circle.vy = (circle.vy || 0) + pushY;
         }
       }
     }
@@ -1063,6 +944,19 @@ Page({
     this.loadCommodityList(true, true);
   },
 
+  switchType(e) {
+    const type = e.currentTarget.dataset.type;
+    if (this.data.currentType === type) return;
+    this.setData({
+      currentType: type,
+      page: 1,
+      commodityList: [],
+      hasMore: true
+    });
+    this.positionCache = null; // 切换类型时清空位置缓存，重新布局
+    this.loadCommodityList(true, true);
+  },
+
   onRefresh() {
     this.setData({ page: 1, isRefreshing: true });
     this.positionCache = null; // 下拉刷新时清空位置缓存，重新布局
@@ -1089,10 +983,22 @@ Page({
 
   goRelease() {
     if (!wx.getStorageSync('openid')) {
-      wx.navigateTo({ url: '/pages/index_register/index_register' });
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再发布信息',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/index/index' });
+          }
+        }
+      });
       return;
     }
-    wx.navigateTo({ url: '/pages/commodity_release/commodity_release' });
+    const type = this.data.currentType === 'want' ? 'want' : (this.data.currentType === 'sell' ? 'sell' : '');
+    wx.navigateTo({
+      url: '/pages/commodity_release/commodity_release' + (type ? '?type=' + type : '')
+    });
   },
 
   onUnload() {

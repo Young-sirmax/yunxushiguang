@@ -1,16 +1,11 @@
 // pages/index_register/index_register.js
 const app = getApp();
 const API = require('../../api/api.js');
-const { validateStudentId, validateContact } = require('../../utils/userValidate.js');
+const { validateContact } = require('../../utils/userValidate.js');
 
 Page({
   data: {
-    universityList: [],
-    selectedUniversity: null,
     avatarUrl: '',
-    realName: '',
-    studentId: '',
-    studentIdError: '',
     nickName: '',
     contact: '',
     contactError: '',
@@ -19,57 +14,19 @@ Page({
     isSubmitting: false
   },
 
-  async onLoad() {
-    try {
-      const res = await API.getUniversityList();
-      if (res.code === 0) {
-        this.setData({ universityList: res.data || [] });
-      }
-    } catch (err) {
-      console.error('获取学校列表失败:', err);
+  // 微信官方头像选择能力（open-type="chooseAvatar"）
+  onChooseAvatar(e) {
+    const url = e.detail && e.detail.avatarUrl;
+    if (!url) {
+      wx.showToast({ title: '未获取到头像，请重试', icon: 'none' });
+      return;
     }
-  },
-
-  chooseAvatar() {
-    wx.chooseImage({
-      count: 1,
-      sizeType: ['compressed'],
-      sourceType: ['album', 'camera'],
-      success: (res) => {
-        this.setData({ avatarUrl: res.tempFilePaths[0] });
-        this.checkCanSubmit();
-      },
-      fail: () => {
-        wx.showToast({ title: '选择图片失败', icon: 'none' });
-      }
-    });
-  },
-
-  onUniversityChange(e) {
-    const index = e.detail.value;
-    this.setData({ selectedUniversity: this.data.universityList[index] });
-    this.checkCanSubmit();
-  },
-
-  onRealNameInput(e) {
-    this.setData({ realName: e.detail.value });
-    this.checkCanSubmit();
-  },
-
-  onStudentIdInput(e) {
-    const value = e.detail.value.replace(/\D/g, '').slice(0, 10);
-    const { error } = validateStudentId(value);
-    let studentIdError = '';
-    if (value.length > 0 && !validateStudentId(value).valid) {
-      studentIdError = error;
-    }
-    this.setData({ studentId: value, studentIdError });
-    this.checkCanSubmit();
+    this.setData({ avatarUrl: url });
+    wx.showToast({ title: '头像已选择', icon: 'none' });
   },
 
   onNickNameInput(e) {
     this.setData({ nickName: e.detail.value });
-    this.checkCanSubmit();
   },
 
   onContactInput(e) {
@@ -88,14 +45,8 @@ Page({
   },
 
   checkCanSubmit() {
-    const { selectedUniversity, realName, studentId, contact, agreed, studentIdError, contactError } = this.data;
-    const canSubmit = selectedUniversity &&
-                      realName.trim() &&
-                      validateStudentId(studentId).valid &&
-                      validateContact(contact).valid &&
-                      agreed &&
-                      !studentIdError &&
-                      !contactError;
+    const { contact, agreed, contactError } = this.data;
+    const canSubmit = validateContact(contact).valid && agreed && !contactError;
     this.setData({ canSubmit });
   },
 
@@ -118,17 +69,13 @@ Page({
 
       const res = await API.updateUser({
         avatarUrl,
-        universityId: this.data.selectedUniversity._id || this.data.selectedUniversity.uid,
-        universityName: this.data.selectedUniversity.name,
-        realName: this.data.realName.trim(),
-        studentId: this.data.studentId.trim(),
-        nickName: this.data.nickName.trim() || this.data.realName.trim(),
+        nickName: this.data.nickName.trim(),
         contact: this.data.contact.trim()
       });
 
       if (res.code === 0) {
-        wx.setStorageSync('userInfo', res.data);
-        app.globalData.userInfo = res.data;
+        // 通过全局同步写入，保证 userInfo/openid 全局一致
+        app.syncUserInfo(res.data);
         wx.hideLoading();
         wx.showToast({ title: '注册成功', icon: 'success' });
         setTimeout(() => {

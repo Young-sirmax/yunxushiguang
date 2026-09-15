@@ -7,7 +7,7 @@ const callCloudFunction = async (name, data = {}) => {
     const result = res && res.result !== undefined ? res.result : res;
 
     if (result && typeof result === 'object' && result.code !== undefined && result.code !== 0) {
-      const error = new Error(result.msg || '云函数 ' + name + ' 执行失败');
+      const error = new Error(result.msg || '服务暂时不可用，请稍后重试');
       error.code = result.code;
       error.detail = result;
       throw error;
@@ -18,7 +18,15 @@ const callCloudFunction = async (name, data = {}) => {
     if (err instanceof Error && err.code !== undefined) {
       throw err;
     }
-    const message = err && err.errMsg ? err.errMsg : (err && err.message ? err.message : '请求失败');
+    const rawMsg = (err && err.errMsg) || (err && err.message) || '';
+    let message = '网络请求失败，请稍后重试';
+    if (rawMsg.indexOf('-504002') > -1) {
+      message = '云函数服务异常，请稍后重试';
+    } else if (rawMsg.indexOf('-504003') > -1) {
+      message = '云函数环境错误，请检查云开发环境配置';
+    } else if (rawMsg) {
+      message = rawMsg.replace(/^.*Error:\s*/, '').trim() || '请求失败';
+    }
     const normalizedError = err instanceof Error ? err : new Error(message);
     normalizedError.name = 'CloudFunctionError';
     console.error('云函数 ' + name + ' 调用失败:', err);
@@ -30,6 +38,25 @@ const API = {
   login: () => callCloudFunction('user', { action: 'login' }),
   updateUser: (data) => callCloudFunction('user', { action: 'update', data }),
   getUserInfo: (openid) => callCloudFunction('user', { action: 'getInfo', openid }),
+  verifyStudent: (data) => callCloudFunction('user', { action: 'verifyStudent', data }),
+  cancelVerifyStudent: () => callCloudFunction('user', { action: 'cancelVerifyStudent' }),
+
+  adminLogin: (password) => callCloudFunction('admin', { action: 'login', password }),
+  adminCheck: () => callCloudFunction('admin', { action: 'checkAdmin' }),
+  adminLogout: () => callCloudFunction('admin', { action: 'logout' }),
+  adminListVerify: (status) => callCloudFunction('admin', { action: 'listVerify', status }),
+  adminAuditVerify: (id, result, reason) => callCloudFunction('admin', { action: 'auditVerify', id, result, reason }),
+
+  // 管理员 · 数据管理（用户）
+  adminListUsers: (params) => callCloudFunction('admin', Object.assign({ action: 'listUsers' }, params)),
+  adminSetAdmin: (userId, isAdmin) => callCloudFunction('admin', { action: 'setAdmin', userId, isAdmin }),
+  adminSetBan: (userId, banned) => callCloudFunction('admin', { action: 'setBan', userId, banned }),
+  adminDeleteUser: (userId) => callCloudFunction('admin', { action: 'deleteUser', userId }),
+
+  // 管理员 · 数据管理（商品/求购）
+  adminListCommodity: (params) => callCloudFunction('commodity', Object.assign({ action: 'adminList' }, params)),
+  adminSetCommodityStatus: (id, status, reason) => callCloudFunction('commodity', { action: 'adminSetStatus', id, status, reason }),
+  adminDeleteCommodity: (id) => callCloudFunction('commodity', { action: 'adminDelete', id }),
 
   getUniversityList: () => callCloudFunction('university', { action: 'list' }),
 
@@ -42,6 +69,9 @@ const API = {
   deleteCommodity: (id) => callCloudFunction('commodity', { action: 'delete', id }),
   restoreCommodity: (id) => callCloudFunction('commodity', { action: 'restore', id }),
   searchCommodity: (keyword, categoryId) => callCloudFunction('commodity', { action: 'search', keyword, categoryId }),
+  getPendingCommodityList: (page, pageSize) => callCloudFunction('commodity', { action: 'pendingList', page, pageSize }),
+  approveCommodity: (id) => callCloudFunction('commodity', { action: 'approve', id }),
+  rejectCommodity: (id, reason) => callCloudFunction('commodity', { action: 'reject', id, reason }),
 
   sendSubscribeMsg: (data) => callCloudFunction('subscribeMsg', Object.assign({ action: 'send' }, data)),
 
@@ -55,14 +85,7 @@ const API = {
   toggleFavorite: (commodityId) => callCloudFunction('favorite', { action: 'toggle', commodityId }),
   checkFavorite: (commodityId) => callCloudFunction('favorite', { action: 'check', commodityId }),
   getFavoriteList: (params) => callCloudFunction('favorite', Object.assign({ action: 'list' }, params)),
-  removeFavorite: (id) => callCloudFunction('favorite', { action: 'remove', id }),
-
-  chatCreateConversation: (data) => callCloudFunction('chat', { action: 'createConversation', data }),
-  chatGetConversationList: () => callCloudFunction('chat', { action: 'getConversationList' }),
-  chatGetConversationDetail: (id) => callCloudFunction('chat', { action: 'getConversationDetail', id }),
-  chatSendMessage: (data) => callCloudFunction('chat', { action: 'sendMessage', data }),
-  chatMarkAsRead: (id) => callCloudFunction('chat', { action: 'markAsRead', id }),
-  chatDeleteConversation: (id) => callCloudFunction('chat', { action: 'deleteConversation', id })
+  removeFavorite: (id) => callCloudFunction('favorite', { action: 'remove', commodityId })
 };
 
 module.exports = API;

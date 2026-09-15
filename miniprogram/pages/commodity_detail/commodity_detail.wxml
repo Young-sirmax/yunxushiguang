@@ -14,9 +14,7 @@
   <view class="info-section card">
     <view class="price-row">
       <block wx:if="{{commodity.type === 'want'}}">
-        <text class="price want" wx:if="{{commodity.rewardAmount > 0}}">¥{{commodity.rewardAmount}}</text>
-        <text class="price want" wx:else>求购</text>
-        <text class="reward-label" wx:if="{{commodity.rewardAmount > 0}}">悬赏金</text>
+        <text class="price want">求购</text>
       </block>
       <block wx:else>
         <text class="price">¥{{commodity.price}}</text>
@@ -30,12 +28,7 @@
       <text class="meta-tag" wx:if="{{commodity.type === 'want'}}">求购信息</text>
       <text class="meta-time">{{timeText}}</text>
     </view>
-    <view class="priv-row" wx:if="{{commodity.privileges && commodity.privileges.length > 0}}">
-      <text class="priv-tag urgent" wx:if="{{commodity.privileges.indexOf('urgent') !== -1}}">🔥 急出</text>
-      <text class="priv-tag top" wx:if="{{commodity.privileges.indexOf('top') !== -1}}">📌 置顶</text>
-      <text class="priv-tag multi" wx:if="{{commodity.privileges.indexOf('multiImg') !== -1}}">🖼 多图</text>
-      <text class="priv-tag precision" wx:if="{{commodity.privileges.indexOf('precision') !== -1}}">🎯 精准推送</text>
-    </view>
+    <view class="price-note" wx:if="{{commodity.type !== 'want'}}">本平台仅为信息展示，价格与交易请买卖双方线下自行协商</view>
   </view>
 
   <!-- 卖家信息 -->
@@ -56,8 +49,12 @@
       </view>
     </view>
     <view class="seller-tip" wx:if="{{!isOwner}}">
-      <text class="tip-text" wx:if="{{commodity.type === 'want'}}">想出售此物？复制联系方式后在微信联系求购者</text>
-      <text class="tip-text" wx:else>复制联系方式后，可在微信添加好友私聊约定面交</text>
+      <block wx:if="{{commodity.type === 'want'}}">
+        <text class="tip-text">想出售此物？复制联系方式后联系求购者</text>
+      </block>
+      <block wx:else>
+        <text class="tip-text">复制联系方式后，可直接联系卖家约定交易</text>
+      </block>
     </view>
   </view>
 
@@ -80,10 +77,6 @@
         <text class="action-icon">{{isFavorited ? '❤️' : '🤍'}}</text>
         <text class="action-text">{{isFavorited ? '已收藏' : '收藏'}}</text>
       </view>
-      <view class="action-btn chat-btn" wx:if="{{!isOwner}}" bindtap="goChat">
-        <text class="action-icon">💬</text>
-        <text class="action-text">聊一聊</text>
-      </view>
       <view class="action-btn" bindtap="goHome">
         <text class="action-icon">🏠</text>
         <text class="action-text">首页</text>
@@ -97,7 +90,7 @@
       复制联系方式
     </button>
     <button class="trade-btn btn-default" wx:if="{{isOwner}}" bindtap="editCommodity">
-      编辑商品
+      编辑信息
     </button>
   </view>
 </view>
