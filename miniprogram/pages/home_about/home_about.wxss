@@ -1,14 +1,14 @@
-/* pages/home_about/home_about.wxss */
+/* pages/home_about/home_about.wxss —— 关于我们（青春校园 · 专业正式） */
 .page-container {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: linear-gradient(180deg, #f0fbf6 0%, #f5f7fa 320rpx);
   padding-bottom: 80rpx;
 }
 
-/* 品牌头部 */
+/* === 品牌头部 === */
 .brand-header {
   position: relative;
-  height: 360rpx;
+  height: 520rpx;
   overflow: hidden;
 }
 
@@ -18,9 +18,32 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(160deg, #07c160 0%, #06ad56 50%, #00b86b 100%);
-  border-bottom-left-radius: 48rpx;
-  border-bottom-right-radius: 48rpx;
+  background: var(--primary-grad-vivid);
+  border-bottom-left-radius: 56rpx;
+  border-bottom-right-radius: 56rpx;
+}
+
+/* 光斑装饰 */
+.brand-bg::before {
+  content: '';
+  position: absolute;
+  top: -80rpx;
+  left: -60rpx;
+  width: 300rpx;
+  height: 300rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, transparent 70%);
+}
+
+.brand-bg::after {
+  content: '';
+  position: absolute;
+  bottom: 40rpx;
+  right: -70rpx;
+  width: 320rpx;
+  height: 320rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 213, 104, 0.4) 0%, transparent 68%);
 }
 
 .brand-content {
@@ -29,257 +52,325 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 80rpx;
+  padding-top: 88rpx;
+}
+
+.brand-logo-wrap {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 44rpx;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  background: #fff;
+  padding: 12rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 60, 40, 0.28), 0 0 0 8rpx rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .brand-logo {
-  font-size: 100rpx;
-  margin-bottom: 16rpx;
+  width: 100%;
+  height: 100%;
+  border-radius: 30rpx;
 }
 
 .brand-name {
-  font-size: 44rpx;
+  font-size: 46rpx;
   font-weight: 800;
   color: #fff;
-  letter-spacing: 4rpx;
+  letter-spacing: 6rpx;
   margin-bottom: 10rpx;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+  text-shadow: 0 2rpx 10rpx rgba(0, 40, 25, 0.25);
 }
 
 .brand-sub {
-  font-size: 28rpx;
+  font-size: 27rpx;
   color: rgba(255, 255, 255, 0.95);
-  margin-bottom: 16rpx;
+  margin-bottom: 18rpx;
+  letter-spacing: 2rpx;
 }
 
 .brand-slogan {
   font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.15);
-  padding: 8rpx 24rpx;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10rpx 30rpx;
   border-radius: 24rpx;
   backdrop-filter: blur(10px);
+  letter-spacing: 1rpx;
 }
 
-/* 介绍卡片 */
+/* === 平台使命卡片 === */
 .intro-card {
-  margin: -60rpx 24rpx 24rpx;
+  margin: -52rpx 24rpx 24rpx;
   background: #fff;
-  border-radius: 24rpx;
+  border-radius: 28rpx;
   padding: 32rpx;
   display: flex;
   align-items: flex-start;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10rpx 40rpx rgba(15, 27, 45, 0.08);
   position: relative;
   z-index: 2;
 }
 
 .intro-quote {
-  font-size: 40rpx;
-  margin-right: 20rpx;
+  font-size: 44rpx;
+  margin-right: 22rpx;
   flex-shrink: 0;
+  line-height: 1;
+}
+
+.intro-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.intro-title {
+  font-size: 31rpx;
+  font-weight: 700;
+  color: #14202f;
+  margin-bottom: 10rpx;
 }
 
 .intro-text {
-  font-size: 28rpx;
-  color: #555566;
-  line-height: 1.7;
-  font-style: italic;
+  font-size: 27rpx;
+  color: #5a6b7f;
+  line-height: 1.8;
 }
 
-/* 分区通用头部 */
-.layer-section,
-.passive-section,
-.exec-section,
-.psych-section {
-  margin: 0 24rpx 24rpx;
+/* === 通用区块 === */
+.block {
+  margin: 0 24rpx 28rpx;
 }
 
-.layer-header {
+.block-title {
   display: flex;
   align-items: center;
   margin-bottom: 20rpx;
+  padding-left: 4rpx;
 }
 
-.layer-emoji {
-  font-size: 36rpx;
-  margin-right: 12rpx;
-}
-
-.layer-title {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #1a1a2e;
-}
-
-/* 三层卡片 */
-.layer-card {
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 28rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
-  border-left: 8rpx solid #07c160;
-}
-
-.layer-card:nth-child(2) {
-  border-left-color: #ff6b35;
-}
-
-.layer-card:nth-child(3) {
-  border-left-color: #a18cd1;
-}
-
-.layer-num {
-  display: inline-block;
-  font-size: 22rpx;
-  color: #07c160;
-  background: #f0faf3;
-  padding: 4rpx 16rpx;
-  border-radius: 20rpx;
-  font-weight: 500;
-  margin-bottom: 12rpx;
-}
-
-.layer-card:nth-child(2) .layer-num {
-  color: #ff6b35;
-  background: #fff3e0;
-}
-
-.layer-card:nth-child(3) .layer-num {
-  color: #a18cd1;
-  background: #f3eeff;
-}
-
-.layer-name {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #1a1a2e;
-  margin-bottom: 10rpx;
-}
-
-.layer-desc {
-  font-size: 26rpx;
-  color: #777788;
-  line-height: 1.6;
-  margin-bottom: 16rpx;
-}
-
-.layer-price {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #ff6b35;
-}
-
-/* 被动收入卡片 */
-.passive-card {
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 28rpx;
-  margin-bottom: 20rpx;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
-}
-
-.passive-icon {
-  font-size: 48rpx;
-  margin-right: 20rpx;
+.block-title-bar {
+  width: 10rpx;
+  height: 32rpx;
+  border-radius: 5rpx;
+  background: var(--primary-grad);
+  margin-right: 16rpx;
   flex-shrink: 0;
 }
 
-.passive-body {
-  flex: 1;
+.block-title-text {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #14202f;
 }
 
-.passive-name {
-  font-size: 28rpx;
+.block-card {
+  background: #fff;
+  border-radius: 26rpx;
+  padding: 30rpx 30rpx;
+  box-shadow: 0 6rpx 26rpx rgba(15, 27, 45, 0.05);
+}
+
+.para {
+  display: block;
+  font-size: 27rpx;
+  color: #4a5a6e;
+  line-height: 1.85;
+  text-align: justify;
+}
+
+.para + .para {
+  margin-top: 18rpx;
+}
+
+/* === 核心服务 === */
+.feature-list {
+  background: #fff;
+  border-radius: 26rpx;
+  padding: 6rpx 28rpx;
+  box-shadow: 0 6rpx 26rpx rgba(15, 27, 45, 0.05);
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  padding: 26rpx 0;
+  border-bottom: 1rpx solid #f2f4f7;
+}
+
+.feature-item:last-child {
+  border-bottom: none;
+}
+
+.feature-icon-wrap {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+  box-shadow: 0 6rpx 16rpx rgba(15, 27, 45, 0.06);
+}
+
+.feature-icon-wrap.icon-green {
+  background: #e0f8ef;
+}
+
+.feature-icon-wrap.icon-want {
+  background: #e0f7f5;
+}
+
+.feature-icon-wrap.icon-blue {
+  background: #e7f2fc;
+}
+
+.feature-icon-wrap.icon-purple {
+  background: #f1ecfd;
+}
+
+.feature-icon-wrap.icon-orange {
+  background: #fff2e6;
+}
+
+.feature-icon-wrap.icon-yellow {
+  background: #fff6d9;
+}
+
+.feature-icon {
+  font-size: 40rpx;
+}
+
+.feature-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-name {
+  font-size: 30rpx;
   font-weight: 600;
-  color: #1a1a2e;
+  color: #14202f;
   margin-bottom: 6rpx;
 }
 
-.passive-desc {
-  font-size: 24rpx;
-  color: #9999aa;
-  line-height: 1.5;
+.feature-desc {
+  font-size: 25rpx;
+  color: #7b8a9c;
+  line-height: 1.55;
 }
 
-.passive-price {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #ff6b35;
-  flex-shrink: 0;
-}
-
-.passive-price.free {
-  color: #07c160;
-}
-
-/* 执行路径 */
-.exec-item {
+/* === 服务承诺 === */
+.promise-card {
   background: #fff;
-  border-radius: 20rpx;
-  padding: 24rpx 28rpx;
-  margin-bottom: 16rpx;
+  border-radius: 26rpx;
+  padding: 14rpx 28rpx;
+  box-shadow: 0 6rpx 26rpx rgba(15, 27, 45, 0.05);
+}
+
+.promise-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f2f4f7;
+}
+
+.promise-row:last-child {
+  border-bottom: none;
+}
+
+.promise-check {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 24rpx;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
-}
-
-.exec-time {
-  width: 220rpx;
+  justify-content: center;
+  margin-right: 20rpx;
   flex-shrink: 0;
-  font-size: 26rpx;
-  font-weight: 700;
-  color: #07c160;
+  margin-top: 2rpx;
 }
 
-.exec-item:last-child .exec-time {
-  color: #ff6b35;
+.promise-text {
+  flex: 1;
+  font-size: 27rpx;
+  color: #3e4e62;
+  line-height: 1.65;
 }
 
-.exec-content {
+/* === 联系我们 === */
+.contact-section {
+  margin: 0 24rpx;
+}
+
+.contact-card {
+  background: #fff;
+  border-radius: 26rpx;
+  padding: 10rpx 28rpx;
+  box-shadow: 0 6rpx 26rpx rgba(15, 27, 45, 0.05);
+}
+
+.contact-item {
+  display: flex;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #f2f4f7;
+}
+
+.contact-item:last-child {
+  border-bottom: none;
+  flex-direction: column;
+}
+
+.contact-label {
   font-size: 26rpx;
-  color: #555566;
+  color: #98a4b3;
+  width: 150rpx;
+  flex-shrink: 0;
+}
+
+.contact-value {
+  font-size: 26rpx;
+  color: #3e4e62;
   flex: 1;
 }
 
-/* 心理卡片 */
-.psych-item {
-  background: #fff;
-  border-radius: 20rpx;
-  padding: 24rpx;
-  margin-bottom: 16rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+.contact-value.note {
+  color: #7b8a9c;
+  font-size: 24rpx;
+  line-height: 1.7;
+  margin-top: 8rpx;
 }
 
-.psych-tag {
-  display: inline-block;
-  font-size: 22rpx;
-  color: #07c160;
-  background: #f0faf3;
-  padding: 4rpx 16rpx;
-  border-radius: 20rpx;
-  font-weight: 500;
-  margin-bottom: 10rpx;
+.feedback-btn {
+  margin-top: 24rpx;
+  background: var(--primary-grad);
+  color: #fff;
+  text-align: center;
+  height: 92rpx;
+  line-height: 92rpx;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  box-shadow: var(--shadow-primary);
+  transition: transform 0.2s;
 }
 
-.psych-tag.free {
-  color: #ff6b35;
-  background: #fff3e0;
-}
-
-.psych-text {
-  font-size: 26rpx;
-  color: #777788;
-  line-height: 1.6;
-  font-style: italic;
+.feedback-btn:active {
+  transform: scale(0.97);
 }
 
 .version {
   text-align: center;
-  font-size: 24rpx;
-  color: #bbb;
-  margin-top: 40rpx;
+  font-size: 23rpx;
+  color: #aeb8c4;
+  margin-top: 48rpx;
+  letter-spacing: 1rpx;
 }

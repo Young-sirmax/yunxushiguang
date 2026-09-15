@@ -2,6 +2,18 @@ const cloud = require('wx-server-sdk');
 cloud.init({ env: 'cloud1-d0gvvc41c5a9dab3f' });
 const db = cloud.database();
 
+async function checkTextSecurity(text, fieldLabel) {
+  if (!text || !text.trim()) return { ok: true };
+  try {
+    const res = await cloud.openapi.security.msgSecCheck({ content: text });
+    if (res.errCode === 0) return { ok: true };
+    return { ok: false, msg: `${fieldLabel || '文本'}包含违规内容，请修改后重试` };
+  } catch (err) {
+    console.error('[commodity_question] msgSecCheck 异常:', err.errCode, err.errMsg);
+    return { ok: false, msg: `${fieldLabel || '文本'}安全检查服务异常，请稍后重试` };
+  }
+}
+
 exports.main = async (event, context) => {
   const { action, commodityId, data, questionId } = event;
   const wxContext = cloud.getWXContext();

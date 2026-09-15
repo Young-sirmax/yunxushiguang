@@ -3,6 +3,57 @@ cloud.init({ env: 'cloud1-d0gvvc41c5a9dab3f' });
 const db = cloud.database();
 const _ = db.command;
 
+async function checkTextSecurity(text, fieldLabel) {
+  if (!text || !text.trim()) return { ok: true };
+  try {
+    const res = await cloud.openapi.security.msgSecCheck({ content: text });
+    if (res.errCode === 0) return { ok: true };
+    return { ok: false, msg: `${fieldLabel || '文本'}包含违规内容，请修改后重试` };
+  } catch (err) {
+    console.error('[feedback] msgSecCheck 异常，降级放行:', err.errCode, err.errMsg);
+    return { ok: true };
+  }
+}
+
+async function checkImageSecurity(fileID, fieldLabel) {
+  if (!fileID || !fileID.startsWith('cloud://')) return { ok: true };
+  try {
+    const downloadRes = await cloud.downloadFile({ fileID });
+    const buffer = downloadRes.fileContent;
+    const res = await cloud.openapi.security.imgSecCheck({
+      media: { contentType: 'image/jpeg', value: buffer }
+    });
+    if (res.errCode === 0) return { ok: true };
+    return { ok: false, msg: `${fieldLabel || '图片'}包含违规内容，请更换后重试` };
+  } catch (err) {
+    console.error('[feedback] imgSecCheck 异常，降级放行:', err.errCode, err.errMsg);
+    return { ok: true };
+  }
+}
+
+async function checkAllText(data) {
+  const textFields = [
+    { field: 'content', label: '反馈内容', value: data.content },
+    { field: 'contact', label: '联系方式', value: data.contact }
+  ];
+  for (const item of textFields) {
+    if (item.value && item.value.trim()) {
+      const result = await checkTextSecurity(item.value, item.label);
+      if (!result.ok) return { ok: false, msg: result.msg };
+    }
+  }
+  return { ok: true };
+}
+
+async function checkAllImages(images) {
+  if (!images || images.length === 0) return { ok: true };
+  for (let i = 0; i < images.length; i++) {
+    const result = await checkImageSecurity(images[i], `第${i + 1}张图片`);
+    if (!result.ok) return { ok: false, msg: result.msg };
+  }
+  return { ok: true };
+}
+
 exports.main = async (event, context) => {
   const { action, id, data, page = 1, pageSize = 20 } = event;
   const wxContext = cloud.getWXContext();
@@ -12,6 +63,15 @@ exports.main = async (event, context) => {
     try {
       if (!data || !data.content) {
         return { code: -1, msg: '反馈内容不能为空' };
+      }
+
+      const textCheck = await checkAllText(data);
+      if (!textCheck.ok) {
+        return { code: -1, msg: textCheck.msg };
+      }
+      const imageCheck = await checkAllImages(data.images);
+      if (!imageCheck.ok) {
+        return { code: -1, msg: imageCheck.msg };
       }
 
       const newData = {
@@ -127,6 +187,20 @@ exports.main = async (event, context) => {
         updateData[field] = data[field];
       }
     }
+
+    if (updateData.content || updateData.contact) {
+      const textCheck = await checkAllText(updateData);
+      if (!textCheck.ok) {
+        return { code: -1, msg: textCheck.msg };
+      }
+    }
+    if (updateData.images && updateData.images.length > 0) {
+      const imageCheck = await checkAllImages(updateData.images);
+      if (!imageCheck.ok) {
+        return { code: -1, msg: imageCheck.msg };
+      }
+    }
+
     updateData.updateTime = db.serverDate();
 
     await db.collection('feedback').doc(id).update({ data: updateData });

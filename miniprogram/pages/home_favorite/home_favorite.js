@@ -10,6 +10,22 @@ Page({
     loading: false
   },
 
+  onLoad() {
+    // 打开右上角“转发给朋友 / 分享到朋友圈”
+    wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] });
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '我在云叙石光收藏了不少好物，快来看看～',
+      path: '/pages/commodity_list/commodity_list'
+    };
+  },
+
+  onShareTimeline() {
+    return { title: '云叙石光 · 校园物品信息服务平台', query: '' };
+  },
+
   onShow() {
     this.setData({ page: 1, list: [] });
     this.loadList();
@@ -63,7 +79,7 @@ Page({
     wx.showModal({
       title: '取消收藏',
       content: '确定要取消收藏这件商品吗？',
-      confirmColor: '#ff4d4f',
+      confirmColor: '#f43f5e',
       success: async (res) => {
         if (res.confirm) {
           try {

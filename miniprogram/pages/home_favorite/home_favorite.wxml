@@ -10,7 +10,7 @@
       <view class="item-info">
         <text class="item-title">{{item.commodityTitle}}</text>
         <view class="item-price-row">
-          <text class="item-price want" wx:if="{{item.commodityType === 'want'}}">{{item.commodityRewardAmount > 0 ? '¥' + item.commodityRewardAmount + ' 悬赏' : '求购中'}}</text>
+          <text class="item-price want" wx:if="{{item.commodityType === 'want'}}">求购中</text>
           <text class="item-price" wx:else>¥{{item.commodityPrice}}</text>
           <text class="item-original-price" wx:if="{{item.commodityOriginalPrice && item.commodityType !== 'want'}}">¥{{item.commodityOriginalPrice}}</text>
         </view>

@@ -28,7 +28,11 @@ Page({
     wx.showLoading({ title: '搜索中...' });
     try {
       const res = await API.searchCommodity(this.data.keyword.trim());
-      this.setData({ results: res.data || [], searched: true });
+      const list = (res.data || []).map(item => {
+        item.isVerified = item.isStudentVerified || false;
+        return item;
+      });
+      this.setData({ results: list, searched: true });
     } catch(err) { console.error(err); }
     wx.hideLoading();
   },

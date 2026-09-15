@@ -1,16 +1,52 @@
-<!--pages/home_release/home_release.wxml-->
+<!--pages/home_release/home_release.wxml  我发布的信息（闲置商品 / 求购物品）-->
 <view class="page-container">
-  <view class="section-title">我的发布</view>
+  <!-- 双分类切换 -->
+  <view class="top-wrap">
+    <view class="seg-bar">
+      <view class="seg sell {{tab === 'sell' ? 'active' : ''}}" data-tab="sell" bindtap="switchTab">
+        <text class="seg-name">📦 闲置商品</text>
+        <text class="seg-badge" wx:if="{{sellCount > 0}}">{{sellCount}}</text>
+      </view>
+      <view class="seg want {{tab === 'want' ? 'active' : ''}}" data-tab="want" bindtap="switchTab">
+        <text class="seg-name">🔍 求购物品</text>
+        <text class="seg-badge" wx:if="{{wantCount > 0}}">{{wantCount}}</text>
+      </view>
+    </view>
+    <view class="publish-quick" bindtap="goPublish">
+      <text class="quick-plus">＋</text>
+      <text class="quick-txt">{{tab === 'want' ? '求购' : '发布'}}</text>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="tab-empty" wx:if="{{list.length === 0 && deletedList.length === 0 && !loading}}">
+    <text class="empty-emoji">{{tab === 'want' ? '🔍' : '📦'}}</text>
+    <text class="empty-title">{{tab === 'want' ? '还没有求购物品' : '还没有发布闲置'}}</text>
+    <text class="empty-hint">{{tab === 'want' ? '发布你的求购需求，让闲置卖家主动联系你' : '把闲置挂出来，让心仪的人找到它'}}</text>
+    <view class="empty-btn {{tab === 'want' ? 'want' : 'sell'}}" bindtap="goPublish">
+      {{tab === 'want' ? '发布求购' : '发布闲置'}}
+    </view>
+  </view>
+
+  <!-- 进行中的信息 -->
   <view class="commodity-list" wx:if="{{list.length > 0}}">
-    <view class="item-card card" wx:for="{{list}}" wx:key="_id">
+    <view class="item-card" wx:for="{{list}}" wx:key="_id">
       <image class="item-img" src="{{item.images[0] || '/images/default-goods.png'}}" mode="aspectFill"/>
       <view class="item-info">
         <text class="item-title">{{item.title}}</text>
-        <text class="item-price" wx:if="{{item.type !== 'want'}}">¥{{item.price}}</text>
-        <text class="item-price want" wx:else>{{item.rewardAmount > 0 ? '¥' + item.rewardAmount + ' 悬赏' : '求购中'}}</text>
-        <view class="item-status-row">
-          <text class="item-status {{item.status === 'onSale' ? 'onsale' : 'sold'}}">{{item.status === 'onSale' ? (item.type === 'want' ? '求购中' : '出售中') : '已结束'}}</text>
-          <view class="verified-mini" wx:if="{{item.isVerified}}">✓ 已认证</view>
+        <view class="item-mid">
+          <text class="item-price" wx:if="{{item.type !== 'want'}}">¥{{item.price}}</text>
+          <text class="item-price want" wx:else>求购中</text>
+          <view class="item-status-row">
+            <text class="item-status {{item.statusClass}}" wx:if="{{item.status !== 'onSale' || item.type !== 'want'}}">{{item.statusText}}</text>
+            <view class="verified-mini" wx:if="{{item.isVerified}}">✓ 已认证</view>
+          </view>
+        </view>
+        <view class="reject-reason" wx:if="{{item.status === 'rejected' && item.rejectReason}}">
+          驳回原因：{{item.rejectReason}}
+        </view>
+        <view class="review-hint" wx:if="{{item.status === 'pendingReview'}}">
+          信息发布后需管理员审核，审核通过后将展示在首页
         </view>
       </view>
       <view class="item-actions">
@@ -19,16 +55,14 @@
       </view>
     </view>
   </view>
-  <view class="empty" wx:if="{{list.length === 0 && deletedList.length === 0}}">
-    <text>你还没有发布过信息</text>
-  </view>
 
+  <!-- 已删除信息 -->
   <view class="section-title" wx:if="{{deletedList.length > 0}}">
     已删除信息
     <text class="section-hint">（可恢复或编辑后重新发布）</text>
   </view>
   <view class="commodity-list" wx:if="{{deletedList.length > 0}}">
-    <view class="item-card card deleted" wx:for="{{deletedList}}" wx:key="_id">
+    <view class="item-card deleted" wx:for="{{deletedList}}" wx:key="_id">
       <image class="item-img" src="{{item.images[0] || '/images/default-goods.png'}}" mode="aspectFill"/>
       <view class="item-info">
         <text class="item-title">{{item.title}}</text>

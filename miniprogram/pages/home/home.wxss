@@ -9,10 +9,10 @@ page {
   padding-bottom: 180rpx;
 }
 
-/* === 渐变头部 === */
+/* === 渐变头部（Stripe 式多色渐变 + 光斑装饰） === */
 .home-header {
   position: relative;
-  height: 320rpx;
+  height: 340rpx;
   overflow: hidden;
 }
 
@@ -22,9 +22,37 @@ page {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(160deg, #07c160 0%, #06ad56 50%, #00b86b 100%);
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255, 255, 255, 0.22) 0%, transparent 40%),
+    radial-gradient(circle at 82% 12%, rgba(255, 213, 104, 0.5) 0%, transparent 32%),
+    radial-gradient(circle at 88% 8%, rgba(60, 232, 190, 0.4) 0%, transparent 45%),
+    var(--primary-grad-vivid);
   border-bottom-left-radius: 48rpx;
   border-bottom-right-radius: 48rpx;
+}
+
+/* 左上大光斑 */
+.home-header::before {
+  content: '';
+  position: absolute;
+  top: -60rpx;
+  left: -80rpx;
+  width: 320rpx;
+  height: 320rpx;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* 右下小光斑 */
+.home-header::after {
+  content: '';
+  position: absolute;
+  bottom: -40rpx;
+  right: -60rpx;
+  width: 240rpx;
+  height: 240rpx;
+  background: radial-gradient(circle, rgba(64, 255, 190, 0.28) 0%, transparent 70%);
+  border-radius: 50%;
 }
 
 .user-info {
@@ -32,17 +60,17 @@ page {
   z-index: 1;
   display: flex;
   align-items: center;
-  padding: 80rpx 40rpx 40rpx;
+  padding: 96rpx 40rpx 48rpx;
 }
 
 .user-avatar {
-  width: 120rpx;
-  height: 120rpx;
+  width: 124rpx;
+  height: 124rpx;
   border-radius: 50%;
-  border: 4rpx solid rgba(255, 255, 255, 0.5);
+  border: 5rpx solid rgba(255, 255, 255, 0.55);
   margin-right: 28rpx;
   background: #fff;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8rpx 32rpx rgba(0, 40, 25, 0.25);
 }
 
 .user-meta {
@@ -50,30 +78,93 @@ page {
   flex-direction: column;
 }
 
+.user-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 6rpx;
+}
+
 .user-name {
-  font-size: 36rpx;
+  font-size: 38rpx;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 6rpx;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+  text-shadow: 0 2rpx 12rpx rgba(0, 40, 25, 0.25);
+}
+
+.verify-mini-badge {
+  font-size: 20rpx;
+  color: #00c17e;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 5rpx 16rpx;
+  border-radius: 24rpx;
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(0, 40, 25, 0.12);
+}
+
+.verify-mini-badge.pending {
+  color: #e08c00;
+}
+
+.menu-verify-badge {
+  font-size: 20rpx;
+  color: #00c17e;
+  background: #e5f8f1;
+  padding: 5rpx 16rpx;
+  border-radius: 24rpx;
+  font-weight: 600;
+  margin-left: auto;
+  margin-right: 12rpx;
+}
+
+.menu-verify-badge.pending {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.menu-verify-badge.unverified {
+  color: var(--text-light);
+  background: #eef1f5;
 }
 
 .user-school {
   font-size: 26rpx;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.default-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60rpx;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.login-action {
+  margin-left: auto;
+  padding: 14rpx 40rpx;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 100rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #00c17e;
+  box-shadow: 0 4rpx 16rpx rgba(0, 40, 25, 0.18);
 }
 
 /* === 玻璃态统计卡片 === */
 .stats-card {
   display: flex;
   align-items: center;
-  margin: -40rpx 24rpx 24rpx;
+  margin: -44rpx 24rpx 24rpx;
   position: relative;
   z-index: 2;
-  padding: 32rpx 0;
-  background: #fff;
-  border-radius: 28rpx;
-  box-shadow: 0 8rpx 32rpx rgba(7, 193, 96, 0.12);
+  padding: 34rpx 0;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24rpx);
+  -webkit-backdrop-filter: blur(24rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.9);
+  border-radius: 32rpx;
+  box-shadow: 0 12rpx 40rpx rgba(0, 60, 40, 0.14);
 }
 
 .stat-item {
@@ -96,7 +187,7 @@ page {
   left: 20%;
   right: 20%;
   height: 4rpx;
-  background: linear-gradient(90deg, #07c160, #00d97e);
+  background: linear-gradient(90deg, #00c17e, #3be6ad);
   border-radius: 2rpx;
   opacity: 0;
   transition: opacity 0.2s;
@@ -108,14 +199,14 @@ page {
 
 .stat-divider {
   width: 1rpx;
-  height: 48rpx;
-  background: #f0f0f5;
+  height: 52rpx;
+  background: #eef1f5;
 }
 
 .stat-num {
-  font-size: 40rpx;
+  font-size: 42rpx;
   font-weight: 800;
-  background: linear-gradient(135deg, #07c160, #00d97e);
+  background: linear-gradient(135deg, #00c17e, #3be6ad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -124,23 +215,24 @@ page {
 
 .stat-label {
   font-size: 24rpx;
-  color: #9999aa;
+  color: #94a3b8;
 }
 
 /* === 功能菜单 === */
 .menu-section {
   margin: 0 24rpx 24rpx;
   background: #fff;
-  border-radius: 24rpx;
+  border: 1rpx solid #eef1f5;
+  border-radius: 32rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4rpx 24rpx rgba(15, 27, 45, 0.05);
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 28rpx 28rpx;
-  border-bottom: 1rpx solid #f5f5fa;
+  padding: 30rpx 28rpx;
+  border-bottom: 1rpx solid #f5f7fa;
   transition: background 0.2s;
   position: relative;
 }
@@ -150,51 +242,53 @@ page {
 }
 
 .menu-item:active {
-  background: #f5fff8;
+  background: #f2fbf7;
 }
 
 .menu-icon-wrap {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 18rpx;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 22rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 20rpx;
+  margin-right: 24rpx;
   flex-shrink: 0;
+  box-shadow: 0 6rpx 16rpx rgba(15, 27, 45, 0.12);
 }
 
 .icon-blue { background: linear-gradient(135deg, #4facfe, #00c6fb); }
-.icon-red { background: linear-gradient(135deg, #ff6b6b, #ff4d4f); }
-.icon-orange { background: linear-gradient(135deg, #ffa751, #ffe259); }
-.icon-purple { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
-.icon-green { background: linear-gradient(135deg, #07c160, #00d97e); }
+.icon-red { background: linear-gradient(135deg, #ff8a80, #f43f5e); }
+.icon-orange { background: linear-gradient(135deg, #ffb347, #ff7a59); }
+.icon-want { background: linear-gradient(135deg, #2dd8c0, #00a8a0); }
+.icon-purple { background: linear-gradient(135deg, #a18cd1, #7c6cf0); }
+.icon-green { background: linear-gradient(135deg, #3be6ad, #00c17e); }
 .icon-yellow { background: linear-gradient(135deg, #ffd93d, #ff9a3c); }
-.icon-gray { background: linear-gradient(135deg, #b0b0c0, #d0d0e0); }
-.icon-cyan { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.icon-gray { background: linear-gradient(135deg, #8b98ab, #b8c2d0); }
+.icon-cyan { background: linear-gradient(135deg, #43e97b, #38d9f9); }
 
 .menu-icon {
-  font-size: 32rpx;
+  font-size: 34rpx;
   line-height: 1;
 }
 
 .menu-text {
   flex: 1;
-  font-size: 29rpx;
-  color: #1a1a2e;
+  font-size: 30rpx;
+  color: #0f1b2d;
   font-weight: 500;
 }
 
 .menu-arrow {
   font-size: 32rpx;
-  color: #cccce0;
+  color: #c8d0dc;
   font-weight: 300;
 }
 
 .menu-badge {
   min-width: 36rpx;
   height: 36rpx;
-  background: #ff4d4f;
+  background: linear-gradient(135deg, #ff7a80, #f43f5e);
   color: #fff;
   font-size: 22rpx;
   border-radius: 18rpx;
@@ -203,20 +297,20 @@ page {
   justify-content: center;
   padding: 0 8rpx;
   margin-right: 12rpx;
-  box-shadow: 0 2rpx 8rpx rgba(255, 77, 79, 0.3);
+  box-shadow: 0 2rpx 10rpx rgba(244, 63, 94, 0.35);
 }
 
 /* === 退出按钮 === */
 .logout-btn {
   margin: 48rpx 32rpx 32rpx;
-  background: linear-gradient(135deg, #ff6b6b, #ff4d4f);
+  background: linear-gradient(135deg, #ff8a80, #f43f5e);
   color: #fff;
-  border-radius: 48rpx;
-  height: 88rpx;
+  border-radius: 999rpx;
+  height: 92rpx;
   font-size: 30rpx;
-  font-weight: 500;
+  font-weight: 600;
   border: none;
-  box-shadow: 0 8rpx 24rpx rgba(255, 77, 79, 0.3);
+  box-shadow: 0 10rpx 30rpx rgba(244, 63, 94, 0.25);
   transition: all 0.2s;
   position: relative;
   overflow: hidden;
@@ -235,7 +329,7 @@ page {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
   animation: shimmer 2.5s infinite;
 }
 
@@ -245,25 +339,21 @@ page {
 
 .logout-btn:active {
   transform: scale(0.96);
-  box-shadow: 0 4rpx 12rpx rgba(255, 77, 79, 0.25);
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  box-shadow: 0 4rpx 12rpx rgba(244, 63, 94, 0.2);
 }
 
 /* === 校园生活圈 === */
 .plaza-section {
   margin: 0 24rpx 24rpx;
   background: #fff;
-  border-radius: 24rpx;
-  padding: 28rpx 0 28rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  border: 1rpx solid #eef1f5;
+  border-radius: 32rpx;
+  padding: 32rpx 0;
+  box-shadow: 0 4rpx 24rpx rgba(15, 27, 45, 0.05);
 }
 
 .plaza-header {
-  padding: 0 28rpx 20rpx;
+  padding: 0 32rpx 24rpx;
 }
 
 .plaza-title-row {
@@ -272,48 +362,54 @@ page {
 }
 
 .plaza-emoji {
-  font-size: 32rpx;
-  margin-right: 8rpx;
+  font-size: 34rpx;
+  margin-right: 10rpx;
 }
 
 .plaza-title {
-  font-size: 32rpx;
+  font-size: 33rpx;
   font-weight: 700;
-  color: #1a1a2e;
-  margin-right: 12rpx;
+  color: #0f1b2d;
+  margin-right: 14rpx;
 }
 
 .plaza-tag {
-  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-  color: #ff6b35;
+  background: linear-gradient(135deg, #fff3e0, #ffe0c0);
+  color: #ff7a59;
   font-size: 22rpx;
-  padding: 4rpx 16rpx;
-  border-radius: 20rpx;
-  font-weight: 500;
+  padding: 5rpx 18rpx;
+  border-radius: 22rpx;
+  font-weight: 600;
 }
 
 .plaza-desc {
   font-size: 24rpx;
-  color: #9999aa;
-  margin-top: 8rpx;
+  color: #94a3b8;
+  margin-top: 10rpx;
   display: block;
 }
 
 .plaza-scroll {
   white-space: nowrap;
-  padding: 0 28rpx;
+  padding: 0 32rpx;
 }
 
 .plaza-card {
   display: inline-flex;
   flex-direction: column;
-  width: 240rpx;
+  width: 248rpx;
   margin-right: 20rpx;
   background: #fff;
-  border-radius: 20rpx;
+  border: 1rpx solid #f0f3f7;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6rpx 20rpx rgba(15, 27, 45, 0.07);
   vertical-align: top;
+  transition: transform 0.2s ease;
+}
+
+.plaza-card:active {
+  transform: scale(0.97);
 }
 
 .plaza-card:last-child {
@@ -323,19 +419,19 @@ page {
 .plaza-img {
   width: 100%;
   height: 160rpx;
-  background: linear-gradient(135deg, #f0f7f3, #e8f8ef);
+  background: linear-gradient(135deg, #f0f7f3, #e5f8f1);
 }
 
 .plaza-info {
-  padding: 16rpx 20rpx;
+  padding: 18rpx 20rpx;
   display: flex;
   flex-direction: column;
 }
 
 .plaza-name {
-  font-size: 26rpx;
+  font-size: 27rpx;
   font-weight: 600;
-  color: #1a1a2e;
+  color: #0f1b2d;
   margin-bottom: 6rpx;
   white-space: nowrap;
   overflow: hidden;
@@ -344,7 +440,7 @@ page {
 
 .plaza-tag-line {
   font-size: 22rpx;
-  color: #9999aa;
+  color: #94a3b8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

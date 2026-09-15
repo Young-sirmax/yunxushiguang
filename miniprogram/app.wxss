@@ -1,52 +1,91 @@
-/**app.wxss**/
+/**app.wxss —— 全局设计系统（青春校园风 · 活力青绿）**/
 page {
-  --primary: #07c160;
-  --primary-dark: #06ad56;
-  --primary-light: #e8f8ef;
-  --primary-grad: linear-gradient(135deg, #07c160 0%, #00d97e 100%);
-  --accent: #FF6B6B;
-  --accent-grad: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-  --warning: #ff9900;
-  --danger: #ff4d4f;
-  --text: #1a1a2e;
-  --text-secondary: #555566;
-  --text-light: #9999aa;
+  /* 主色：活力青绿（薄荷绿 → 青绿 → 湖水青渐变） */
+  --primary: #00c17e;
+  --primary-dark: #00a76b;
+  --primary-light: #e0f8ef;
+  --primary-grad: linear-gradient(135deg, #3be6ad 0%, #00c17e 48%, #00b3a3 100%);
+  --primary-grad-vivid: linear-gradient(160deg, #3ce8b2 0%, #00c17e 46%, #00a9c4 100%);
+
+  /* 求购专属：活力青蓝 */
+  --want: #00a8a0;
+  --want-grad: linear-gradient(135deg, #2dd8c0 0%, #00a8a0 100%);
+  --want-soft: #e0f7f5;
+
+  /* 强调色：活力珊瑚橙 */
+  --accent: #ff7a59;
+  --accent-grad: linear-gradient(135deg, #ff9a76 0%, #ff7a59 100%);
+
+  /* 点缀色：阳光黄 */
+  --sun: #ffc53d;
+  --sun-grad: linear-gradient(135deg, #ffd968 0%, #ffb020 100%);
+
+  /* 功能色 */
+  --warning: #ffb020;
+  --danger: #f43f5e;
+  --info: #3b82f6;
+  --white: #ffffff;
+
+  /* 浅色功能背景（徽章/标签底） */
+  --primary-soft: #e0f8ef;
+  --accent-soft: #fff1ec;
+  --danger-soft: #fdeef1;
+  --info-soft: #edf4ff;
+  --warning-soft: #fff7e6;
+
+  /* 文字层级（深墨蓝） */
+  --text: #0f1b2d;
+  --text-secondary: #5a6b7f;
+  --text-light: #94a3b8;
+
+  /* 背景与卡片 */
   --bg: #f5f7fa;
   --bg-card: #ffffff;
-  --border: #f0f0f5;
-  --white: #ffffff;
+  --border: #eef1f5;
+
+  /* 圆角体系 */
   --radius: 20rpx;
   --radius-lg: 28rpx;
-  --shadow: 0 8rpx 30rpx rgba(7, 193, 96, 0.08);
-  --shadow-card: 0 4rpx 24rpx rgba(0, 0, 0, 0.05);
-  --shadow-hover: 0 12rpx 40rpx rgba(0, 0, 0, 0.1);
+  --radius-pill: 999rpx;
+
+  /* 分层阴影体系（Material 3 式双层阴影） */
+  --shadow-sm: 0 1rpx 2rpx rgba(15, 27, 45, 0.04), 0 4rpx 12rpx rgba(15, 27, 45, 0.05);
+  --shadow-card: 0 2rpx 4rpx rgba(15, 27, 45, 0.05), 0 12rpx 32rpx rgba(15, 27, 45, 0.08);
+  --shadow-hover: 0 4rpx 8rpx rgba(15, 27, 45, 0.06), 0 24rpx 48rpx rgba(15, 27, 45, 0.12);
+  --shadow-primary: 0 10rpx 30rpx rgba(0, 193, 126, 0.28);
+  --shadow-danger: 0 10rpx 30rpx rgba(244, 63, 94, 0.24);
+
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
+  font-size: 28rpx;
 }
 
 .container {
   padding: 24rpx;
 }
 
+/* === 卡片 === */
 .card {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
+  border: 1rpx solid var(--border);
   box-shadow: var(--shadow-card);
   padding: 28rpx;
   margin-bottom: 24rpx;
 }
 
+/* === 主按钮（胶囊形 · 渐变 · 高光 · 按压反馈） === */
 .btn-primary {
   background: var(--primary-grad);
   color: var(--white);
-  border-radius: 48rpx;
-  height: 90rpx;
+  border-radius: var(--radius-pill);
+  height: 92rpx;
   font-size: 32rpx;
   font-weight: 600;
   text-align: center;
   border: none;
-  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.3);
+  box-shadow: var(--shadow-primary);
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
@@ -57,43 +96,53 @@ page {
   padding: 0 32rpx;
 }
 
+/* 顶部高光 */
 .btn-primary::before {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  animation: shimmer 2.5s infinite;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent);
+  border-radius: inherit;
 }
 
+/* 流光 */
 .btn-primary::after {
-  border: none;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  animation: shimmer 2.8s infinite;
 }
 
 .btn-primary:active {
-  transform: scale(0.97);
-  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.25);
+  transform: scale(0.96);
+  box-shadow: 0 5rpx 16rpx rgba(0, 193, 126, 0.22);
 }
 
 .btn-primary[disabled] {
-  background: linear-gradient(135deg, #c8e6d4, #b8e6cc);
-  color: rgba(255, 255, 255, 0.85);
+  background: linear-gradient(135deg, #cde7d8, #c2e2d0);
+  color: rgba(255, 255, 255, 0.9);
   box-shadow: none;
-  cursor: not-allowed;
 }
 
-.btn-primary[disabled]::before {
+.btn-primary[disabled]::before,
+.btn-primary[disabled]::after {
   display: none;
 }
 
+/* === 次级按钮（白底描边） === */
 .btn-default {
-  background: var(--white);
+  background: var(--bg-card);
   color: var(--primary);
-  border: 2rpx solid var(--primary);
-  border-radius: 48rpx;
-  height: 90rpx;
+  border: 2rpx solid rgba(0, 193, 126, 0.4);
+  border-radius: var(--radius-pill);
+  height: 92rpx;
   font-size: 32rpx;
   font-weight: 600;
   text-align: center;
@@ -102,12 +151,193 @@ page {
   justify-content: center;
   line-height: normal;
   padding: 0 32rpx;
+  transition: all 0.2s ease;
 }
 
 .btn-default::after {
   border: none;
 }
 
+.btn-default:active {
+  transform: scale(0.96);
+  background: var(--primary-light);
+}
+
+/* === 文字按钮 === */
+.btn-text {
+  color: var(--primary);
+  font-size: 28rpx;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  padding: 0;
+  line-height: inherit;
+}
+
+.btn-text::after {
+  border: none;
+}
+
+/* === 危险按钮（红色渐变胶囊） === */
+.btn-danger {
+  background: linear-gradient(135deg, #ff7a8a 0%, #f43f5e 55%, #e11d48 100%);
+  color: var(--white);
+  border-radius: var(--radius-pill);
+  height: 92rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  box-shadow: var(--shadow-danger);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
+  padding: 0 32rpx;
+}
+
+.btn-danger::after {
+  border: none;
+}
+
+.btn-danger:active {
+  transform: scale(0.96);
+  box-shadow: 0 5rpx 16rpx rgba(244, 63, 94, 0.2);
+}
+
+/* === 小型按钮 === */
+.btn-sm {
+  height: 64rpx;
+  font-size: 26rpx;
+  padding: 0 28rpx;
+  border-radius: 32rpx;
+}
+
+/* === 通用徽章（认证/状态） === */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 16rpx;
+  border-radius: var(--radius-pill);
+  font-size: 20rpx;
+  font-weight: 500;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+.badge-verified {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.badge-pending {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.badge-danger {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.badge-info {
+  color: var(--info);
+  background: var(--info-soft);
+}
+
+/* === 价格文本 === */
+.price-text {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.price-want {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* === 通用空状态 === */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 40rpx;
+}
+
+.empty-icon-wrap {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 36rpx;
+  box-shadow: inset 0 2rpx 8rpx rgba(0, 193, 126, 0.08);
+}
+
+.empty-icon {
+  font-size: 88rpx;
+  opacity: 0.85;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12rpx;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: var(--text-light);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* === 通用输入框 === */
+.input-base {
+  height: 88rpx;
+  background: #f1f5f9;
+  border: 2rpx solid transparent;
+  border-radius: var(--radius);
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.input-base:focus {
+  border-color: var(--primary);
+  background: var(--white);
+  box-shadow: 0 0 0 6rpx rgba(0, 193, 126, 0.08);
+}
+
+/* === 页面区块标题 === */
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* 可选：配合 .title-bar 启用左侧绿色竖条装饰 */
+.section-title.title-bar {
+  display: flex;
+  align-items: center;
+}
+
+.section-title.title-bar::before {
+  content: '';
+  width: 6rpx;
+  height: 28rpx;
+  border-radius: 3rpx;
+  background: var(--primary-grad);
+  margin-right: 14rpx;
+  flex-shrink: 0;
+}
+
+/* === 布局工具 === */
 .flex {
   display: flex;
 }
@@ -124,6 +354,7 @@ page {
   align-items: center;
 }
 
+/* === 文本工具 === */
 .text-primary { color: var(--primary); }
 .text-warning { color: var(--warning); }
 .text-danger { color: var(--danger); }
@@ -143,7 +374,7 @@ page {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* 通用渐变文字 */
+/* === 通用渐变文字 === */
 .gradient-text {
   background: var(--primary-grad);
   -webkit-background-clip: text;
@@ -151,7 +382,7 @@ page {
   background-clip: text;
 }
 
-/* 通用页面入场动画 */
+/* === 通用页面入场动画 === */
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(30rpx); }
   to { opacity: 1; transform: translateY(0); }
@@ -164,5 +395,11 @@ page {
 
 @keyframes shimmer {
   0% { left: -100%; }
-  100% { left: 100%; }
+  100% { left: 150%; }
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
 }

@@ -5,11 +5,15 @@ const { isRegistrationComplete } = require('../../utils/userValidate.js');
 
 Page({
   data: {
-    agreed: false
+    agreed: false,
+    universityName: ''
   },
 
   onLoad() {
     const userInfo = wx.getStorageSync('userInfo');
+    if (userInfo && userInfo.universityName) {
+      this.setData({ universityName: userInfo.universityName });
+    }
     if (isRegistrationComplete(userInfo)) {
       wx.switchTab({ url: '/pages/commodity_list/commodity_list' });
     } else if (userInfo && userInfo._openid) {
@@ -21,9 +25,19 @@ Page({
     this.setData({ agreed: !this.data.agreed });
   },
 
+  onUniversityInput(e) {
+    this.setData({ universityName: e.detail.value });
+  },
+
   async handleLogin() {
     if (!this.data.agreed) {
       wx.showToast({ title: '请先同意隐私政策', icon: 'none' });
+      return;
+    }
+
+    const universityName = this.data.universityName.trim();
+    if (!universityName) {
+      wx.showToast({ title: '请填写学校名称', icon: 'none' });
       return;
     }
 
@@ -40,11 +54,17 @@ Page({
       const res = await API.login();
 
       if (res.code === 0) {
-        const userInfo = res.data;
-        wx.setStorageSync('userInfo', userInfo);
-        wx.setStorageSync('openid', userInfo._openid || userInfo.openid);
-        app.globalData.userInfo = userInfo;
-        app.globalData.openid = userInfo._openid || userInfo.openid;
+        let userInfo = res.data;
+        // 登录成功后保存自定义填写的学校
+        if (universityName && universityName !== userInfo.universityName) {
+          const updateRes = await API.updateUser({ universityName });
+          if (updateRes.code === 0) {
+            userInfo = updateRes.data;
+          }
+        }
+
+        // 通过全局同步写入，保证 userInfo/openid 全局一致
+        app.syncUserInfo(userInfo);
 
         wx.hideLoading();
 
@@ -63,6 +83,10 @@ Page({
     } finally {
       this._logining = false;
     }
+  },
+
+  goBrowse() {
+    wx.switchTab({ url: '/pages/commodity_list/commodity_list' });
   },
 
   goPrivacy() {

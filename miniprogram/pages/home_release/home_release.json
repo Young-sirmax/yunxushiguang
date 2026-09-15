@@ -1,1 +1,5 @@
-{"navigationBarTitleText": "我发布的商品"}
+{
+  "navigationBarTitleText": "我发布的信息",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

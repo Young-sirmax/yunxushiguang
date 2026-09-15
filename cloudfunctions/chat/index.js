@@ -5,6 +5,34 @@ const _ = db.command;
 
 const BUYER_MSG_LIMIT = 20;
 
+async function checkTextSecurity(text, fieldLabel) {
+  if (!text || !text.trim()) return { ok: true };
+  try {
+    const res = await cloud.openapi.security.msgSecCheck({ content: text });
+    if (res.errCode === 0) return { ok: true };
+    return { ok: false, msg: `${fieldLabel || '消息'}包含违规内容，请修改后重试` };
+  } catch (err) {
+    console.error('[chat] msgSecCheck 异常:', err.errCode, err.errMsg);
+    return { ok: false, msg: `${fieldLabel || '消息'}安全检查服务异常，请稍后重试` };
+  }
+}
+
+async function checkImageSecurity(fileID, fieldLabel) {
+  if (!fileID || !fileID.startsWith('cloud://')) return { ok: true };
+  try {
+    const downloadRes = await cloud.downloadFile({ fileID });
+    const buffer = downloadRes.fileContent;
+    const res = await cloud.openapi.security.imgSecCheck({
+      media: { contentType: 'image/jpeg', value: buffer }
+    });
+    if (res.errCode === 0) return { ok: true };
+    return { ok: false, msg: `${fieldLabel || '图片'}包含违规内容，请更换后重试` };
+  } catch (err) {
+    console.error('[chat] imgSecCheck 异常:', err.errCode, err.errMsg);
+    return { ok: false, msg: `${fieldLabel || '图片'}安全检查服务异常，请稍后重试` };
+  }
+}
+
 exports.main = async (event, context) => {
   const { action, data, id } = event;
   const wxContext = cloud.getWXContext();
@@ -241,6 +269,14 @@ exports.main = async (event, context) => {
     }
     if (!['text', 'image', 'video', 'paycode'].includes(type)) {
       return { code: -1, msg: '不支持的消息类型' };
+    }
+
+    if (type === 'text') {
+      const textCheck = await checkTextSecurity(content, '消息内容');
+      if (!textCheck.ok) return { code: -1, msg: textCheck.msg };
+    } else if (type === 'image' || type === 'paycode') {
+      const imageCheck = await checkImageSecurity(content, '消息图片');
+      if (!imageCheck.ok) return { code: -1, msg: imageCheck.msg };
     }
 
     const convRes = await db.collection('conversations').doc(conversationId).get();

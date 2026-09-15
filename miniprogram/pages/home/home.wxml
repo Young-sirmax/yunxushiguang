@@ -3,17 +3,29 @@
   <!-- 渐变头部 -->
   <view class="home-header">
     <view class="header-bg-grad"></view>
-    <view class="user-info">
+    <view class="user-info" wx:if="{{isLoggedIn}}">
       <image class="user-avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}"/>
       <view class="user-meta">
-        <text class="user-name">{{userInfo.nickName || '未登录'}}</text>
-        <text class="user-school">{{userInfo.universityName || ''}}</text>
+        <view class="user-name-row">
+          <text class="user-name">{{userInfo.nickName || '未登录'}}</text>
+          <view wx:if="{{userInfo.isStudentVerified}}" class="verify-mini-badge">✓ 已认证</view>
+          <view wx:elif="{{userInfo.studentVerifyStatus === 'pending'}}" class="verify-mini-badge pending">审核中</view>
+        </view>
+        <text class="user-school">{{userInfo.universityName || (userInfo.contact ? '点击完善资料' : '')}}</text>
       </view>
+    </view>
+    <view class="user-info" wx:else>
+      <view class="user-avatar default-avatar">👤</view>
+      <view class="user-meta">
+        <text class="user-name">未登录</text>
+        <text class="user-school">登录后享受完整功能</text>
+      </view>
+      <view class="login-action" bindtap="goLogin">登录</view>
     </view>
   </view>
 
   <!-- 数据统计 - 玻璃态卡片 -->
-  <view class="stats-card">
+  <view class="stats-card" wx:if="{{isLoggedIn}}">
     <view class="stat-item" bindtap="goMyRelease">
       <text class="stat-num">{{stats.release}}</text>
       <text class="stat-label">我发布的</text>
@@ -30,6 +42,9 @@
     <view class="menu-item" bindtap="goUserInfo">
       <view class="menu-icon-wrap icon-blue"><text class="menu-icon">👤</text></view>
       <text class="menu-text">个人信息</text>
+      <view wx:if="{{userInfo.isStudentVerified}}" class="menu-verify-badge">✓ 已认证</view>
+      <view wx:elif="{{userInfo.studentVerifyStatus === 'pending'}}" class="menu-verify-badge pending">审核中</view>
+      <view wx:elif="{{isLoggedIn}}" class="menu-verify-badge unverified">未认证</view>
       <text class="menu-arrow">›</text>
     </view>
     <view class="menu-item" bindtap="goMyFavorite">
@@ -42,15 +57,14 @@
       <text class="menu-text">我发布的信息</text>
       <text class="menu-arrow">›</text>
     </view>
-    <view class="menu-item" bindtap="goMessage">
-      <view class="menu-icon-wrap icon-green"><text class="menu-icon">💬</text></view>
-      <text class="menu-text">我的消息</text>
-      <view class="menu-badge" wx:if="{{unreadMessageCount > 0}}">{{unreadMessageCount}}</view>
+    <view class="menu-item" bindtap="goMyWant">
+      <view class="menu-icon-wrap icon-want"><text class="menu-icon">🔍</text></view>
+      <text class="menu-text">我的求购</text>
       <text class="menu-arrow">›</text>
     </view>
-    <view class="menu-item" bindtap="goService">
-      <view class="menu-icon-wrap icon-purple"><text class="menu-icon">⚡</text></view>
-      <text class="menu-text">服务中心</text>
+    <view class="menu-item" wx:if="{{isAdmin}}" bindtap="goAdmin">
+      <view class="menu-icon-wrap icon-purple"><text class="menu-icon">🛡️</text></view>
+      <text class="menu-text">认证审核管理</text>
       <text class="menu-arrow">›</text>
     </view>
   </view>
@@ -66,6 +80,9 @@
       <text class="menu-text">隐私政策</text>
       <text class="menu-arrow">›</text>
     </view>
+  </view>
+
+  <view class="menu-section">
     <view class="menu-item" bindtap="goAbout">
       <view class="menu-icon-wrap icon-cyan"><text class="menu-icon">ℹ️</text></view>
       <text class="menu-text">关于我们</text>
@@ -73,26 +90,5 @@
     </view>
   </view>
 
-  <!-- 校园生活圈 - 信息位租赁 -->
-  <view class="plaza-section">
-    <view class="plaza-header">
-      <view class="plaza-title-row">
-        <text class="plaza-emoji">🏪</text>
-        <text class="plaza-title">校园生活圈</text>
-        <view class="plaza-tag">周边好店</view>
-      </view>
-      <text class="plaza-desc">周边商家信息展示位 · 按月租赁</text>
-    </view>
-    <scroll-view class="plaza-scroll" scroll-x="{{true}}" enable-flex="{{true}}">
-      <view class="plaza-card" wx:for="{{lifePlaza}}" wx:key="id" bindtap="openPlaza" data-id="{{item.id}}">
-        <image class="plaza-img" src="{{item.image}}" mode="aspectFill"/>
-        <view class="plaza-info">
-          <text class="plaza-name">{{item.name}}</text>
-          <text class="plaza-tag-line">{{item.tag}}</text>
-        </view>
-      </view>
-    </scroll-view>
-  </view>
-
-  <button class="logout-btn" bindtap="logout">退出登录</button>
+  <button class="logout-btn" wx:if="{{isLoggedIn}}" bindtap="logout">退出登录</button>
 </view>

@@ -1,0 +1,225 @@
+<view class="page-container">
+
+  <!-- 未登录管理员 -->
+  <view class="login-card card" wx:if="{{!isAdmin}}">
+    <view class="login-title">管理员登录</view>
+    <view class="login-desc">首次使用：输入正确管理密码后，当前微信账号即绑定为管理员，之后打开本页免密进入。</view>
+    <input class="login-input" password type="text" value="{{password}}" placeholder="请输入管理密码" bindinput="onPassword"/>
+    <button class="btn-primary login-btn" bindtap="doLogin">登录</button>
+  </view>
+
+  <!-- 已登录 -->
+  <block wx:else>
+    <view class="admin-header">
+      <view class="admin-title">{{module === 'verify' ? '学生认证审核' : (module === 'commodity' ? '商品审核' : '数据管理')}}</view>
+      <view class="admin-logout" bindtap="doLogout">退出管理员</view>
+    </view>
+
+    <view class="module-bar">
+      <view class="module-item {{module === 'verify' ? 'active' : ''}}" data-module="verify" bindtap="switchModule">学生认证</view>
+      <view class="module-item {{module === 'commodity' ? 'active' : ''}}" data-module="commodity" bindtap="switchModule">商品审核</view>
+      <view class="module-item {{module === 'data' ? 'active' : ''}}" data-module="data" bindtap="switchModule">数据管理</view>
+    </view>
+
+    <!-- ===== 学生认证模块 ===== -->
+    <block wx:if="{{module === 'verify'}}">
+      <view class="tab-bar">
+        <view class="tab-item {{tab === 'pending' ? 'active' : ''}}" data-tab="pending" bindtap="switchTab">待审核</view>
+        <view class="tab-item {{tab === 'approved' ? 'active' : ''}}" data-tab="approved" bindtap="switchTab">已通过</view>
+        <view class="tab-item {{tab === 'rejected' ? 'active' : ''}}" data-tab="rejected" bindtap="switchTab">已拒绝</view>
+      </view>
+
+      <view wx:if="{{loading}}" class="empty-tip">加载中...</view>
+      <view wx:elif="{{list.length === 0}}" class="empty-tip">
+        {{tab === 'pending' ? '暂无待审核的认证申请' : (tab === 'approved' ? '暂无已通过的认证' : '暂无已拒绝的记录')}}
+      </view>
+
+      <view class="verify-card card" wx:for="{{list}}" wx:key="_id">
+        <view class="verify-user">
+          <image class="user-avatar" src="{{item.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"/>
+          <view class="user-meta">
+            <view class="user-name">
+              <text class="real-name">{{item.realName || '未填写姓名'}}</text>
+              <text class="user-nick" wx:if="{{item.nickName}}">（{{item.nickName}}）</text>
+            </view>
+            <view class="user-school">{{item.universityName || '未选择学校'}}</view>
+          </view>
+          <view class="verify-time">{{item.timeText || ''}}</view>
+        </view>
+
+        <view class="verify-info">
+          <view class="info-row">
+            <text class="info-label">学号</text>
+            <text class="info-value">{{item.studentId || '-'}}</text>
+          </view>
+          <view class="info-row" wx:if="{{item.rejectReason}}">
+            <text class="info-label">拒绝原因</text>
+            <text class="info-value reject-reason">{{item.rejectReason}}</text>
+          </view>
+        </view>
+
+        <view class="verify-img-row">
+          <image
+            wx:if="{{item.verifyImageUrl}}"
+            class="verify-img"
+            src="{{item.verifyImageUrl}}"
+            mode="aspectFill"
+            data-url="{{item.verifyImageUrl}}"
+            bindtap="previewImage"
+          />
+          <view wx:else class="verify-img placeholder" data-url="{{item.studentVerifyImage}}" bindtap="previewImage">
+            <text class="placeholder-text">{{item.studentVerifyImage ? '点击查看学生证照片' : '无照片'}}</text>
+          </view>
+        </view>
+
+        <view class="verify-actions" wx:if="{{tab === 'pending'}}">
+          <button class="btn-approve" data-id="{{item._id}}" data-result="approved" bindtap="audit">通过</button>
+          <button class="btn-reject" data-id="{{item._id}}" data-result="rejected" bindtap="audit">拒绝</button>
+        </view>
+        <view class="audited-tag approved" wx:elif="{{tab === 'approved'}}">✓ 已通过认证</view>
+        <view class="audited-tag rejected" wx:else>✗ 已拒绝</view>
+      </view>
+    </block>
+
+    <!-- ===== 商品审核模块 ===== -->
+    <block wx:elif="{{module === 'commodity'}}">
+      <view wx:if="{{loading}}" class="empty-tip">加载中...</view>
+      <view wx:elif="{{list.length === 0}}" class="empty-tip">暂无待审核的商品</view>
+
+      <view class="commodity-card card" wx:for="{{list}}" wx:key="_id">
+        <view class="commodity-top">
+          <image
+            class="commodity-img"
+            src="{{item.images[0] || '/images/default-goods.png'}}"
+            mode="aspectFill"
+            data-url="{{item.images[0]}}"
+            bindtap="previewImage"
+          />
+          <view class="commodity-meta">
+            <view class="commodity-title">{{item.title}}</view>
+            <view class="commodity-price {{item.type === 'want' ? 'want' : ''}}">{{item.priceText}}</view>
+            <view class="commodity-info-row">
+              <text class="commodity-tag">{{item.statusText}}</text>
+              <text class="commodity-category">{{item.categoryName || '未分类'}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="commodity-desc" wx:if="{{item.description}}">{{item.description}}</view>
+
+        <view class="commodity-sub">
+          <text>发布者：{{item.sellerName || '未知用户'}}</text>
+          <text class="commodity-time">{{item.timeText || ''}}</text>
+        </view>
+
+        <view class="verify-actions">
+          <button class="btn-approve" data-id="{{item._id}}" data-result="approved" bindtap="auditCommodity">通过上架</button>
+          <button class="btn-reject" data-id="{{item._id}}" data-result="rejected" bindtap="auditCommodity">驳回</button>
+        </view>
+      </view>
+    </block>
+
+    <!-- ===== 数据管理模块 ===== -->
+    <block wx:else>
+      <view class="sub-bar">
+        <view class="sub-item {{dataSub === 'commodity' ? 'active' : ''}}" data-sub="commodity" bindtap="switchDataSub">商品数据</view>
+        <view class="sub-item {{dataSub === 'user' ? 'active' : ''}}" data-sub="user" bindtap="switchDataSub">用户数据</view>
+      </view>
+
+      <view class="search-row">
+        <input
+          class="search-input"
+          placeholder="{{dataSub === 'user' ? '搜索昵称 / 姓名 / 学号 / 学校' : '搜索商品标题'}}"
+          value="{{dataKeyword}}"
+          confirm-type="search"
+          bindinput="onDataKeyword"
+          bindconfirm="searchData"
+        />
+        <view class="search-btn" bindtap="searchData">搜索</view>
+      </view>
+
+      <!-- 商品：状态 + 类型筛选 -->
+      <block wx:if="{{dataSub === 'commodity'}}">
+        <scroll-view class="data-tab-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+          <view class="data-tabs">
+            <view class="data-tab {{dataStatus === '' ? 'active' : ''}}" data-status="" bindtap="switchDataStatus">全部</view>
+            <view class="data-tab {{dataStatus === 'pendingReview' ? 'active' : ''}}" data-status="pendingReview" bindtap="switchDataStatus">待审核</view>
+            <view class="data-tab {{dataStatus === 'onSale' ? 'active' : ''}}" data-status="onSale" bindtap="switchDataStatus">上架中</view>
+            <view class="data-tab {{dataStatus === 'rejected' ? 'active' : ''}}" data-status="rejected" bindtap="switchDataStatus">已驳回</view>
+            <view class="data-tab {{dataStatus === 'deleted' ? 'active' : ''}}" data-status="deleted" bindtap="switchDataStatus">已删除</view>
+            <view class="data-tab {{dataStatus === 'sold' ? 'active' : ''}}" data-status="sold" bindtap="switchDataStatus">已结束</view>
+          </view>
+        </scroll-view>
+        <view class="type-chips">
+          <view class="type-chip {{dataType === '' ? 'active' : ''}}" data-type="" bindtap="switchDataType">全部类型</view>
+          <view class="type-chip {{dataType === 'sell' ? 'active' : ''}}" data-type="sell" bindtap="switchDataType">📦 闲置</view>
+          <view class="type-chip want {{dataType === 'want' ? 'active' : ''}}" data-type="want" bindtap="switchDataType">🔍 求购</view>
+        </view>
+
+        <view wx:if="{{dataLoading}}" class="empty-tip">加载中...</view>
+        <view wx:elif="{{cList.length === 0}}" class="empty-tip">暂无商品数据</view>
+
+        <view class="data-card card" wx:for="{{cList}}" wx:key="_id">
+          <view class="data-top">
+            <image class="data-img" src="{{item.cover || '/images/default-goods.png'}}" mode="aspectFill" data-url="{{item.cover}}" bindtap="previewImage"/>
+            <view class="data-meta">
+              <view class="data-title-row">
+                <text class="data-title">{{item.title}}</text>
+                <text class="data-kind {{item.type === 'want' ? 'want' : ''}}">{{item.type === 'want' ? '求购' : '闲置'}}</text>
+              </view>
+              <view class="data-price {{item.type === 'want' ? 'want' : ''}}">{{item.priceText}}</view>
+              <view class="data-row">
+                <text class="data-status s-{{item.status}}">{{item.statusText}}</text>
+                <text class="data-sub">{{item.categoryName || '未分类'}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="data-sub-row">
+            <text>发布者：{{item.sellerName || '未知用户'}}　({{item.sellerContact || '未留联系方式'}})</text>
+            <text class="data-time">{{item.timeText || ''}}</text>
+          </view>
+          <view class="data-actions">
+            <view class="mini-btn primary" data-id="{{item._id}}" bindtap="changeCommodityStatus">改状态</view>
+            <view class="mini-btn danger" data-id="{{item._id}}" bindtap="deleteCommodity">永久删除</view>
+          </view>
+        </view>
+        <view class="more-btn" wx:if="{{cList.length > 0}}" bindtap="loadMoreData">{{cList.length >= cTotal ? '已加载全部' : '加载更多'}}</view>
+      </block>
+
+      <!-- 用户 -->
+      <block wx:else>
+        <view wx:if="{{dataLoading}}" class="empty-tip">加载中...</view>
+        <view wx:elif="{{uList.length === 0}}" class="empty-tip">暂无用户</view>
+
+        <view class="user-card card" wx:for="{{uList}}" wx:key="_id">
+          <view class="user-head">
+            <image class="data-avatar" src="{{item.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"/>
+            <view class="data-meta">
+              <view class="u-name-row">
+                <text class="u-name">{{item.realName || item.nickName || '未命名用户'}}</text>
+                <text class="u-nick" wx:if="{{item.nickName && item.realName}}">{{item.nickName}}</text>
+              </view>
+              <view class="u-school">{{item.universityName || '未选学校'}}</view>
+            </view>
+            <view class="u-tags">
+              <text class="mini-tag admin" wx:if="{{item.isAdmin}}">管理员</text>
+              <text class="mini-tag ban" wx:if="{{item.banned}}">已封禁</text>
+              <text class="mini-tag verified" wx:if="{{item.isStudentVerified}}">已认证</text>
+            </view>
+          </view>
+          <view class="u-info-row">
+            <text>学号：{{item.studentId || '-'}}</text>
+            <text>联系方式：{{item.contact || '-'}}</text>
+          </view>
+          <view class="u-time-row">注册时间：{{item.timeText || '-'}}</view>
+          <view class="data-actions">
+            <view class="mini-btn primary" data-id="{{item._id}}" bindtap="toggleUserAdmin">{{item.isAdmin ? '取消管理员' : '设为管理员'}}</view>
+            <view class="mini-btn warn" data-id="{{item._id}}" bindtap="toggleUserBan">{{item.banned ? '解封' : '封禁'}}</view>
+            <view class="mini-btn danger" data-id="{{item._id}}" bindtap="deleteUser">删除</view>
+          </view>
+        </view>
+        <view class="more-btn" wx:if="{{uList.length > 0}}" bindtap="loadMoreData">{{uList.length >= uTotal ? '已加载全部' : '加载更多'}}</view>
+      </block>
+    </block>
+  </block>
+</view>

@@ -1,120 +1,88 @@
-<!--pages/home_feedback/home_feedback.wxml-->
+<!--pages/home_feedback/home_feedback.wxml  意见反馈 → 反馈交流群-->
 <view class="page-container">
-  <view class="form-section">
-    <view class="section-title">
-      <text class="title-text">反馈类型</text>
-    </view>
-    <view class="type-list">
-      <view 
-        class="type-item {{currentType === item.value ? 'active' : ''}}" 
-        wx:for="{{typeOptions}}" 
-        wx:key="value"
-        bindtap="onTypeChange"
-        data-value="{{item.value}}"
-      >
-        <text class="type-icon">{{item.icon}}</text>
-        <text class="type-name">{{item.name}}</text>
-      </view>
+  <!-- 顶部欢迎语 -->
+  <view class="fb-hero">
+    <view class="fb-hero-bg"></view>
+    <view class="fb-hero-inner">
+      <view class="fb-hero-title">✨ 抓 Bug 大本营</view>
+      <view class="fb-hero-sub">欢迎来到「云叙石光」专属反馈群 · 吐槽踩坑 / 脑洞献策 / 抓捕隐藏 Bug</view>
     </view>
   </view>
 
-  <view class="form-section">
-    <view class="section-title">
-      <text class="title-text">反馈内容</text>
-      <text class="title-count">{{content.length}}/{{maxLength}}</text>
-    </view>
-    <view class="textarea-wrap">
-      <textarea 
-        class="feedback-textarea"
-        placeholder="请详细描述您的问题或建议，我们会认真对待每一条反馈"
-        value="{{content}}"
-        bindinput="onContentInput"
-        maxlength="{{maxLength}}"
-        auto-height
-      />
-    </view>
+  <view class="intro-card">
+    <text class="intro-text">不管是使用时碰到的异常故障，还是心里期待的新功能、小优化想法，都欢迎来这里分享。我们会认真登记每一条反馈，持续迭代打磨～</text>
   </view>
 
-  <view class="form-section">
-    <view class="section-title">
-      <text class="title-text">联系方式（选填）</text>
-    </view>
-    <view class="input-wrap">
-      <input 
-        class="contact-input"
-        placeholder="手机号或微信，方便我们回复您"
-        value="{{contact}}"
-        bindinput="onContactInput"
-      />
-    </view>
+  <!-- 群二维码 -->
+  <view class="qr-card">
+    <view class="qr-title">📲 扫码加入反馈交流群</view>
+    <image
+      class="qr-img"
+      src="{{qrPath}}"
+      mode="aspectFit"
+      show-menu-by-longpress="{{true}}"
+      bindtap="previewQr"
+    />
+    <view class="qr-tip">▲ 长按二维码可「识别图中二维码」或保存到相册</view>
+    <view class="qr-btn" bindtap="saveQr">📥 保存二维码到相册</view>
   </view>
 
-  <view class="form-section">
-    <view class="section-title">
-      <text class="title-text">上传截图（选填，最多3张）</text>
-    </view>
-    <view class="image-list">
-      <view 
-        class="image-item" 
-        wx:for="{{images}}" 
-        wx:key="*this"
-      >
-        <image class="feedback-img" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-index="{{index}}"/>
-        <view class="image-delete" bindtap="deleteImage" data-index="{{index}}">×</view>
-      </view>
-      <view class="image-add" wx:if="{{images.length < 3}}" bindtap="chooseImage">
-        <text class="add-icon">+</text>
-      </view>
-    </view>
-  </view>
-
-  <view class="bottom-action-bar safe-bottom">
-    <view class="action-tip" wx:if="{{!canSubmit}}">
-      <text>请输入至少5个字的反馈内容</text>
-    </view>
-    <view class="action-tip" wx:else>
-      <text>感谢您的反馈，我们会在1-3个工作日内处理</text>
-    </view>
-    <button 
-      class="submit-btn {{canSubmit ? '' : 'disabled'}}" 
-      bindtap="submitFeedback"
-      disabled="{{isSubmitting || !canSubmit}}"
-      hover-class="submit-btn-hover"
-      hover-stay-time="80"
-    >
-      <text wx:if="{{isSubmitting}}" class="btn-loading">
-        <text class="loading-icon"></text>
-        <text>提交中...</text>
-      </text>
-      <text wx:else>提交反馈</text>
-    </button>
-  </view>
-
-  <view class="history-section" wx:if="{{historyList.length > 0}}">
-    <view class="section-title">
-      <text class="title-text">我的历史反馈</text>
-    </view>
-    <view class="history-list">
-      <view class="history-card" wx:for="{{historyList}}" wx:key="_id">
-        <view class="history-header">
-          <text class="history-type">{{item.typeName}}</text>
-          <text class="history-status status-{{item.status}}">{{item.statusText}}</text>
+  <!-- 反馈模板 -->
+  <view class="block">
+    <view class="block-title"><text class="dot"></text><text class="bt-text">📝 反馈提交模板</text></view>
+    <view class="tpl-card">
+      <view class="tpl-sec">
+        <view class="tpl-sec-title">🐛 Bug 问题上报</view>
+        <view class="tpl-item">
+          <text class="tpl-arrow">▸</text>
+          <text class="tpl-txt">出现了什么异常 ＋ 一步步怎么操作触发 ＋ 你的手机型号 / 小程序版本</text>
         </view>
-        <view class="history-content">{{item.content}}</view>
-        <view class="history-footer">
-          <text class="history-time">{{item.timeText}}</text>
-          <view class="history-actions">
-            <text class="urge-count" wx:if="{{item.urgeCount > 0 && item.status !== 'resolved' && item.status !== 'rejected'}}">已催{{item.urgeCount}}次</text>
-            <view 
-              class="urge-btn" 
-              wx:if="{{item.status === 'pending' || item.status === 'processing'}}"
-              bindtap="onUrge"
-              data-id="{{item._id}}"
-              data-index="{{index}}"
-            >催一催</view>
-          </view>
+        <view class="tpl-item">
+          <text class="tpl-arrow">▸</text>
+          <text class="tpl-txt">截图、录屏优先附上，更容易复现排查！</text>
+        </view>
+      </view>
+      <view class="tpl-divider"></view>
+      <view class="tpl-sec">
+        <view class="tpl-sec-title">💡 功能脑洞建议</view>
+        <view class="tpl-item">
+          <text class="tpl-arrow">▸</text>
+          <text class="tpl-txt">你希望增加什么功能 ＋ 什么场景下会用到它 ＋ 它能解决什么痛点</text>
+        </view>
+        <view class="tpl-item">
+          <text class="tpl-arrow">▸</text>
+          <text class="tpl-txt">有参考想法的截图，也可以一起发出来～</text>
         </view>
       </view>
     </view>
+  </view>
+
+  <!-- 群规 -->
+  <view class="block">
+    <view class="block-title"><text class="dot warn"></text><text class="bt-text">⚠️ 小小群规，一起遵守</text></view>
+    <view class="rule-card">
+      <view class="rule-item no">
+        <text class="rule-ico">❌</text>
+        <text class="rule-txt">禁止广告推销、刷屏灌水、争吵引战、发送无关外部链接</text>
+      </view>
+      <view class="rule-item yes">
+        <text class="rule-ico">✅</text>
+        <text class="rule-txt">每一条 Bug 反馈、每一个创意想法都会登记存档，我们持续迭代打磨小程序</text>
+      </view>
+      <view class="rule-item yes">
+        <text class="rule-ico">✅</text>
+        <text class="rule-txt">可以和群友交流使用感受，聊天尽量围绕云叙石光相关内容</text>
+      </view>
+      <view class="rule-item yes">
+        <text class="rule-ico">✅</text>
+        <text class="rule-txt">大家友善讨论、互相尊重，一起给产品出谋划策</text>
+      </view>
+    </view>
+    <view class="urgent-note">⚠️ 遇到紧急、影响使用的重大问题，请直接私信群主！</view>
+  </view>
+
+  <view class="thanks">
+    <text class="thanks-main">感谢各位厉害的“捕虫达人”🐞</text>
+    <text class="thanks-sub">一起把云叙石光打造成属于咱们的“时光叙集”🥳</text>
   </view>
 </view>

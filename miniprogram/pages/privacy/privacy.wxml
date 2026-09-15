@@ -1,22 +1,112 @@
-<!--pages/privacy/privacy.wxml-->
+<!--pages/privacy/privacy.wxml  隐私政策-->
 <view class="page-container">
-  <view class="content-card card">
+  <view class="content-card">
     <view class="title">隐私政策</view>
+    <view class="update-date">更新日期：2026年9月8日　·　生效日期：2026年9月8日</view>
+
     <view class="section">
-      <view class="section-title">1. 信息收集</view>
-      <text class="section-text">我们收集你的昵称、头像、姓名、学号、手机号及所在学校，姓名和学号用于人工核验身份，手机号用于交易联系。</text>
+      <view class="section-title">1. 引言与适用范围</view>
+      <text class="section-text">欢迎使用「云叙石光」（以下简称"本平台"）。本平台是面向在校大学生提供闲置转让与求购信息交流服务的微信小程序。我们深知个人信息对您的重要性，并将按照法律法规的要求，采取相应的安全保护措施，尽力保护您的个人信息安全可控。</text>
+      <text class="section-text">本政策适用于您通过本平台（含微信小程序端）提交、浏览、使用全部服务过程中所涉及的个人信息处理活动。请您在使用本平台前，仔细阅读并充分理解本政策；您开始使用或继续使用本平台任一服务，即视为您已同意本政策。</text>
     </view>
+
     <view class="section">
-      <view class="section-title">2. 信息使用</view>
-      <text class="section-text">对外仅展示昵称和头像。姓名、学号不对其他用户公开，手机号仅向交易对方展示，不会用于其他商业用途。</text>
+      <view class="section-title">2. 我们收集的信息</view>
+      <text class="section-text">我们仅收集与提供服务直接相关且必要的个人信息，并遵循"最小必要"原则：</text>
+      <view class="sub-block">
+        <view class="sub-title">2.1 您主动提供的信息</view>
+        <view class="section-list">
+          <view class="list-item"><text class="list-dot">·</text><text>昵称、头像：用于在本平台展示您的身份标识；</text></view>
+          <view class="list-item"><text class="list-dot">·</text><text>真实姓名、学号、所在学校、学生证件照片：用于学生身份实名认证及人工审核，保障交易双方真实可信；</text></view>
+          <view class="list-item"><text class="list-dot">·</text><text>手机号 / 微信号：用于交易双方线下联系，仅向相关交易方展示；</text></view>
+          <view class="list-item"><text class="list-dot">·</text><text>您发布信息中的文字、图片、价格、地点等内容。</text></view>
+        </view>
+      </view>
+      <view class="sub-block">
+        <view class="sub-title">2.2 微信授权与登录信息</view>
+        <text class="section-text">为完成登录，我们会通过微信开放能力获取您的微信 OpenID 等必要标识信息。我们不会收集您的微信账号密码，也建议您不要在平台内透露支付密码等无关敏感信息。</text>
+      </view>
+      <view class="sub-block">
+        <view class="sub-title">2.3 我们自动获取的信息</view>
+        <text class="section-text">当您使用本平台时，我们可能通过微信平台能力获得设备的操作系统、网络状态、操作日志等基础信息，仅用于服务的正常运行、故障排查与安全风控，不作其他用途。</text>
+      </view>
     </view>
+
     <view class="section">
-      <view class="section-title">3. 信息保护</view>
-      <text class="section-text">我们采用加密存储，严格保护你的个人信息安全。</text>
+      <view class="section-title">3. 我们如何使用信息</view>
+      <view class="section-list">
+        <view class="list-item"><text class="list-dot">·</text><text>用于账号注册、登录验证与身份认证，向您提供信息发布、浏览、搜索与收藏等服务；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>用于完成闲置转让与求购信息的展示与撮合，向交易相关方提供必要的联系方式；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>用于对发布内容进行安全审核、违规处置与反诈风控；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>用于通过「意见反馈」反馈交流群回应您的反馈、投诉与咨询；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>用于改进和优化产品功能，提升服务体验。</text></view>
+      </view>
+      <text class="section-text">除本政策另有约定或取得您的单独同意外，我们不会将您的个人信息用于上述目的之外的用途。</text>
     </view>
+
     <view class="section">
-      <view class="section-title">4. 联系方式</view>
-      <text class="section-text">如有疑问，请通过小程序客服反馈。</text>
+      <view class="section-title">4. 信息的共享与披露</view>
+      <view class="section-list">
+        <view class="list-item"><text class="list-dot">·</text><text>对外仅展示您的昵称、头像及所在学校等公开信息，不向其他用户公开您的真实姓名与学号；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>您的联系方式仅向与您产生交易意向的对方展示，用于促成线下沟通；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>在获得您明确同意，或依法律法规、司法机关及监管机构要求时，我们才会向第三方共享或披露您的个人信息；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>本平台不会以出售、出租等方式向第三方提供您的个人信息。</text></view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">5. 信息的存储与保护</view>
+      <view class="section-list">
+        <view class="list-item"><text class="list-dot">·</text><text>您的信息存储于腾讯云服务器，采用行业认可的加密与访问控制技术进行保护；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>平台建立严格的内部数据权限管理制度，仅经授权的运营人员可在必要范围内查阅信息，用于审核与安全处置；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>您注销账号或撤回相关授权后，我们将依照法律法规规定的期限保存，并在到期后予以删除或匿名化处理；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>尽管我们已采取合理措施，但任何网络传输方式均难以做到绝对安全，请您妥善保管账号与个人信息，警惕钓鱼链接与诈骗行为。</text></view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">6. 第三方服务</view>
+      <text class="section-text">本平台基于微信小程序及腾讯云开发能力运行，涉及的第三方服务包括：</text>
+      <view class="section-list">
+        <view class="list-item"><text class="list-dot">·</text><text>微信小程序平台：提供登录、分享及运行环境支持；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>腾讯云开发服务：提供数据库存储、文件云存储及内容安全检测能力。</text></view>
+      </view>
+      <text class="section-text footnote">上述第三方服务均遵循其自身隐私保护政策，您可以查阅微信《隐私保护指引》等官方文档了解更多。</text>
+    </view>
+
+    <view class="section">
+      <view class="section-title">7. 未成年人保护</view>
+      <text class="section-text">本平台面向在校大学生等成年人提供服务。若您为未满 18 周岁的未成年人，请在监护人陪同下阅读本政策，并在取得监护人同意后使用本平台。我们不会主动收集未成年人的个人信息；如发现误收集，我们将及时删除。</text>
+    </view>
+
+    <view class="section">
+      <view class="section-title">8. 您的权利</view>
+      <view class="section-list">
+        <view class="list-item"><text class="list-dot">·</text><text>查询与更正：您可随时在「我的」-「个人信息」页面查看、修改您的头像、昵称及联系方式等资料；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>撤销授权：您可以取消学生认证，取消后相关实名认证信息将不再保留于展示用途；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>删除信息：您可在「我发布的信息」中对已发布内容进行删除或恢复操作；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>注销与停止使用：您可联系我们申请注销账号，我们将在核实身份后的合理期限内删除或匿名化处理您的个人信息。</text></view>
+      </view>
+      <text class="section-text">如您行使上述权利，或对本政策内容有任何疑问，请通过下方方式与我们联系，我们将在 15 个工作日内予以答复。</text>
+    </view>
+
+    <view class="section">
+      <view class="section-title">9. 政策更新</view>
+      <text class="section-text">我们可能根据法律法规变化、业务功能调整等情况适时修订本政策。政策更新后，我们将在本平台内以显著方式发布更新内容，并更新页面顶部日期。若修订涉及对您权益产生重大影响的内容，我们将以弹窗、推送等明显方式再次征求您的同意。请您定期查阅本政策。</text>
+    </view>
+
+    <view class="section">
+      <view class="section-title">10. 如何联系我们</view>
+      <text class="section-text">如您对本隐私政策或个人信息保护相关事宜有任何疑问、意见或建议，欢迎通过以下方式与我们联系：</text>
+      <view class="contact-card">
+        <text class="contact-item-text">📮 小程序内「我的」-「意见反馈」功能提交</text>
+        <text class="contact-item-text">我们会在收到反馈后尽快处理，并承诺 48 小时内响应、15 个工作日内答复。</text>
+      </view>
+    </view>
+
+    <view class="agreement-tip">
+      <text class="tip-title">重要提示</text>
+      <text class="tip-content">本平台为校园物品信息展示与撮合服务，不参与实际交易，也不代为收取或保管任何交易款项。请尽量选择校园内公共、人多的场所当面交易，当面核验物品真实情况，切勿提前转账、汇款。如遇可疑情况，请及时通过「意见反馈」向我们举报，必要时可向公安机关求助。</text>
     </view>
   </view>
 </view>

@@ -1,21 +1,125 @@
-<!--pages/home_about/home_about.wxml-->
+<!--pages/home_about/home_about.wxml  关于我们-->
 <view class="page-container">
   <!-- 品牌头部 -->
   <view class="brand-header">
     <view class="brand-bg"></view>
     <view class="brand-content">
-      <view class="brand-logo">🏫</view>
+      <view class="brand-logo-wrap">
+        <image class="brand-logo" src="/images/logo.png" mode="aspectFit"/>
+      </view>
       <view class="brand-name">云叙石光</view>
-      <view class="brand-sub">校园物品信息流服务站</view>
-      <view class="brand-slogan">不碰货、不垫资、不仓储</view>
+      <view class="brand-sub">校园物品信息服务平台</view>
+      <view class="brand-slogan">让闲置流转 · 让求购回应</view>
     </view>
   </view>
 
-  <!-- 一句话介绍 -->
+  <!-- 平台使命 -->
   <view class="intro-card">
     <view class="intro-quote">💡</view>
-    <view class="intro-text">我们是校园物品信息的编辑部和广播站，把粗糙信息加工成精装信息推送给精准人群。</view>
+    <view class="intro-body">
+      <view class="intro-title">我们的使命</view>
+      <text class="intro-text">每一件闲置都值得被重新发现，每一个需求都值得被认真回应。我们希望通过安全、便捷、免费的信息服务，让校园里的好物与需求高效相遇，让校园生活更简单、更绿色。</text>
+    </view>
   </view>
 
-  <view class="version">Version 5.0 · 信息服务站版</view>
+  <!-- 平台简介 -->
+  <view class="block">
+    <view class="block-title"><text class="block-title-bar"></text><text class="block-title-text">平台简介</text></view>
+    <view class="block-card">
+      <text class="para">云叙石光是一个面向在校大学生的校园物品信息交流平台，提供「闲置转让」与「求购发布」两类信息服务，覆盖学习、生活、娱乐等多种校园场景，帮助同学们以更低成本实现物品循环利用。</text>
+      <text class="para">平台依托微信小程序生态运行，接入学生身份实名认证与内容安全审核机制，由校园开发者团队负责日常运营与维护，长期坚持「免费、纯净、可信」的产品理念，致力于打造同学们身边的绿色循环服务站。</text>
+    </view>
+  </view>
+
+  <!-- 核心服务 -->
+  <view class="block">
+    <view class="block-title"><text class="block-title-bar"></text><text class="block-title-text">核心服务</text></view>
+    <view class="feature-list">
+      <view class="feature-item">
+        <view class="feature-icon-wrap icon-green"><text class="feature-icon">📦</text></view>
+        <view class="feature-body">
+          <text class="feature-name">闲置转让</text>
+          <text class="feature-desc">教材资料、数码好物、生活用品等闲置信息一键发布，转给真正需要的人</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon-wrap icon-want"><text class="feature-icon">🔍</text></view>
+        <view class="feature-body">
+          <text class="feature-name">求购发布</text>
+          <text class="feature-desc">找不到想要的物品？发布求购信息，让有闲置的同学主动联系你</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon-wrap icon-blue"><text class="feature-icon">🎓</text></view>
+        <view class="feature-body">
+          <text class="feature-name">实名认证</text>
+          <text class="feature-desc">学生身份实名认证，营造真实可信的校园交易环境</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon-wrap icon-purple"><text class="feature-icon">🛡️</text></view>
+        <view class="feature-body">
+          <text class="feature-name">内容审核</text>
+          <text class="feature-desc">发布信息先审后发，机器安全检测与人工复核双重保障</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon-wrap icon-orange"><text class="feature-icon">🔒</text></view>
+        <view class="feature-body">
+          <text class="feature-name">隐私保护</text>
+          <text class="feature-desc">严格隐私政策，联系方式等敏感信息仅向交易相关方展示</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon-wrap icon-yellow"><text class="feature-icon">💚</text></view>
+        <view class="feature-body">
+          <text class="feature-name">全程免费</text>
+          <text class="feature-desc">信息发布与浏览均不收取任何费用，无平台佣金</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 平台治理与安全 -->
+  <view class="block">
+    <view class="block-title"><text class="block-title-bar"></text><text class="block-title-text">平台治理与安全</text></view>
+    <view class="block-card">
+      <text class="para">本平台对发布内容实行「先审后发」机制：每条信息提交后，均先经过文本、图片内容安全检查与管理员人工复核，审核通过后才对外展示；被删除的信息支持恢复后重新审核。</text>
+      <text class="para">我们同步建立了举报与处置通道，对虚假、违禁、侵权等不良信息做到及时发现、快速下架、依法处置，并持续优化反诈提示与风险预警，全力守护每一位同学的合法权益。</text>
+    </view>
+  </view>
+
+  <!-- 服务承诺 -->
+  <view class="block">
+    <view class="block-title"><text class="block-title-bar"></text><text class="block-title-text">服务承诺</text></view>
+    <view class="promise-card">
+      <view class="promise-row"><text class="promise-check">✓</text><text class="promise-text">信息免费发布、免费浏览，平台不向用户收取任何费用</text></view>
+      <view class="promise-row"><text class="promise-check">✓</text><text class="promise-text">学生实名认证，双向信任，杜绝虚假身份</text></view>
+      <view class="promise-row"><text class="promise-check">✓</text><text class="promise-text">内容先审后发，营造清朗、诚信的交流空间</text></view>
+      <view class="promise-row"><text class="promise-check">✓</text><text class="promise-text">用户信息严格保密，非必要不收集、不滥用</text></view>
+      <view class="promise-row"><text class="promise-check">✓</text><text class="promise-text">意见与投诉 48 小时内响应处理</text></view>
+    </view>
+  </view>
+
+  <!-- 联系我们 -->
+  <view class="contact-section">
+    <view class="block-title"><text class="block-title-bar"></text><text class="block-title-text">联系我们</text></view>
+    <view class="contact-card">
+      <view class="contact-item">
+        <text class="contact-label">反馈渠道</text>
+        <text class="contact-value">小程序内「意见反馈」功能</text>
+      </view>
+      <view class="contact-item">
+        <text class="contact-label">服务时间</text>
+        <text class="contact-value">工作日 9:00 - 18:00</text>
+      </view>
+      <view class="contact-item">
+        <text class="contact-label">温馨提示</text>
+        <text class="contact-value note">本平台为信息展示与撮合服务，不参与线下交易。请尽量在校园公共区域当面交易、当面核验物品，警惕各类网络诈骗。</text>
+      </view>
+    </view>
+    <view class="feedback-btn" bindtap="goFeedback">📝 我要反馈</view>
+  </view>
+
+  <view class="version">云叙石光 · 正式版 v1.0.0</view>
 </view>

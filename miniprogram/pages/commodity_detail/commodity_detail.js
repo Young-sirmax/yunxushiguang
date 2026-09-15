@@ -48,6 +48,7 @@ Page({
       const res = await API.getCommodityDetail(this.commodityId);
       if (res.code === 0) {
         const commodity = res.data;
+        commodity.isVerified = commodity.sellerIsStudentVerified || false;
         const openid = wx.getStorageSync('openid');
         this.setData({
           commodity,
@@ -87,26 +88,6 @@ Page({
     wx.switchTab({ url: '/pages/commodity_list/commodity_list' });
   },
 
-  goChat() {
-    const c = this.data.commodity;
-    if (!c) return;
-    const userInfo = wx.getStorageSync('userInfo') || {};
-    wx.setStorageSync('chatData', {
-      sellerName: c.sellerName || '卖家',
-      sellerAvatar: c.sellerAvatar || '',
-      sellerContact: c.sellerContact || '',
-      sellerPayCode: c.sellerPayCode || '',
-      productTitle: c.title || '',
-      productPrice: c.price || '',
-      productImage: (c.images && c.images[0]) || '',
-      commodityId: this.commodityId,
-      sellerOpenid: c._openid || '',
-      isOwner: this.data.isOwner,
-      myPayCode: userInfo.payCodeUrl || ''
-    });
-    wx.navigateTo({ url: '/pages/chat/chat' });
-  },
-
   editCommodity() {
     wx.navigateTo({ url: '/pages/commodity_release/commodity_release?mode=edit&id=' + this.commodityId });
   },
@@ -120,9 +101,18 @@ Page({
     wx.setClipboardData({
       data: String(contact),
       success: () => {
-        showToast('联系方式已复制，可去微信添加好友');
+        showToast('联系方式已复制');
       }
     });
+  },
+
+  shareTitle(c) {
+    if (!c) return '校园闲置好物分享';
+    if (c.type === 'want') {
+      return `【求购】${c.title}，有闲置快联系我吧`;
+    }
+    const price = c.price > 0 ? `¥${c.price}` : '免费';
+    return `【${c.condition || '闲置'}】${c.title} ${price}`;
   },
 
   onShareAppMessage() {
@@ -131,7 +121,7 @@ Page({
       return { title: '校园闲置好物分享', path: '/pages/commodity_list/commodity_list' };
     }
     return {
-      title: `【${c.condition || '闲置'}】${c.title} ¥${c.price}`,
+      title: this.shareTitle(c),
       path: `/pages/commodity_detail/commodity_detail?id=${this.commodityId}`,
       imageUrl: c.images && c.images[0] ? c.images[0] : ''
     };
@@ -143,7 +133,7 @@ Page({
       return { title: '校园闲置好物分享', query: '' };
     }
     return {
-      title: `【${c.condition || '闲置'}】${c.title} ¥${c.price}`,
+      title: this.shareTitle(c),
       query: `id=${this.commodityId}`,
       imageUrl: c.images && c.images[0] ? c.images[0] : ''
     };
@@ -165,8 +155,16 @@ Page({
   async toggleFavorite() {
     const openid = wx.getStorageSync('openid');
     if (!openid) {
-      showToast('请先登录');
-      wx.navigateTo({ url: '/pages/index_register/index_register' });
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再收藏',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/index/index' });
+          }
+        }
+      });
       return;
     }
 

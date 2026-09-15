@@ -11,14 +11,14 @@
 .register-title {
   display: block;
   font-size: 44rpx;
-  font-weight: bold;
-  color: #333;
+  font-weight: 800;
+  color: var(--text);
   margin-bottom: 12rpx;
 }
 
 .register-desc {
   font-size: 26rpx;
-  color: #999;
+  color: var(--text-light);
 }
 
 .register-form {
@@ -32,23 +32,31 @@
 .form-label {
   display: block;
   font-size: 28rpx;
-  color: #333;
+  color: var(--text);
   margin-bottom: 16rpx;
   font-weight: 500;
 }
 
 .required {
-  color: #ff4d4f;
+  color: var(--danger);
 }
 
 .form-input, .picker-value {
   height: 88rpx;
   line-height: 88rpx;
-  background: #f8f8f8;
-  border-radius: 12rpx;
+  background: #f1f5f9;
+  border: 2rpx solid transparent;
+  border-radius: var(--radius);
   padding: 0 24rpx;
   font-size: 28rpx;
-  color: #333;
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: var(--primary);
+  background: var(--white);
+  box-shadow: 0 0 0 6rpx rgba(0, 193, 126, 0.08);
 }
 
 .picker-value {
@@ -58,11 +66,11 @@
 }
 
 .picker-value.placeholder {
-  color: #bbb;
+  color: var(--text-light);
 }
 
 .arrow {
-  color: #ccc;
+  color: var(--text-light);
   font-size: 32rpx;
 }
 
@@ -87,36 +95,42 @@
   width: 120rpx;
   height: 120rpx;
   border-radius: 50%;
-  border: 2rpx solid #eee;
+  border: 2rpx solid var(--border);
 }
 
 .avatar-placeholder {
   width: 120rpx;
   height: 120rpx;
   border-radius: 50%;
-  background: #f8f8f8;
+  background: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2rpx dashed #ddd;
+  border: 2rpx dashed var(--text-light);
+  transition: all 0.2s ease;
+}
+
+.avatar-placeholder:active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
 }
 
 .avatar-icon {
   font-size: 48rpx;
-  color: #999;
+  color: var(--text-light);
 }
 
 .error-text {
   display: block;
   font-size: 24rpx;
-  color: #ff4d4f;
+  color: var(--danger);
   margin-top: 8rpx;
 }
 
 .hint-text {
   display: block;
   font-size: 22rpx;
-  color: #999;
+  color: var(--text-light);
   margin-top: 8rpx;
 }
 
@@ -125,7 +139,7 @@
   align-items: flex-start;
   margin: 40rpx 0 32rpx;
   font-size: 24rpx;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .privacy-agree checkbox {
@@ -138,9 +152,28 @@
 }
 
 .link {
-  color: #07c160;
+  color: var(--primary);
+  font-weight: 500;
 }
 
 .submit-btn {
   width: 100%;
+}
+/* 头像改为微信官方 chooseAvatar 按钮后的样式重置 */
+.avatar-btn {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  line-height: normal;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.avatar-btn::after {
+  border: none;
+}
+.avatar-btn:active {
+  opacity: 0.75;
 }

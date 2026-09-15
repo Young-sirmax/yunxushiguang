@@ -25,40 +25,24 @@ Page({
     contact: '',
     description: '',
     canSubmit: false,
-    isSubmitting: false,
-
-    needVerify: false,
-    isVerified: false,
-    verifyImage: '',
-    verifyStatus: '',
-
-    privilegeOptions: [
-      { id: 'multiImg', name: '多图权限', price: 1, desc: '突破3张图限制，可发9张图+1个视频', checked: false },
-      { id: 'urgent', name: '急出标签', price: 2, desc: '帖子角标变红，触发一次社群广播', checked: false },
-      { id: 'top', name: '置顶展示', price: 3, desc: '固定在分类信息流顶部，24小时', checked: false },
-      { id: 'precision', name: '精准推送', price: 5, desc: '手动推送到3个垂直社群', checked: false }
-    ],
-    selectedPrivileges: [],
-    totalPrivilegeCost: 0,
-
-    rewardAmount: 0
+    isSubmitting: false
   },
 
   async onLoad(options) {
+    // 打开右上角“转发给朋友 / 分享到朋友圈”
+    wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] });
     await this.loadCategoryList();
     const userInfo = wx.getStorageSync('userInfo') || {};
     this.setData({ contact: userInfo.contact || '' });
 
-    const savedMode = wx.getStorageSync('releaseMode') || 'sell';
-    const savedNeedVerify = wx.getStorageSync('needVerify') || false;
-    const savedIsVerified = wx.getStorageSync('isVerified') || false;
-    this.setData({
-      mode: savedMode,
-      needVerify: savedNeedVerify,
-      isVerified: savedIsVerified
-    });
+    // 支持通过 type=want / type=sell 直接定位发布模式（如从「我的求购」快速发布）
+    if (options && options.type === 'want') {
+      this.setData({ mode: 'want' });
+    } else if (options && options.type === 'sell') {
+      this.setData({ mode: 'sell' });
+    }
 
-    if (options.mode === 'edit' && options.id) {
+    if (options && options.mode === 'edit' && options.id) {
       this.setData({ isEdit: true, commodityId: options.id });
       this.loadCommodityData(options.id);
     }
@@ -66,9 +50,6 @@ Page({
   },
 
   onUnload() {
-    wx.removeStorageSync('releaseMode');
-    wx.removeStorageSync('needVerify');
-    wx.removeStorageSync('isVerified');
   },
 
   async loadCategoryList() {
@@ -117,84 +98,6 @@ Page({
     this.checkCanSubmit();
   },
 
-  toggleVerify(e) {
-    const needVerify = e.detail.value;
-    this.setData({ needVerify });
-    wx.setStorageSync('needVerify', needVerify);
-    if (!needVerify) {
-      this.setData({ verifyImage: '', verifyStatus: '' });
-    }
-  },
-
-  chooseVerifyImage() {
-    wx.chooseMedia({
-      count: 1,
-      mediaType: ['image'],
-      sourceType: ['album', 'camera'],
-      success: (res) => {
-        const path = res.tempFiles[0].tempFilePath;
-        this.setData({
-          verifyImage: path,
-          verifyStatus: 'pending'
-        });
-        wx.setStorageSync('isVerified', false);
-        this.uploadVerifyImage(path);
-      }
-    });
-  },
-
-  async uploadVerifyImage(path) {
-    try {
-      const res = await wx.cloud.uploadFile({
-        cloudPath: `verify/${Date.now()}.jpg`,
-        filePath: path
-      });
-      this.setData({ verifyImage: res.fileID });
-      setTimeout(() => {
-        this.setData({ verifyStatus: 'approved', isVerified: true });
-        wx.setStorageSync('isVerified', true);
-      }, 2000);
-    } catch (err) {
-      console.error('上传证件失败:', err);
-      showToast('证件上传失败，请重试');
-      this.setData({ verifyImage: '', verifyStatus: '' });
-    }
-  },
-
-  previewVerifyImage() {
-    if (!this.data.verifyImage) return;
-    wx.previewImage({
-      urls: [this.data.verifyImage]
-    });
-  },
-
-  deleteVerifyImage() {
-    this.setData({ verifyImage: '', verifyStatus: '', isVerified: false });
-    wx.setStorageSync('isVerified', false);
-  },
-
-  togglePrivilege(e) {
-    const id = e.currentTarget.dataset.id;
-    const options = this.data.privilegeOptions.map(item => {
-      if (item.id === id) {
-        return { ...item, checked: !item.checked };
-      }
-      return item;
-    });
-    const selectedPrivileges = options.filter(i => i.checked);
-    const totalPrivilegeCost = selectedPrivileges.reduce((sum, i) => sum + i.price, 0);
-    this.setData({
-      privilegeOptions: options,
-      selectedPrivileges: selectedPrivileges.map(i => i.id),
-      totalPrivilegeCost
-    });
-  },
-
-  setReward(e) {
-    const value = parseInt(e.currentTarget.dataset.value);
-    this.setData({ rewardAmount: value });
-  },
-
   chooseImage() {
     wx.chooseMedia({
       count: 9,
@@ -237,12 +140,6 @@ Page({
 
   onConditionTap(e) {
     this.setData({ condition: e.currentTarget.dataset.value });
-    this.checkCanSubmit();
-    this.calcSmartPrice();
-  },
-
-  onConditionChange(e) {
-    this.setData({ condition: this.data.conditionOptions[e.detail.value] });
     this.checkCanSubmit();
     this.calcSmartPrice();
   },
@@ -375,7 +272,7 @@ Page({
     try {
       const imageUrls = await this.uploadImages();
       const userInfo = wx.getStorageSync('userInfo');
-      const { mode, rewardAmount, selectedPrivileges, needVerify, isVerified } = this.data;
+      const { mode } = this.data;
 
       const data = {
         title: this.data.title.trim(),
@@ -391,18 +288,10 @@ Page({
         sellerName: userInfo.nickName,
         sellerAvatar: userInfo.avatarUrl,
         sellerContact: this.data.contact.trim(),
-        sellerPayCode: userInfo.payCodeUrl || '',
         universityId: userInfo.universityId,
         universityName: userInfo.universityName,
         requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        type: mode,
-        needVerify,
-        isVerified,
-        verifyImage: this.data.verifyImage || '',
-        privileges: selectedPrivileges,
-        privilegeCost: this.data.totalPrivilegeCost,
-        rewardAmount: mode === 'want' ? rewardAmount : 0,
-        wantFee: mode === 'want' ? (rewardAmount > 0 ? 0 : 1) : 0
+        type: mode
       };
 
       let res;
@@ -416,9 +305,9 @@ Page({
       this.setData({ isSubmitting: false });
 
       if (res.code === 0) {
-        const successMsg = mode === 'want'
-          ? (rewardAmount > 0 ? '求购悬赏发布成功' : '求购信息发布成功')
-          : (this.data.isEdit ? '修改成功' : '发布成功');
+        const successMsg = this.data.isEdit
+          ? '修改成功，等待管理员审核'
+          : '发布成功，等待管理员审核';
         showToast(successMsg);
         setTimeout(() => {
           this._submitLock = false;
@@ -435,5 +324,16 @@ Page({
       showToast('操作失败，请重试');
       console.error(err);
     }
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '云叙石光 · 免费发布闲置 / 求购，快到校园圈子里看看吧',
+      path: '/pages/commodity_list/commodity_list'
+    };
+  },
+
+  onShareTimeline() {
+    return { title: '云叙石光 · 校园物品信息服务平台', query: '' };
   }
 });

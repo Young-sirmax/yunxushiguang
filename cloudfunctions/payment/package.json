@@ -1,0 +1,10 @@
+{
+  "name": "payment",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest",
+    "axios": "latest",
+    "xml2js": "latest"
+  }
+}

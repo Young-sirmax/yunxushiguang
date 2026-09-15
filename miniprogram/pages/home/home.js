@@ -5,37 +5,57 @@ const API = require('../../api/api.js');
 Page({
   data: {
     userInfo: {},
-    stats: { release: 0, favorite: 0 },
-    unreadMessageCount: 0,
-    lifePlaza: [
-      { id: 1, name: '学长打印店', tag: '打印·复印·装订', image: '/images/plaza-print.png' },
-      { id: 2, name: '校园驾校', tag: 'C1/C2 驾照培训', image: '/images/plaza-drive.png' },
-      { id: 3, name: '考研自习室', tag: '寄宿·网课·答疑', image: '/images/plaza-exam.png' },
-      { id: 4, name: '神秘小甜水', tag: '奶茶·柠檬水', image: '/images/plaza-milk.png' },
-      { id: 5, name: '校园洗衣房', tag: '干洗·水洗·上门', image: '/images/plaza-wash.png' }
-    ]
+    isLoggedIn: false,
+    isAdmin: false,
+    stats: { release: 0, favorite: 0 }
   },
 
   onShow() {
     const userInfo = wx.getStorageSync('userInfo') || {};
-    this.setData({ userInfo });
-    this.loadStats();
-    this.loadUnreadCount();
+    const isLoggedIn = !!(userInfo && userInfo._openid);
+    this.setData({ userInfo, isLoggedIn });
+    if (isLoggedIn) {
+      this.loadStats();
+      this.checkAdmin();
+      // 后台刷新最新用户信息（含认证状态），保证全局一致
+      app.refreshUserInfo().then((fresh) => {
+        if (fresh) {
+          this.setData({ userInfo: fresh });
+        }
+      });
+    }
   },
 
-  async loadUnreadCount() {
-    try {
-      const res = await API.chatGetConversationList();
-      if (res.code === 0) {
-        let unread = 0;
-        (res.data || []).forEach(c => {
-          unread += (c.unreadCount || 0);
-        });
-        this.setData({ unreadMessageCount: unread });
-      }
-    } catch (err) {
-      console.error('加载未读消息数失败:', err);
-    }
+  checkAdmin() {
+    if (!this.data.isLoggedIn) return;
+    API.adminCheck()
+      .then((res) => {
+        if (res.code === 0 && res.data && res.data.isAdmin) {
+          this.setData({ isAdmin: true });
+        }
+      })
+      .catch((err) => {
+        const msg = (err && err.message) || '';
+        const isNotFound = msg.includes('504001') || msg.includes('找不到') || msg.includes('not found');
+        if (isNotFound) {
+          wx.showToast({
+            title: '请部署admin云函数',
+            icon: 'none',
+            duration: 2500
+          });
+        }
+        console.error('管理员校验失败:', err);
+      });
+  },
+
+  goAdmin() {
+    this.requireLogin(() => {
+      wx.navigateTo({ url: '/pages/admin/admin' });
+    });
+  },
+
+  goLogin() {
+    wx.navigateTo({ url: '/pages/index/index' });
   },
 
   async loadStats() {
@@ -63,24 +83,45 @@ Page({
     }
   },
 
+  requireLogin(callback) {
+    if (!this.data.isLoggedIn) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再使用此功能',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            this.goLogin();
+          }
+        }
+      });
+      return;
+    }
+    if (callback) callback();
+  },
+
   goUserInfo() {
-    wx.navigateTo({ url: '/pages/home_user_info/home_user_info' });
+    this.requireLogin(() => {
+      wx.navigateTo({ url: '/pages/home_user_info/home_user_info' });
+    });
   },
 
   goMyRelease() {
-    wx.navigateTo({ url: '/pages/home_release/home_release' });
+    this.requireLogin(() => {
+      wx.navigateTo({ url: '/pages/home_release/home_release' });
+    });
+  },
+
+  goMyWant() {
+    this.requireLogin(() => {
+      wx.navigateTo({ url: '/pages/home_release/home_release?tab=want' });
+    });
   },
 
   goMyFavorite() {
-    wx.navigateTo({ url: '/pages/home_favorite/home_favorite' });
-  },
-
-  goMessage() {
-    wx.navigateTo({ url: '/pages/home_message/home_message' });
-  },
-
-  goService() {
-    wx.switchTab({ url: '/pages/business/business' });
+    this.requireLogin(() => {
+      wx.navigateTo({ url: '/pages/home_favorite/home_favorite' });
+    });
   },
 
   goPrivacy() {
@@ -95,20 +136,6 @@ Page({
     wx.navigateTo({ url: '/pages/home_feedback/home_feedback' });
   },
 
-  openPlaza(e) {
-    const id = e.currentTarget.dataset.id;
-    const item = this.data.lifePlaza.find(p => p.id === id);
-    if (item) {
-      wx.showModal({
-        title: item.name,
-        content: item.tag + '\n\n信息位租赁中，如有合作意向请联系运营者微信',
-        showCancel: false,
-        confirmText: '知道了',
-        confirmColor: '#07c160'
-      });
-    }
-  },
-
   logout() {
     wx.showModal({
       title: '确认退出',
@@ -118,7 +145,7 @@ Page({
           wx.clearStorageSync();
           app.globalData.userInfo = null;
           app.globalData.openid = null;
-          wx.reLaunch({ url: '/pages/index/index' });
+          wx.switchTab({ url: '/pages/commodity_list/commodity_list' });
         }
       }
     });
