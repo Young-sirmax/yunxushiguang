@@ -1,0 +1,63 @@
+<view class="page-container">
+  <!-- 登记成功页 -->
+  <block wx:if="{{done}}">
+    <view class="done-card">
+      <view class="done-icon">🎉</view>
+      <view class="done-title">登记成功，让文字继续旅行</view>
+      <view class="done-tip">别忘了把留下的那本书交给茶咖的图书角管理员盖章上架</view>
+      <view class="done-hook" bindtap="goPublish">手上还有闲置教材？挂出来给需要的同学 →</view>
+      <view class="done-back" bindtap="backToList">再看看书架上的书</view>
+    </view>
+  </block>
+
+  <!-- 登记表单 -->
+  <block wx:else>
+    <view class="rule-card card">
+      <view class="rule-title">「拿一本，留一本」</view>
+      <view class="rule-line">· 每次限换 1 本，带走一本，留下一本</view>
+      <view class="rule-line">· 留下的须是八成新以上的教材 / 教辅 / 专业书</view>
+      <view class="rule-line">· 留入的书经检查后盖「公益用书（请勿转售）」章上架</view>
+      <view class="rule-line">· 换走的书可外带，请勿转售</view>
+    </view>
+
+    <view class="form-card card">
+      <view class="field">
+        <view class="field-label">
+          <text>带走的书名</text>
+          <text class="field-count">{{bookLen}}/{{titleMax}}</text>
+        </view>
+        <input
+          class="input-base"
+          value="{{bookTitle}}"
+          maxlength="{{titleMax}}"
+          placeholder="例如：能源通识导论"
+          data-field="bookTitle"
+          bindinput="onInput"
+        />
+      </view>
+
+      <view class="field">
+        <view class="field-label">
+          <text>留下的书名</text>
+          <text class="field-count">{{giveLen}}/{{titleMax}}</text>
+        </view>
+        <input
+          class="input-base"
+          value="{{giveTitle}}"
+          maxlength="{{titleMax}}"
+          placeholder="例如：高等数学（上册）"
+          data-field="giveTitle"
+          bindinput="onInput"
+        />
+      </view>
+
+      <view class="field">
+        <view class="field-label"><text>昵称</text></view>
+        <view class="nick-readonly">{{nickname}}</view>
+        <view class="field-note">昵称由系统自动带出，用于图书角登记与防丢书追溯</view>
+      </view>
+    </view>
+
+    <view class="submit-btn btn-primary" bindtap="submit">{{submitting ? '提交中...' : '提交登记'}}</view>
+  </block>
+</view>

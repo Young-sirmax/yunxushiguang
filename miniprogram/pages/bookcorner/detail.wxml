@@ -1,0 +1,53 @@
+<view class="page-container">
+  <view class="book-head card" wx:if="{{book}}">
+    <view class="book-title-row">
+      <text class="book-title">{{book.title}}</text>
+      <text class="book-cat" wx:if="{{book.category}}">{{book.category}}</text>
+    </view>
+    <view class="book-author" wx:if="{{book.author}}">{{book.author}}</view>
+    <view class="book-intro" wx:if="{{book.intro}}">{{book.intro}}</view>
+    <view class="book-meta">
+      <text class="book-zone">{{book.zone}}区</text>
+      <text class="book-count">{{commentTotal}} 条留言</text>
+    </view>
+  </view>
+
+  <view class="section-title title-bar post-title">留言长帖</view>
+
+  <view class="comment-list" wx:if="{{comments.length > 0}}">
+    <view class="comment-item {{item.starred ? 'starred' : ''}}" wx:for="{{comments}}" wx:key="_id">
+      <view class="comment-head">
+        <text class="comment-nick">{{item.nickname}}</text>
+        <text class="comment-time">{{item.timeText}}</text>
+      </view>
+      <view class="comment-content">{{item.content}}</view>
+      <view class="comment-star-tag" wx:if="{{item.starred}}">精选</view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{comments.length === 0 && !loading}}">
+    <text class="empty-icon">✍️</text>
+    <text class="empty-text">还没有人留言</text>
+    <text class="empty-hint">成为第一个在这里留下阅读感受的人</text>
+  </view>
+
+  <view class="loading-tip" wx:if="{{loading}}">加载中...</view>
+  <view class="no-more" wx:if="{{!loading && comments.length > 0 && noMore}}">没有更多了</view>
+
+  <!-- 底部固定输入栏 -->
+  <view class="input-bar">
+    <view class="input-wrap" bindtap="onInputBarTap">
+      <input
+        class="comment-input"
+        value="{{input}}"
+        focus="{{inputFocus}}"
+        maxlength="{{commentMax}}"
+        placeholder="写下你的阅读感受（200字以内）"
+        confirm-type="send"
+        bindinput="onInput"
+        bindconfirm="submit"
+      />
+    </view>
+    <view class="send-btn {{canSubmit ? '' : 'disabled'}}" bindtap="submit">{{submitting ? '发送中' : '发送'}}</view>
+  </view>
+</view>

@@ -1,0 +1,123 @@
+/* pages/bookcorner/list.wxss —— 分区书目列表 */
+page {
+  background: var(--bg);
+}
+
+.page-container {
+  min-height: 100vh;
+  padding: 0 24rpx 60rpx;
+  box-sizing: border-box;
+}
+
+.zone-hero {
+  margin: 24rpx 0 20rpx;
+  padding: 32rpx 28rpx;
+  border-radius: var(--radius-lg);
+  background: var(--primary-grad);
+  color: #fff;
+  box-shadow: var(--shadow-primary);
+}
+
+.zone-title {
+  font-size: 36rpx;
+  font-weight: 800;
+}
+
+.zone-desc {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  opacity: 0.92;
+}
+
+.cat-scroll {
+  white-space: nowrap;
+  margin-bottom: 20rpx;
+}
+
+.cat-tabs {
+  display: inline-flex;
+  gap: 16rpx;
+  padding: 4rpx 0;
+}
+
+.cat-tab {
+  padding: 12rpx 28rpx;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  border: 1rpx solid var(--border);
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.cat-tab.active {
+  background: var(--primary-grad);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 6rpx 16rpx rgba(0, 193, 126, 0.24);
+}
+
+.book-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.book-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1rpx solid var(--border);
+  box-shadow: var(--shadow-card);
+  padding: 26rpx 28rpx;
+  transition: transform 0.15s ease;
+}
+
+.book-card:active {
+  transform: scale(0.985);
+}
+
+.book-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.book-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-cat {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: var(--radius-pill);
+  padding: 4rpx 18rpx;
+}
+
+.book-summary {
+  margin-top: 12rpx;
+  font-size: 25rpx;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.exchange-entry {
+  margin: 32rpx 0 0;
+  text-align: center;
+  padding: 24rpx;
+  border-radius: var(--radius-pill);
+  font-size: 27rpx;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-weight: 600;
+}

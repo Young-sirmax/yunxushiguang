@@ -1,0 +1,25 @@
+<view class="page-container">
+  <!-- 空间头部：默认用主色渐变 + 书本占位图，茶咖 logo 到位后直接替换 space.logo -->
+  <view class="space-hero">
+    <image class="space-logo" wx:if="{{spaceLogo}}" src="{{spaceLogo}}" mode="aspectFill"/>
+    <view class="space-logo placeholder" wx:else>📚</view>
+    <view class="space-name">{{spaceName}}</view>
+    <view class="space-sub">茶咖空间 · 公益图书角</view>
+  </view>
+
+  <view class="zone-list">
+    <view class="zone-card" wx:for="{{zones}}" wx:key="key" data-zone="{{item.key}}" bindtap="goList">
+      <view class="zone-badge zone-{{item.key}}">{{item.key}}</view>
+      <view class="zone-info">
+        <view class="zone-name">{{item.name}}</view>
+        <view class="zone-desc">{{item.desc}}</view>
+        <view class="zone-hint">{{item.hint}}</view>
+      </view>
+      <view class="zone-arrow">›</view>
+    </view>
+  </view>
+
+  <view class="loading-tip" wx:if="{{loading}}">加载中...</view>
+
+  <view class="footer-note">本功能由云叙石光提供技术支持</view>
+</view>

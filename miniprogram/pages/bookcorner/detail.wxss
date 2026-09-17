@@ -1,0 +1,176 @@
+/* pages/bookcorner/detail.wxss —— 图书详情 + 留言长帖 */
+page {
+  background: var(--bg);
+}
+
+.page-container {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 180rpx;
+  box-sizing: border-box;
+}
+
+.book-head {
+  margin-bottom: 28rpx;
+}
+
+.book-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.book-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 38rpx;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.book-cat {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: var(--radius-pill);
+  padding: 4rpx 18rpx;
+}
+
+.book-author {
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+
+.book-intro {
+  margin-top: 18rpx;
+  font-size: 27rpx;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.book-meta {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  font-size: 24rpx;
+  color: var(--text-light);
+}
+
+.book-zone {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: var(--radius-pill);
+  padding: 2rpx 16rpx;
+}
+
+.post-title {
+  margin: 8rpx 0 20rpx;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.comment-item {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1rpx solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 24rpx 26rpx;
+}
+
+.comment-item.starred {
+  border-color: rgba(255, 197, 61, 0.5);
+  background: linear-gradient(180deg, #fffdf5 0%, #ffffff 60%);
+}
+
+.comment-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+
+.comment-nick {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.comment-time {
+  font-size: 22rpx;
+  color: var(--text-light);
+}
+
+.comment-content {
+  font-size: 28rpx;
+  color: var(--text);
+  line-height: 1.7;
+  word-break: break-all;
+}
+
+.comment-star-tag {
+  position: absolute;
+  top: -12rpx;
+  right: 24rpx;
+  font-size: 20rpx;
+  color: #7a4a00;
+  background: var(--sun-grad);
+  border-radius: var(--radius-pill);
+  padding: 2rpx 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(255, 176, 32, 0.3);
+}
+
+.input-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 24rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.98);
+  border-top: 1rpx solid var(--border);
+  box-shadow: 0 -6rpx 24rpx rgba(15, 27, 45, 0.06);
+}
+
+.input-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-input {
+  height: 76rpx;
+  background: #f1f5f9;
+  border-radius: var(--radius-pill);
+  padding: 0 28rpx;
+  font-size: 27rpx;
+  color: var(--text);
+}
+
+.send-btn {
+  flex-shrink: 0;
+  padding: 0 34rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  border-radius: var(--radius-pill);
+  background: var(--primary-grad);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 600;
+  box-shadow: 0 6rpx 16rpx rgba(0, 193, 126, 0.24);
+}
+
+.send-btn.disabled {
+  background: #d7dee6;
+  color: #fff;
+  box-shadow: none;
+}
