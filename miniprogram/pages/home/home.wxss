@@ -527,6 +527,13 @@ page {
 .icon-expert { background: var(--skill-grad); }
 .icon-star { background: linear-gradient(135deg, #ffd166, #ff9a3c); }
 
+/* 公益图书角入口图标（占位图，替换 images/bookcorner-entry.png 即可） */
+.menu-icon-img {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 12rpx;
+}
+
 /* 维护模式横幅 */
 .maintenance-banner {
   background: #fff7e6;

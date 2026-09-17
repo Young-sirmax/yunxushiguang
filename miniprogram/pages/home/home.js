@@ -220,6 +220,11 @@ Page({
     });
   },
 
+  // 公益图书角：公益浏览功能，不需要登录即可进入
+  goBookcorner() {
+    wx.navigateTo({ url: '/pages/bookcorner/index' });
+  },
+
   goLogin() {
     wx.navigateTo({ url: '/pages/index/index' });
   },

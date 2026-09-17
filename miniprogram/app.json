@@ -17,7 +17,11 @@
     "pages/expert_apply/expert_apply",
     "pages/expert_home/expert_home",
     "pages/my_reviews/my_reviews",
-    "pages/admin_batch/admin_batch"
+    "pages/admin_batch/admin_batch",
+    "pages/bookcorner/index",
+    "pages/bookcorner/list",
+    "pages/bookcorner/detail",
+    "pages/bookcorner/exchange"
   ],
   "window": {
     "backgroundTextStyle": "dark",

@@ -1,0 +1,41 @@
+<view class="page-container">
+  <view class="zone-hero">
+    <view class="zone-title">{{zoneMeta.name}}</view>
+    <view class="zone-desc">{{zoneMeta.desc}}</view>
+  </view>
+
+  <scroll-view class="cat-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="cat-tabs">
+      <view class="cat-tab {{activeCategory === '' ? 'active' : ''}}" data-category="" bindtap="switchCategory">全部</view>
+      <view
+        class="cat-tab {{activeCategory === item ? 'active' : ''}}"
+        wx:for="{{categories}}"
+        wx:key="*this"
+        data-category="{{item}}"
+        bindtap="switchCategory"
+      >{{item}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="book-list" wx:if="{{list.length > 0}}">
+    <view class="book-card" wx:for="{{list}}" wx:key="_id" data-id="{{item._id}}" bindtap="goDetail">
+      <view class="book-top">
+        <text class="book-title">{{item.title}}</text>
+        <text class="book-cat" wx:if="{{item.category}}">{{item.category}}</text>
+      </view>
+      <view class="book-summary" wx:if="{{item.summary}}">{{item.summary}}</view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{list.length === 0 && !loading}}">
+    <text class="empty-icon">📚</text>
+    <text class="empty-text">这里还没有书</text>
+    <text class="empty-hint">{{zoneMeta.hint}}</text>
+  </view>
+
+  <view class="loading-tip" wx:if="{{loading}}">加载中...</view>
+  <view class="no-more" wx:if="{{!loading && list.length > 0 && noMore}}">没有更多了</view>
+
+  <!-- A 区是流转区，底部给一个换书登记入口 -->
+  <view class="exchange-entry" wx:if="{{zone === 'A'}}" bindtap="goExchange">拿一本，留一本 · 去登记换书</view>
+</view>

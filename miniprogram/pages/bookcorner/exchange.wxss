@@ -1,0 +1,116 @@
+/* pages/bookcorner/exchange.wxss —— 换书登记 */
+page {
+  background: var(--bg);
+}
+
+.page-container {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 60rpx;
+  box-sizing: border-box;
+}
+
+.rule-card {
+  background: linear-gradient(180deg, #f2fdf8 0%, #ffffff 70%);
+}
+
+.rule-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 16rpx;
+}
+
+.rule-line {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  line-height: 1.9;
+}
+
+.field {
+  margin-bottom: 32rpx;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 14rpx;
+}
+
+.field-count {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: var(--text-light);
+}
+
+.field-note {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: var(--text-light);
+}
+
+.nick-readonly {
+  height: 88rpx;
+  line-height: 88rpx;
+  padding: 0 24rpx;
+  border-radius: var(--radius);
+  background: #f1f5f9;
+  font-size: 28rpx;
+  color: var(--text-secondary);
+}
+
+.submit-btn {
+  margin-top: 16rpx;
+}
+
+/* 成功页 */
+.done-card {
+  margin-top: 80rpx;
+  padding: 60rpx 36rpx;
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.done-icon {
+  font-size: 96rpx;
+}
+
+.done-title {
+  margin-top: 20rpx;
+  font-size: 36rpx;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.done-tip {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.done-hook {
+  margin-top: 48rpx;
+  padding: 26rpx 24rpx;
+  border-radius: var(--radius-pill);
+  background: var(--primary-grad);
+  color: #fff;
+  font-size: 27rpx;
+  font-weight: 600;
+  box-shadow: var(--shadow-primary);
+}
+
+.done-back {
+  margin-top: 28rpx;
+  font-size: 26rpx;
+  color: var(--text-light);
+}
