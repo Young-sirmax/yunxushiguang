@@ -11,13 +11,17 @@
   <!-- 已登录 -->
   <block wx:else>
     <view class="admin-header">
-      <view class="admin-title">{{module === 'verify' ? '学生认证审核' : (module === 'commodity' ? '商品审核' : '数据管理')}}</view>
+      <view class="admin-title">{{module === 'verify' ? '学生认证审核' : (module === 'commodity' ? '商品审核' : (module === 'comment' ? '留言审核' : '数据管理'))}}</view>
       <view class="admin-logout" bindtap="doLogout">退出管理员</view>
     </view>
 
     <view class="module-bar">
       <view class="module-item {{module === 'verify' ? 'active' : ''}}" data-module="verify" bindtap="switchModule">学生认证</view>
       <view class="module-item {{module === 'commodity' ? 'active' : ''}}" data-module="commodity" bindtap="switchModule">商品审核</view>
+      <view class="module-item {{module === 'comment' ? 'active' : ''}}" data-module="comment" bindtap="switchModule">
+        留言审核
+        <text class="module-badge" wx:if="{{commentPendingCount > 0}}">{{commentPendingCount}}</text>
+      </view>
       <view class="module-item {{module === 'data' ? 'active' : ''}}" data-module="data" bindtap="switchModule">数据管理</view>
     </view>
 
@@ -117,6 +121,52 @@
           <button class="btn-reject" data-id="{{item._id}}" data-result="rejected" bindtap="auditCommodity">驳回</button>
         </view>
       </view>
+    </block>
+
+    <!-- ===== 留言审核模块（公益图书角） ===== -->
+    <block wx:elif="{{module === 'comment'}}">
+      <view class="tab-bar">
+        <view class="tab-item {{cmtTab === 'pending' ? 'active' : ''}}" data-tab="pending" bindtap="switchCommentTab">待审核</view>
+        <view class="tab-item {{cmtTab === 'approved' ? 'active' : ''}}" data-tab="approved" bindtap="switchCommentTab">已通过</view>
+        <view class="tab-item {{cmtTab === 'rejected' ? 'active' : ''}}" data-tab="rejected" bindtap="switchCommentTab">已拒绝</view>
+      </view>
+
+      <view wx:if="{{cmtLoading && cmtList.length === 0}}" class="empty-tip">加载中...</view>
+      <view wx:elif="{{cmtList.length === 0}}" class="empty-tip">
+        {{cmtTab === 'pending' ? '暂无待审核的留言' : (cmtTab === 'approved' ? '暂无已通过的留言' : '暂无已拒绝的留言')}}
+      </view>
+
+      <view class="comment-card card" wx:for="{{cmtList}}" wx:key="_id">
+        <view class="comment-head">
+          <view class="comment-book">
+            <image wx:if="{{item.bookCover}}" class="comment-book-cover" src="{{item.bookCover}}" mode="aspectFill"/>
+            <text class="comment-book-title">{{item.bookTitle}}</text>
+            <text class="comment-zone" wx:if="{{item.bookZone}}">{{item.bookZone}}区</text>
+          </view>
+          <text class="comment-time">{{item.timeText}}</text>
+        </view>
+
+        <view class="comment-body">{{item.content}}</view>
+
+        <view class="comment-foot">
+          <text class="comment-nick">{{item.nickname}}</text>
+          <view class="comment-tags">
+            <text class="mini-tag starred" wx:if="{{item.starred}}">精选</text>
+            <text class="mini-tag rejected" wx:if="{{item.status === 'rejected'}}">已拒绝</text>
+          </view>
+        </view>
+
+        <view class="verify-actions" wx:if="{{cmtTab === 'pending'}}">
+          <button class="btn-approve" data-id="{{item._id}}" bindtap="approveComment">✅ 通过</button>
+          <button class="btn-reject" data-id="{{item._id}}" bindtap="rejectComment">❌ 拒绝</button>
+          <button class="btn-star" data-id="{{item._id}}" data-starred="{{item.starred}}" bindtap="starComment">⭐ 加精</button>
+        </view>
+        <view class="verify-actions" wx:else>
+          <button class="btn-star" data-id="{{item._id}}" data-starred="{{item.starred}}" bindtap="starComment">{{item.starred ? '取消加精' : '⭐ 加精'}}</button>
+        </view>
+      </view>
+
+      <view class="more-btn" wx:if="{{cmtList.length > 0}}" bindtap="loadMoreComment">{{cmtList.length >= cmtTotal ? '已加载全部' : '加载更多'}}</view>
     </block>
 
     <!-- ===== 数据管理模块 ===== -->

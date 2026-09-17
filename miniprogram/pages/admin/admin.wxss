@@ -736,3 +736,132 @@
   color: var(--skill);
   background: var(--skill-soft);
 }
+
+/* === 留言审核（公益图书角） === */
+.module-badge {
+  display: inline-block;
+  min-width: 32rpx;
+  height: 32rpx;
+  line-height: 32rpx;
+  padding: 0 8rpx;
+  margin-left: 8rpx;
+  border-radius: 16rpx;
+  background: var(--danger);
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 600;
+  vertical-align: top;
+}
+
+.comment-card {
+  animation: fadeIn 0.3s ease;
+}
+
+.comment-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.comment-book {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-book-cover {
+  width: 48rpx;
+  height: 64rpx;
+  border-radius: 8rpx;
+  margin-right: 12rpx;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.comment-book-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 360rpx;
+}
+
+.comment-zone {
+  margin-left: 10rpx;
+  font-size: 20rpx;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 999rpx;
+  padding: 2rpx 12rpx;
+  flex-shrink: 0;
+}
+
+.comment-time {
+  font-size: 22rpx;
+  color: var(--text-light);
+  flex-shrink: 0;
+}
+
+.comment-body {
+  font-size: 28rpx;
+  color: var(--text);
+  line-height: 1.6;
+  background: #f7f9fb;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  word-break: break-all;
+}
+
+.comment-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.comment-nick {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+.comment-tags {
+  display: flex;
+  gap: 10rpx;
+}
+
+.mini-tag.starred {
+  background: var(--sun-grad);
+  color: #7a4a00;
+}
+
+.mini-tag.rejected {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.btn-star {
+  flex: 1;
+  background: var(--sun-grad);
+  color: #7a4a00;
+  border-radius: 40rpx;
+  height: 76rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6rpx 16rpx rgba(255, 176, 32, 0.25);
+}
+
+.btn-star::after {
+  border: none;
+}
+
+.btn-star:active {
+  transform: scale(0.97);
+}
