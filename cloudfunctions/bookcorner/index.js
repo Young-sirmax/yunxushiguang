@@ -8,7 +8,8 @@
 //   4. 留言昵称、时间、spaceId 一律服务端补全，客户端只提交 bookId + content。
 //
 // action 一览：
-//   getBooks       { spaceId, category?, page?, pageSize? } → { list, total, categories }
+//   getSpace       { spaceId }                              → { space }        ← 为「主页展示空间名称/头图」新增
+//   getBooks       { spaceId, zone?, category?, page?, pageSize? } → { list, total, categories }
 //   getBookDetail  { bookId }                               → { book, commentTotal }
 //   getComments    { bookId, page?, pageSize? }             → { list, total }   ← 为「留言长帖分页」新增（指令 6 要求）
 //   addComment     { bookId, content }                      → { status }
@@ -133,10 +134,13 @@ async function getBooks(event) {
   const spaceId = trimTo(event.spaceId, 64);
   if (!spaceId) return { code: -1, msg: '缺少空间标识' };
 
+  // 分区：A / B（数据层定义：A=教材流转可外带，B=馆内阅览不外带）
+  const zone = trimTo(event.zone, 2).toUpperCase();
   const category = trimTo(event.category, 30);
   const { page, pageSize } = normalizePage(event);
 
   const where = { spaceId, status: 'on' };
+  if (zone) where.zone = zone;
   if (category) where.category = category;
 
   const totalRes = await db.collection('book').where(where).count();
@@ -151,7 +155,7 @@ async function getBooks(event) {
 
   // 分类筛选项：只取该空间全部上架书的分类，去重后按首次出现顺序返回
   const allRes = await db.collection('book')
-    .where({ spaceId, status: 'on' })
+    .where(zone ? { spaceId, status: 'on', zone } : { spaceId, status: 'on' })
     .field({ category: true })
     .limit(MAX_PAGE_SIZE * 10)
     .get();
@@ -169,6 +173,28 @@ async function getBooks(event) {
     page,
     pageSize,
     noMore: (page - 1) * pageSize + listRes.data.length >= totalRes.total
+  };
+}
+
+/** 空间信息（主页头部用）：只回展示所需字段，不下发 managers 等管理信息 */
+async function getSpace(event) {
+  const spaceId = trimTo(event.spaceId, 64);
+  if (!spaceId) return { code: -1, msg: '缺少空间标识' };
+
+  const res = await db.collection('space').where({ _id: spaceId }).limit(1).get();
+  const space = res.data[0];
+  if (!space) return { code: -1, msg: '空间不存在' };
+  if (space.status && space.status !== 'active') return { code: -1, msg: '空间暂未开放' };
+
+  return {
+    code: 0,
+    data: {
+      _id: space._id,
+      name: space.name || '',
+      type: space.type || 'welfare',
+      logo: space.logo || '',
+      modules: space.modules || []
+    }
   };
 }
 
@@ -331,6 +357,7 @@ exports.main = async (event) => {
 
   try {
     // 只读接口：允许未登录浏览（图书角是公益展示区，先看后登录）
+    if (action === 'getSpace') return await getSpace(event);
     if (action === 'getBooks') return await getBooks(event);
     if (action === 'getBookDetail') return await getBookDetail(event);
     if (action === 'getComments') return await getComments(event);

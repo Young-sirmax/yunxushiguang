@@ -41,15 +41,20 @@ function makeQuery(name, where, state) {
     limit(n) { st.limit = n; return q; },
     async get() {
       let rows = store[name].filter(doc => matches(doc, where));
-      st.order.forEach(([field, dir]) => {
+      if (st.order.length) {
+        // 多字段排序必须逐键比较（先按第一个键分组，再在组内用第二个键），与云数据库行为一致
         rows = rows.slice().sort((a, b) => {
-          const av = a[field] instanceof Date ? a[field].getTime() : a[field];
-          const bv = b[field] instanceof Date ? b[field].getTime() : b[field];
-          if (av === bv) return 0;
-          const cmp = av > bv ? 1 : -1;
-          return dir === 'desc' ? -cmp : cmp;
+          for (let i = 0; i < st.order.length; i++) {
+            const [field, dir] = st.order[i];
+            const av = a[field] instanceof Date ? a[field].getTime() : a[field];
+            const bv = b[field] instanceof Date ? b[field].getTime() : b[field];
+            if (av === bv) continue;
+            const cmp = av > bv ? 1 : -1;
+            return dir === 'desc' ? -cmp : cmp;
+          }
+          return 0;
         });
-      });
+      }
       let page = rows.slice(st.skip, st.skip + st.limit).map(doc => Object.assign({}, doc));
       // 模拟云数据库的字段投影（field 只保留为 true 的字段，_id 默认保留）
       if (st.fields) {
@@ -133,6 +138,7 @@ function seed() {
   store.book.push({ _id: 'book_1', spaceId: 'space_stnh_001', title: '能源通识导论', category: '能源通识', intro: '', zone: 'A', status: 'on', sort: 1, createdAt: new Date('2026-09-17T02:10:00Z') });
   store.book.push({ _id: 'book_2', spaceId: 'space_stnh_001', title: '人间草木', category: '文学散文', intro: '汪曾祺散文集', zone: 'A', status: 'on', sort: 2, createdAt: new Date('2026-09-17T02:11:00Z') });
   store.book.push({ _id: 'book_3', spaceId: 'space_stnh_001', title: '下架书', category: '文学散文', intro: '', zone: 'A', status: 'off', sort: 3, createdAt: new Date('2026-09-17T02:12:00Z') });
+  store.book.push({ _id: 'book_4', spaceId: 'space_stnh_001', title: '馆内阅览的书', category: '文学散文', intro: '只在茶咖里读', zone: 'B', status: 'on', sort: 1, createdAt: new Date('2026-09-17T02:13:00Z') });
 }
 
 // ===================== 断言工具 =====================
@@ -148,16 +154,25 @@ async function run() {
   seed();
   let res = await fn.main({ action: 'getBooks', spaceId: 'space_stnh_001' });
   check('code=0', res.code === 0, res);
-  check('只回 2 本上架书（下架书被过滤）', res.total === 2, res.total);
+  check('只回 3 本上架书（下架书被过滤）', res.total === 3, res.total);
   check('字段只有 _id/title/category/intro', Object.keys(res.data[0]).sort().join(',') === '_id,category,intro,title', Object.keys(res.data[0]));
-  check('按 sort 升序', res.data[0]._id === 'book_1' && res.data[1]._id === 'book_2');
+  check('按 sort 升序（同 sort 时用 createdAt 兜底）', res.data[0]._id === 'book_1' && res.data[1]._id === 'book_4', res.data.map(b => b._id));
   check('返回分类列表', Array.isArray(res.categories) && res.categories.length === 2, res.categories);
 
   res = await fn.main({ action: 'getBooks', spaceId: 'space_stnh_001', category: '文学散文' });
-  check('category 过滤生效', res.total === 1 && res.data[0]._id === 'book_2', res);
+  check('category 过滤生效', res.total === 2, res);
+
+  res = await fn.main({ action: 'getBooks', spaceId: 'space_stnh_001', zone: 'B' });
+  check('zone 过滤生效（B 区只有 1 本）', res.total === 1 && res.data[0]._id === 'book_4', res);
 
   res = await fn.main({ action: 'getBooks', spaceId: '' });
   check('缺 spaceId 报错', res.code === -1, res);
+
+  const space = await fn.main({ action: 'getSpace', spaceId: 'space_stnh_001' });
+  check('getSpace 返回空间名', space.code === 0 && space.data.name === '石大年华·茶咖空间', space);
+  check('getSpace 不下发 managers', space.data.managers === undefined, Object.keys(space.data));
+  const noSpace = await fn.main({ action: 'getSpace', spaceId: 'space_x' });
+  check('空间不存在时报错', noSpace.code === -1, noSpace);
 
   console.log('\n[2] getBookDetail / getComments：不返回待审留言');
   seed();

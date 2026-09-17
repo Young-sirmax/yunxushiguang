@@ -39,15 +39,20 @@ function createHarness(initialData) {
       async get() {
         if (!store[name]) store[name] = [];
         let rows = store[name].filter(doc => matches(doc, where));
-        st.order.forEach(([field, dir]) => {
+        if (st.order.length) {
+          // 多字段排序逐键比较（与云数据库行为一致）
           rows = rows.slice().sort((a, b) => {
-            const av = a[field] instanceof Date ? a[field].getTime() : a[field];
-            const bv = b[field] instanceof Date ? b[field].getTime() : b[field];
-            if (av === bv) return 0;
-            const cmp = av > bv ? 1 : -1;
-            return dir === 'desc' ? -cmp : cmp;
+            for (let i = 0; i < st.order.length; i++) {
+              const [field, dir] = st.order[i];
+              const av = a[field] instanceof Date ? a[field].getTime() : a[field];
+              const bv = b[field] instanceof Date ? b[field].getTime() : b[field];
+              if (av === bv) continue;
+              const cmp = av > bv ? 1 : -1;
+              return dir === 'desc' ? -cmp : cmp;
+            }
+            return 0;
           });
-        });
+        }
         let page = rows.slice(st.skip, st.skip + st.limit).map(doc => Object.assign({}, doc));
         if (st.fields) {
           const keys = Object.keys(st.fields).filter(k => st.fields[k]);
