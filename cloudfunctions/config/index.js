@@ -7,11 +7,16 @@
 //     "notice": "系统维护中，请稍后再试",
 //     "admin_openids": ["oXXXX-xxxxxxxxxxxxxxxxxxx"],
 //     "skill_categories": ["项目辅导", "科研教学", ...],
-//     "skill_price_ref": { "项目辅导": { "min": 30, "max": 80, "unit": "per_hour" } }
+//     "skill_price_ref": { "项目辅导": { "min": 30, "max": 80, "unit": "per_hour" } },
+//     "sensitiveWords": ["加微信", "刷单", ...]
 //   }
 // admin_openids：批量上架白名单（数组，填管理员的 openid）
 // skill_categories：技能分类枚举（数组）。改这里即可增减技能分类，前端与云函数校验都会跟随，
 //                   无需重新提审发版（前端有 1 小时本地缓存）。留空/非法时用下面的默认列表兜底。
+// sensitiveWords：敏感词表（数组），公益图书角评论审核用。同样改这里即生效、无需重新部署。
+//                 出于防绕过考虑，本字段**不下发给客户端**（action 'get' 不返回）；
+//                 其他云函数需要时请直接读 config 集合（照 user 云函数 isMaintenanceOn 的写法），
+//                 不要跨云函数调用。留空/非法时用下面的默认词表兜底。
 const cloud = require('wx-server-sdk');
 cloud.init({ env: 'cloud1-d0gvvc41c5a9dab3f' });
 const db = cloud.database();
@@ -41,6 +46,31 @@ function normalizeSkillCategories(raw) {
     if (name && list.indexOf(name) === -1) list.push(name);
   });
   return list.length > 0 ? list : DEFAULT_SKILL_CATEGORIES;
+}
+
+// 敏感词默认值（公益图书角评论审核用）
+// 只覆盖「平台自定的引流 / 违规交易」词——这类词 msgSecCheck 不拦，必须靠本地词表。
+// 词条用词组而非单字，降低误伤；上线后按实际审核记录在控制台增删即可，无需改代码。
+const DEFAULT_SENSITIVE_WORDS = [
+  // 广告引流
+  '加微信', '扫码加', '私聊我', '代购', '刷单',
+  // 违规服务
+  '代写', '代考', '办证', '论文代写',
+  // 违规商品
+  '盗版', '影印版', '复印版',
+  // 诈骗交易
+  '保证金', '先付款', '私下转账'
+];
+
+/** 规整敏感词数组：去空、去重、去非字符串；不合法时返回默认词表 */
+function normalizeSensitiveWords(raw) {
+  if (!Array.isArray(raw)) return DEFAULT_SENSITIVE_WORDS;
+  const list = [];
+  raw.forEach(item => {
+    const word = typeof item === 'string' ? item.trim() : '';
+    if (word && list.indexOf(word) === -1) list.push(word);
+  });
+  return list.length > 0 ? list : DEFAULT_SENSITIVE_WORDS;
 }
 
 async function readAppConfig() {
@@ -74,6 +104,17 @@ exports.main = async (event) => {
         skillCategories: normalizeSkillCategories(cfg && cfg.skill_categories)
       }
     };
+  }
+
+  // 敏感词表：仅批量上架白名单（即管理员）可读。
+  // 普通用户拿不到词表，避免按词表逐条试探绕过审核。
+  if (action === 'sensitiveWords') {
+    const cfg = await readAppConfig();
+    const whitelist = (cfg && Array.isArray(cfg.admin_openids)) ? cfg.admin_openids : [];
+    if (!openid || whitelist.indexOf(openid) === -1) {
+      return { code: -1, msg: '无权限' };
+    }
+    return { code: 0, data: normalizeSensitiveWords(cfg && cfg.sensitiveWords) };
   }
 
   return { code: -1, msg: '未知操作' };
