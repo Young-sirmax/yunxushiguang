@@ -39,6 +39,10 @@
         <view class="list-item"><text class="list-dot">·</text><text>用于完成闲置转让与求购信息的展示与撮合，向交易相关方提供必要的联系方式；</text></view>
         <view class="list-item"><text class="list-dot">·</text><text>用于对发布内容进行安全审核、违规处置与反诈风控；</text></view>
         <view class="list-item"><text class="list-dot">·</text><text>用于通过「意见反馈」反馈交流群回应您的反馈、投诉与咨询；</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>联系方式仅限交易沟通使用，禁止用于其他用途。</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>平台仅提供信息撮合服务，技能服务的交易双方自行约定并承担交易责任。</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>技能服务价格由双方自行协商，平台提供参考价信息仅供参考。</text></view>
+        <view class="list-item"><text class="list-dot">·</text><text>平台仅提供信息撮合服务，用户间的交易行为由双方自行承担责任；禁止发布违法违规内容。</text></view>
         <view class="list-item"><text class="list-dot">·</text><text>用于改进和优化产品功能，提升服务体验。</text></view>
       </view>
       <text class="section-text">除本政策另有约定或取得您的单独同意外，我们不会将您的个人信息用于上述目的之外的用途。</text>

@@ -1,0 +1,56 @@
+<!--components/preview-card/index.wxml  长按预览卡片（居中，脱离手指遮挡）-->
+<view
+  class="pc-mask"
+  wx:if="{{show}}"
+  bindtap="onMaskTap"
+  catchtouchmove="preventMove"
+>
+  <view class="pc-card" catchtap="onCardTap">
+    <!-- 类型角标（闲置 / 求购 / 易物 / 技能） -->
+    <view class="pc-badge {{item.type}}" wx:if="{{item.typeLabel}}">{{item.typeLabel}}</view>
+
+    <!-- 商品图：等比缩放，最高 50vh；加载中显示骨架，加载完成淡入 -->
+    <view class="pc-media {{imgLoaded || imgError ? '' : 'is-loading'}}">
+      <view class="img-skel" wx:if="{{item.image && !imgLoaded && !imgError}}"></view>
+
+      <image
+        wx:if="{{item.image && !imgError}}"
+        class="pc-img img-fade {{imgLoaded ? 'is-loaded' : ''}}"
+        src="{{item.image}}"
+        mode="widthFix"
+        bindload="onImgLoad"
+        binderror="onImgError"
+      />
+
+      <view wx:elif="{{imgError}}" class="pc-img pc-img-empty">
+        <text class="pc-empty-icon">🖼️</text>
+        <text class="pc-empty-text">图片加载失败</text>
+      </view>
+
+      <view wx:else class="pc-img pc-img-empty">
+        <text class="pc-empty-icon">📦</text>
+      </view>
+    </view>
+
+    <!-- 信息区 -->
+    <view class="pc-body">
+      <view class="pc-title">{{item.title}}</view>
+
+      <view class="pc-meta">
+        <text class="pc-price {{item.type}}" wx:if="{{item.priceText}}">{{item.priceText}}</text>
+        <text class="pc-sep" wx:if="{{item.condition && item.priceText}}">·</text>
+        <text class="pc-condition" wx:if="{{item.condition}}">{{item.condition}}</text>
+        <view class="pc-verified" wx:if="{{item.verified}}">✓ 已认证</view>
+        <view class="pc-expert" wx:if="{{item.expert}}">🎓 技能达人</view>
+      </view>
+
+      <!-- 以物易物：期望交换 -->
+      <view class="pc-extra" wx:if="{{item.exchangeWant}}">🔁 期望交换：{{item.exchangeWant}}</view>
+
+      <!-- 技能服务：可服务时间 -->
+      <view class="pc-extra" wx:if="{{item.availableTime}}">🕒 可服务时间：{{item.availableTime}}</view>
+
+      <view class="pc-hint">点击卡片查看详情</view>
+    </view>
+  </view>
+</view>

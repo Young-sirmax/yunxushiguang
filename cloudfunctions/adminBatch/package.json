@@ -1,0 +1,9 @@
+{
+  "name": "adminBatch",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest",
+    "adm-zip": "^0.5.10"
+  }
+}

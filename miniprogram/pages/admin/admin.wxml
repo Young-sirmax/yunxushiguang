@@ -154,6 +154,7 @@
           <view class="type-chip {{dataType === '' ? 'active' : ''}}" data-type="" bindtap="switchDataType">全部类型</view>
           <view class="type-chip {{dataType === 'sell' ? 'active' : ''}}" data-type="sell" bindtap="switchDataType">📦 闲置</view>
           <view class="type-chip want {{dataType === 'want' ? 'active' : ''}}" data-type="want" bindtap="switchDataType">🔍 求购</view>
+          <view class="type-chip exchange {{dataType === 'exchange' ? 'active' : ''}}" data-type="exchange" bindtap="switchDataType">🔁 易物</view>
         </view>
 
         <view wx:if="{{dataLoading}}" class="empty-tip">加载中...</view>
@@ -165,9 +166,9 @@
             <view class="data-meta">
               <view class="data-title-row">
                 <text class="data-title">{{item.title}}</text>
-                <text class="data-kind {{item.type === 'want' ? 'want' : ''}}">{{item.type === 'want' ? '求购' : '闲置'}}</text>
+                <text class="data-kind {{item.type === 'want' ? 'want' : (item.type === 'exchange' ? 'exchange' : '')}}">{{item.type === 'want' ? '求购' : (item.type === 'exchange' ? '易物' : '闲置')}}</text>
               </view>
-              <view class="data-price {{item.type === 'want' ? 'want' : ''}}">{{item.priceText}}</view>
+              <view class="data-price {{item.type === 'want' ? 'want' : (item.type === 'exchange' ? 'exchange' : '')}}">{{item.priceText}}</view>
               <view class="data-row">
                 <text class="data-status s-{{item.status}}">{{item.statusText}}</text>
                 <text class="data-sub">{{item.categoryName || '未分类'}}</text>
@@ -175,7 +176,7 @@
             </view>
           </view>
           <view class="data-sub-row">
-            <text>发布者：{{item.sellerName || '未知用户'}}　({{item.sellerContact || '未留联系方式'}})</text>
+            <text>发布者：{{item.sellerName || '未知用户'}}</text>
             <text class="data-time">{{item.timeText || ''}}</text>
           </view>
           <view class="data-actions">
@@ -205,16 +206,19 @@
               <text class="mini-tag admin" wx:if="{{item.isAdmin}}">管理员</text>
               <text class="mini-tag ban" wx:if="{{item.banned}}">已封禁</text>
               <text class="mini-tag verified" wx:if="{{item.isStudentVerified}}">已认证</text>
+              <text class="mini-tag expert" wx:if="{{item.expert_status === 'approved'}}">技能达人</text>
             </view>
           </view>
           <view class="u-info-row">
             <text>学号：{{item.studentId || '-'}}</text>
-            <text>联系方式：{{item.contact || '-'}}</text>
+            <text>手机号：{{item.phone || '-'}}</text>
+            <text>微信号：{{item.wechat_id || '-'}}</text>
           </view>
           <view class="u-time-row">注册时间：{{item.timeText || '-'}}</view>
           <view class="data-actions">
             <view class="mini-btn primary" data-id="{{item._id}}" bindtap="toggleUserAdmin">{{item.isAdmin ? '取消管理员' : '设为管理员'}}</view>
             <view class="mini-btn warn" data-id="{{item._id}}" bindtap="toggleUserBan">{{item.banned ? '解封' : '封禁'}}</view>
+            <view class="mini-btn expert" data-id="{{item._id}}" bindtap="toggleExpert">{{item.expert_status === 'approved' ? '撤销达人' : '设为达人'}}</view>
             <view class="mini-btn danger" data-id="{{item._id}}" bindtap="deleteUser">删除</view>
           </view>
         </view>

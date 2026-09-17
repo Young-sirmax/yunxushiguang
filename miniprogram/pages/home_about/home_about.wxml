@@ -8,8 +8,8 @@
         <image class="brand-logo" src="/images/logo.png" mode="aspectFit"/>
       </view>
       <view class="brand-name">云叙石光</view>
-      <view class="brand-sub">校园物品信息服务平台</view>
-      <view class="brand-slogan">让闲置流转 · 让求购回应</view>
+      <view class="brand-sub">校园物品与技能信息服务平台</view>
+      <view class="brand-slogan">让闲置流转 · 让求购与技能被回应</view>
     </view>
   </view>
 
@@ -18,7 +18,7 @@
     <view class="intro-quote">💡</view>
     <view class="intro-body">
       <view class="intro-title">我们的使命</view>
-      <text class="intro-text">每一件闲置都值得被重新发现，每一个需求都值得被认真回应。我们希望通过安全、便捷、免费的信息服务，让校园里的好物与需求高效相遇，让校园生活更简单、更绿色。</text>
+      <text class="intro-text">每一件闲置都值得被重新发现，每一个需求、每一项技能都值得被认真回应。我们希望通过安全、便捷、免费的信息服务，让校园里的好物、需求与技能高效相遇，让校园生活更简单、更绿色。</text>
     </view>
   </view>
 
@@ -26,8 +26,18 @@
   <view class="block">
     <view class="block-title"><text class="block-title-bar"></text><text class="block-title-text">平台简介</text></view>
     <view class="block-card">
-      <text class="para">云叙石光是一个面向在校大学生的校园物品信息交流平台，提供「闲置转让」与「求购发布」两类信息服务，覆盖学习、生活、娱乐等多种校园场景，帮助同学们以更低成本实现物品循环利用。</text>
+      <text class="para">云叙石光是一个面向在校大学生的校园物品与技能信息交流平台，提供四类信息服务：<text class="para-strong">闲置转让</text>、<text class="para-strong">求购发布</text>、<text class="para-strong">以物易物</text>、<text class="para-strong">技能服务</text>（支持技能达人入驻，提供家教辅导、摄影修图、设计剪辑、编程开发、乐器教学、运动陪练、跑腿代办等服务），覆盖学习、生活、娱乐等多种校园场景。</text>
       <text class="para">平台依托微信小程序生态运行，接入学生身份实名认证与内容安全审核机制，由校园开发者团队负责日常运营与维护，长期坚持「免费、纯净、可信」的产品理念，致力于打造同学们身边的绿色循环服务站。</text>
+    </view>
+  </view>
+
+  <!-- 平台定位 -->
+  <view class="intro-card position-card">
+    <view class="intro-quote">🧭</view>
+    <view class="intro-body">
+      <view class="intro-title">平台定位</view>
+      <text class="intro-text">本平台是<text class="para-strong">校园物品与技能信息撮合平台</text>，仅提供信息展示与撮合服务，<text class="para-strong">不提供交易担保</text>；交易由双方自行完成并承担责任。请务必当面核验物品、理性支付，警惕各类网络诈骗。</text>
+      <text class="intro-text">技能服务价格由双方自行协商，平台提供参考价信息仅供参考。</text>
     </view>
   </view>
 
@@ -50,17 +60,24 @@
         </view>
       </view>
       <view class="feature-item">
-        <view class="feature-icon-wrap icon-blue"><text class="feature-icon">🎓</text></view>
+        <view class="feature-icon-wrap icon-exchange"><text class="feature-icon">🔁</text></view>
         <view class="feature-body">
-          <text class="feature-name">实名认证</text>
-          <text class="feature-desc">学生身份实名认证，营造真实可信的校园交易环境</text>
+          <text class="feature-name">以物易物</text>
+          <text class="feature-desc">不想花钱？用你的闲置换需要的物品，可标注期望交换物与可接受补差价</text>
         </view>
       </view>
       <view class="feature-item">
-        <view class="feature-icon-wrap icon-purple"><text class="feature-icon">🛡️</text></view>
+        <view class="feature-icon-wrap icon-skill"><text class="feature-icon">🎓</text></view>
         <view class="feature-body">
-          <text class="feature-name">内容审核</text>
-          <text class="feature-desc">发布信息先审后发，机器安全检测与人工复核双重保障</text>
+          <text class="feature-name">技能服务与技能达人</text>
+          <text class="feature-desc">完成达人入驻即可发布技能服务（按次 / 按小时 / 面议），也可寻找同学提供帮助</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon-wrap icon-blue"><text class="feature-icon">🛡️</text></view>
+        <view class="feature-body">
+          <text class="feature-name">实名认证与内容审核</text>
+          <text class="feature-desc">学生身份实名认证 + 发布内容先审后发，营造真实可信的校园交流环境</text>
         </view>
       </view>
       <view class="feature-item">
@@ -109,9 +126,17 @@
         <text class="contact-label">反馈渠道</text>
         <text class="contact-value">小程序内「意见反馈」功能</text>
       </view>
+      <view class="contact-item" wx:if="{{officialWechat}}">
+        <text class="contact-label">官方微信</text>
+        <text class="contact-value wechat">{{officialWechat}}</text>
+      </view>
       <view class="contact-item">
         <text class="contact-label">服务时间</text>
         <text class="contact-value">工作日 9:00 - 18:00</text>
+      </view>
+      <view class="contact-item">
+        <text class="contact-label">版本号</text>
+        <text class="contact-value">{{version}}</text>
       </view>
       <view class="contact-item">
         <text class="contact-label">温馨提示</text>
@@ -121,5 +146,5 @@
     <view class="feedback-btn" bindtap="goFeedback">📝 我要反馈</view>
   </view>
 
-  <view class="version">云叙石光 · 正式版 v1.0.0</view>
+  <view class="version">云叙石光 · 校园物品与技能信息撮合平台 · {{version}}</view>
 </view>

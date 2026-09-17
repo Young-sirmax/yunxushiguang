@@ -1,0 +1,116 @@
+/* pages/my_reviews/my_reviews.wxss —— 我收到的评价 */
+page {
+  background: #f5f7fa;
+}
+
+.page-container {
+  min-height: 100vh;
+  padding: 24rpx;
+  background: #f5f7fa;
+  box-sizing: border-box;
+}
+
+.mr-header {
+  background: #fff;
+  border-radius: 28rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.04);
+}
+
+.mr-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 16rpx;
+  margin-bottom: 10rpx;
+}
+
+.mr-summary-label {
+  font-size: 26rpx;
+  color: #7b8a9c;
+}
+
+.mr-summary-value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #ffb020;
+}
+
+.mr-count {
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.mr-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 26rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+}
+
+.mr-card-head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.mr-avatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+  background: #f1f5f9;
+}
+
+.mr-name {
+  flex: 1;
+  font-size: 27rpx;
+  color: #4a5a6e;
+}
+
+.mr-stars {
+  font-size: 24rpx;
+  color: #ffb020;
+  letter-spacing: 2rpx;
+}
+
+.mr-comment {
+  display: block;
+  font-size: 28rpx;
+  color: #1a1a2e;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.mr-time {
+  display: block;
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-top: 10rpx;
+}
+
+.mr-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx 40rpx;
+}
+
+.mr-empty-icon {
+  font-size: 96rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.7;
+}
+
+.mr-empty-text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #4a5a6e;
+  margin-bottom: 10rpx;
+}
+
+.mr-empty-hint {
+  font-size: 25rpx;
+  color: #94a3b8;
+}

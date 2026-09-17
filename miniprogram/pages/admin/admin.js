@@ -120,13 +120,15 @@ Page({
 
   // ===================== 数据管理：商品 / 用户 =====================
   mapCommodity(c) {
-    const statusMap = { pendingReview: '待审核', onSale: '已上架', rejected: '已驳回', deleted: '已删除', sold: '已结束' };
+    const statusMap = { draft: '待上架', pendingReview: '待审核', onSale: '已上架', rejected: '已驳回', deleted: '已删除', sold: '已结束' };
     const price = Number(c.price) || 0;
     return Object.assign({}, c, {
       cover: (c.images && c.images[0]) || '',
       timeText: timeText(c.createTime),
       statusText: statusMap[c.status] || c.status || '',
-      priceText: c.type === 'want' ? '求购中' : (price > 0 ? '¥' + price : '面议')
+      priceText: c.type === 'want'
+        ? '求购中'
+        : (c.type === 'exchange' ? ('🔁 换：' + (c.exchange_want || '面议')) : (price > 0 ? '¥' + price : '面议'))
     });
   },
 
@@ -376,6 +378,40 @@ Page({
     });
   },
 
+  // 技能达人：设为 / 撤销（小程序内的人工审核与撤销入口）
+  toggleExpert(e) {
+    const id = e.currentTarget.dataset.id;
+    const user = this.data.uList.find(u => u._id === id);
+    if (!user) return;
+    const toExpert = user.expert_status !== 'approved';
+
+    wx.showModal({
+      title: toExpert ? '设为技能达人' : '撤销技能达人',
+      content: toExpert
+        ? '确认将该用户设为技能达人？对方即可发布技能服务。'
+        : '确认撤销该用户的技能达人身份？其技能服务将无法继续发布。',
+      confirmText: '确定',
+      confirmColor: toExpert ? '#ffb020' : '#f43f5e',
+      success: async (res) => {
+        if (!res.confirm) return;
+        showLoading('处理中...');
+        try {
+          const apiRes = await API.expertAudit(id, toExpert ? 'approved' : 'none');
+          hideLoading();
+          if (apiRes.code === 0) {
+            showToast(apiRes.msg || '操作成功');
+            this.loadData(true);
+          } else {
+            showToast(apiRes.msg || '操作失败');
+          }
+        } catch (err) {
+          hideLoading();
+          showToast(err.message || '操作失败');
+        }
+      }
+    });
+  },
+
   deleteUser(e) {
     const id = e.currentTarget.dataset.id;
     wx.showModal({
@@ -413,8 +449,10 @@ Page({
           ...item,
           images: item.images || [],
           timeText: timeText(item.createTime),
-          statusText: item.type === 'want' ? '求购' : '出售',
-          priceText: item.type === 'want' ? '求购中' : '¥' + (item.price || '0')
+          statusText: item.type === 'want' ? '求购' : (item.type === 'exchange' ? '易物' : '出售'),
+          priceText: item.type === 'want'
+            ? '求购中'
+            : (item.type === 'exchange' ? ('🔁 换：' + (item.exchange_want || '面议')) : '¥' + (item.price || '0'))
         }));
         this.setData({ list });
       } else {

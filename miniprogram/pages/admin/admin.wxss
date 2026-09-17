@@ -710,3 +710,29 @@
 .mini-tag.admin { color: #6d4fdc; background: #f1ecfd; }
 .mini-tag.ban { color: var(--danger); background: var(--danger-soft); }
 .mini-tag.verified { color: var(--primary); background: var(--primary-soft); }
+
+/* === 以物易物：类型筛选与标签 === */
+.type-chip.exchange.active {
+  background: var(--exchange-grad);
+}
+
+.data-kind.exchange {
+  color: var(--exchange);
+  background: var(--exchange-soft);
+}
+
+.data-price.exchange {
+  color: var(--exchange);
+  font-size: 26rpx;
+}
+
+/* === 技能达人标签与操作 === */
+.mini-tag.expert {
+  color: var(--skill);
+  background: var(--skill-soft);
+}
+
+.mini-btn.expert {
+  color: var(--skill);
+  background: var(--skill-soft);
+}

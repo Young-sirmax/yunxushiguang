@@ -2,13 +2,19 @@
 const app = getApp();
 const API = require('../../api/api.js');
 const { showToast, showLoading, hideLoading } = require('../../utils/util.js');
-const { validateStudentId, validateContact } = require('../../utils/userValidate.js');
+const { avatarView, uploadAvatar } = require('../../utils/avatar.js');
+const { validateStudentId, validatePhone, validateWechatId } = require('../../utils/userValidate.js');
 
 Page({
   data: {
     userInfo: {},
-    avatarChanged: false,
-    contactError: '',
+    avatar: { useImage: false, src: '', letter: '👤', color: '' },
+    avatarUploading: false,
+    phoneError: '',
+    wechatIdError: '',
+    wechatConfirm: '',
+    wechatConfirmError: '',
+    wechatDirty: false, // 是否正在修改微信号（改动后才要求二次确认）
     canSave: true,
 
     universityList: [],
@@ -46,12 +52,39 @@ Page({
     }
   },
 
-  // 统一应用用户信息到页面数据
+  // 统一应用用户信息到页面数据（头像同时算出展示态：fileID 或字母兜底）
   applyUserInfo(userInfo) {
-    const contact = (userInfo && userInfo.contact) || '';
+    const u = userInfo || {};
+    // 上传中的本地预览优先级更高，避免云端旧数据把刚选的头像冲掉
+    const patch = {
+      userInfo: u,
+      canSave: this.canSaveWith(u)
+    };
+    if (!this.data.avatarUploading) patch.avatar = avatarView(u);
+    this.setData(patch);
+  },
+
+  // 保存按钮可用性：微信号必填且合法；手机号选填但填了必须合法
+  canSaveWith(userInfo) {
+    if (!validateWechatId(userInfo.wechat_id).valid) return false;
+    const phone = (userInfo.phone || '').trim();
+    if (phone && !validatePhone(phone).valid) return false;
+    const { wechatDirty, wechatConfirm } = this.data;
+    if (wechatDirty && wechatConfirm !== (userInfo.wechat_id || '').trim()) return false;
+    return true;
+  },
+
+  // 微信号改动后要求二次确认
+  refreshWechatConfirmState() {
+    const wechatId = (this.data.userInfo.wechat_id || '').trim();
+    const confirm = (this.data.wechatConfirm || '').trim();
+    let wechatConfirmError = '';
+    if (this.data.wechatDirty && confirm && confirm !== wechatId) {
+      wechatConfirmError = '两次输入的微信号不一致';
+    }
     this.setData({
-      userInfo: userInfo || {},
-      canSave: contact.trim().length >= 4
+      wechatConfirmError,
+      canSave: this.canSaveWith(this.data.userInfo)
     });
   },
 
@@ -64,43 +97,107 @@ Page({
   },
 
   // 微信官方头像选择能力（open-type="chooseAvatar"）
-  onChooseAvatar(e) {
-    const url = e.detail && e.detail.avatarUrl;
-    if (!url) {
-      showToast('未获取到头像，请重试');
-      return;
-    }
+  // 选完立即上传云存储并落库，不再依赖下方“保存”按钮（该按钮受微信号必填约束，常常是灰的）
+  async onChooseAvatar(e) {
+    // 防并发：上传中重复触发直接忽略（按钮同时被 disabled，双保险）
+    if (this.data.avatarUploading) return;
+
+    const tempPath = e.detail && e.detail.avatarUrl;
+    // 用户取消选择时回调不带 avatarUrl，静默返回，不打断操作
+    if (!tempPath) return;
+
+    // 先本地预览，交互零延迟
     this.setData({
-      'userInfo.avatarUrl': url,
-      avatarChanged: true
+      avatarUploading: true,
+      avatar: { useImage: true, src: tempPath, letter: '', color: '' }
     });
-    showToast('头像已选好，请点下方“保存”生效');
+    showLoading('头像上传中...');
+
+    try {
+      const fileID = await uploadAvatar(tempPath);
+      const res = await API.updateUser({ avatarUrl: fileID });
+      if (!res || res.code !== 0) {
+        throw new Error((res && res.msg) || '头像保存失败');
+      }
+      // 全局同步（storage + globalData），“我的”页与其他页面立即一致
+      app.syncUserInfo(res.data);
+      hideLoading();
+      this.setData({ userInfo: res.data, avatar: avatarView(res.data), avatarUploading: false });
+      showToast('头像已更新');
+    } catch (err) {
+      console.error('头像更新失败:', err);
+      hideLoading();
+      // 失败保持原头像，不阻塞其他功能
+      const original = wx.getStorageSync('userInfo') || {};
+      this.setData({ userInfo: original, avatar: avatarView(original), avatarUploading: false });
+      showToast(err.message || '头像上传失败，请重试');
+    }
+  },
+
+  // fileID 失效时回退字母头像，避免一直空白
+  onAvatarError() {
+    this.setData({
+      avatar: avatarView(Object.assign({}, this.data.userInfo, { avatarUrl: '' }))
+    });
   },
 
   onNickName(e) {
     this.setData({ 'userInfo.nickName': e.detail.value });
   },
 
-  onContact(e) {
-    const value = e.detail.value.slice(0, 30);
-    let contactError = '';
-    if (value.length > 0 && value.trim().length < 4) {
-      contactError = '请输入完整的微信号或手机号';
+  // 手机号：选填，仅用于账号找回，不对外展示
+  onPhone(e) {
+    const value = e.detail.value.replace(/\D/g, '').slice(0, 11);
+    let phoneError = '';
+    if (value.length > 0 && !validatePhone(value).valid) {
+      phoneError = validatePhone(value).error;
+    }
+    this.setData({ 'userInfo.phone': value, phoneError });
+    this.setData({ canSave: this.canSaveWith(Object.assign({}, this.data.userInfo, { phone: value })) });
+  },
+
+  // 微信号：对外展示，供交易对方复制
+  onWechatId(e) {
+    const value = (e.detail.value || '').trim();
+    let wechatIdError = '';
+    if (value.length > 0 && !validateWechatId(value).valid) {
+      wechatIdError = validateWechatId(value).error;
     }
     this.setData({
-      'userInfo.contact': value,
-      contactError,
-      canSave: !contactError && value.trim().length >= 4
+      'userInfo.wechat_id': value,
+      wechatIdError,
+      wechatDirty: true
     });
+    this.refreshWechatConfirmState();
+  },
+
+  onWechatConfirm(e) {
+    this.setData({ wechatConfirm: (e.detail.value || '').trim() });
+    this.refreshWechatConfirmState();
   },
 
   async save() {
-    const { userInfo, avatarChanged, contactError } = this.data;
-    const contact = (userInfo.contact || '').trim();
-    if (contactError || contact.length < 4) {
-      showToast('请填写正确的微信号或手机号');
+    const { userInfo, phoneError, wechatDirty, wechatConfirm } = this.data;
+
+    // 微信号：必填 + 格式校验 + 改动后二次确认
+    const wechatId = (userInfo.wechat_id || '').trim();
+    const wechatCheck = validateWechatId(wechatId);
+    if (!wechatCheck.valid) {
+      showToast(wechatCheck.error);
       return;
     }
+    if (wechatDirty && wechatConfirm !== wechatId) {
+      showToast('两次输入的微信号不一致');
+      return;
+    }
+
+    // 手机号：选填，填了必须合法
+    const phone = (userInfo.phone || '').trim();
+    if (phoneError || (phone && !validatePhone(phone).valid)) {
+      showToast('手机号格式不正确');
+      return;
+    }
+
     if (!userInfo.nickName || !userInfo.nickName.trim()) {
       showToast('请填写昵称');
       return;
@@ -109,17 +206,11 @@ Page({
     try {
       const updateData = {
         nickName: userInfo.nickName.trim(),
-        contact: contact
+        wechat_id: wechatId
       };
+      if (phone) updateData.phone = phone;
 
-      if (avatarChanged && userInfo.avatarUrl && userInfo.avatarUrl.indexOf('cloud://') !== 0) {
-        const uploadRes = await wx.cloud.uploadFile({
-          cloudPath: `avatars/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`,
-          filePath: userInfo.avatarUrl
-        });
-        updateData.avatarUrl = uploadRes.fileID;
-      }
-
+      // 头像不由“保存”提交：选择时已即时上传并落库，此处不带 avatarUrl，避免覆盖
       const res = await API.updateUser(updateData);
       if (res.code === 0) {
         // 全局同步最新用户信息（storage + globalData）

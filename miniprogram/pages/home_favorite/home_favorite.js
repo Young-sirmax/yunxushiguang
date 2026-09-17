@@ -1,5 +1,6 @@
 const API = require('../../api/api.js');
 const { formatDate, showToast } = require('../../utils/util.js');
+const { formatSkillPrice } = require('../../utils/expert.js');
 
 Page({
   data: {
@@ -47,7 +48,15 @@ Page({
 
       const newList = (res.data || []).map(item => ({
         ...item,
-        timeText: formatDate(item.createTime)
+        timeText: formatDate(item.createTime),
+        // 交易状态：已预定 / 已完成
+        tradeStatusText: item.commodityTradeStatus === 'matched'
+          ? '已预定'
+          : (item.commodityTradeStatus === 'completed' ? '已完成' : ''),
+        // 技能服务：报价文案
+        priceText: item.commodityType === 'skill'
+          ? formatSkillPrice(item.commodityPriceUnit, item.commodityPrice)
+          : ''
       }));
 
       this.setData({

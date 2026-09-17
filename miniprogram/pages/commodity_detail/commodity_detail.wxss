@@ -1,6 +1,7 @@
 /* pages/commodity_detail/commodity_detail.wxss */
 .page-container {
-  padding-bottom: 180rpx;
+  /* 底部固定操作栏 + 安全区 */
+  padding-bottom: calc(200rpx + env(safe-area-inset-bottom));
 }
 
 .image-swiper {
@@ -10,6 +11,40 @@
 .swiper-img {
   width: 100%;
   height: 100%;
+}
+
+/* 轮播单元：作为骨架/图片/失败占位的定位容器 */
+.swiper-cell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #eef2f6;
+  overflow: hidden;
+}
+
+/* 加载失败占位：点击可重试 */
+.img-fail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f3f5f8;
+}
+
+.img-fail-icon {
+  font-size: 68rpx;
+  margin-bottom: 12rpx;
+  opacity: 0.7;
+}
+
+.img-fail-text {
+  font-size: 24rpx;
+  color: var(--text-light);
 }
 
 .info-section {
@@ -309,4 +344,159 @@
   font-size: 22rpx;
   color: var(--primary-dark);
   line-height: 1.5;
+}
+/* === 以物易物 / 交易状态 / 联系方式（仅复制不明文展示） === */
+.price.exchange {
+  color: var(--exchange);
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.meta-tag.trade-status {
+  color: #b45309;
+  background: #fef3c7;
+  font-weight: 600;
+}
+
+.exchange-box {
+  margin-top: 20rpx;
+  padding: 20rpx 24rpx;
+  background: #f6f3ff;
+  border-radius: 16rpx;
+}
+
+.exchange-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8rpx;
+}
+
+.exchange-row:last-child {
+  margin-bottom: 0;
+}
+
+.exchange-label {
+  flex-shrink: 0;
+  width: 180rpx;
+  font-size: 26rpx;
+  color: #7c7a99;
+}
+
+.exchange-value {
+  flex: 1;
+  font-size: 26rpx;
+  color: #4b3f8f;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.seller-contact-hint {
+  font-size: 24rpx;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+.copy-contact-btn.disabled {
+  opacity: 0.45;
+}
+
+/* === 发布者：交易状态操作 === */
+.owner-section {
+  margin-bottom: 24rpx;
+}
+
+.owner-trade-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.trade-chip {
+  padding: 14rpx 28rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  background: #f1f5f9;
+  transition: all 0.2s ease;
+}
+
+.trade-chip.active {
+  background: var(--primary-grad);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--shadow-primary);
+}
+
+/* === 技能服务 / 达人 / 评价 === */
+.skill-box .exchange-value {
+  color: var(--skill);
+}
+
+.expert-badge {
+  font-size: 20rpx;
+  font-weight: 600;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  color: var(--skill);
+  background: var(--skill-soft);
+}
+
+.expert-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14rpx;
+  padding: 14rpx 20rpx;
+  background: #fff8e6;
+  border-radius: 16rpx;
+}
+
+.expert-rating {
+  font-size: 24rpx;
+  color: var(--skill);
+}
+
+.expert-link {
+  font-size: 24rpx;
+  color: var(--skill);
+  font-weight: 600;
+}
+
+.expert-intro {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 25rpx;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.review-entry {
+  margin-top: 20rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  border-radius: 999rpx;
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--skill);
+  background: var(--skill-soft);
+}
+
+.review-entry.done {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.price.skill {
+  color: var(--skill);
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+/* 技能分类标签 */
+.meta-tag.skill-cat {
+  color: var(--skill);
+  background: var(--skill-soft);
 }

@@ -7,15 +7,23 @@
       <view class="header-title">{{isEdit ? '编辑信息' : '发布信息'}}</view>
       <view class="header-tip">{{isEdit ? '修改信息内容' : '免费发布，精准触达'}}</view>
     </view>
-    <!-- 模式切换 -->
+    <!-- 类型选择：闲置转让 / 求购 / 以物易物 -->
     <view class="mode-switch">
       <view class="mode-item {{mode === 'sell' ? 'active' : ''}}" bindtap="switchMode" data-mode="sell">
         <text class="mode-icon">📦</text>
-        <text class="mode-label">发布闲置</text>
+        <text class="mode-label">闲置转让</text>
       </view>
       <view class="mode-item want {{mode === 'want' ? 'active' : ''}}" bindtap="switchMode" data-mode="want">
         <text class="mode-icon">🔍</text>
-        <text class="mode-label">求购信息</text>
+        <text class="mode-label">求购</text>
+      </view>
+      <view class="mode-item exchange {{mode === 'exchange' ? 'active' : ''}}" bindtap="switchMode" data-mode="exchange">
+        <text class="mode-icon">🔁</text>
+        <text class="mode-label">以物易物</text>
+      </view>
+      <view class="mode-item skill {{mode === 'skill' ? 'active' : ''}}" bindtap="switchMode" data-mode="skill">
+        <text class="mode-icon">🎓</text>
+        <text class="mode-label">技能服务</text>
       </view>
     </view>
   </view>
@@ -23,10 +31,37 @@
   <!-- 表单主体 -->
   <view class="release-body">
 
-    <!-- 图片上传区 -->
-    <view class="form-card" wx:if="{{mode === 'sell'}}">
+    <!-- 求购分区：物品求购 / 技能求助（必选，未选不能提交） -->
+    <view class="form-card want-seg-card" wx:if="{{mode === 'want'}}">
       <view class="card-head">
-        <text class="card-title">商品图片</text>
+        <text class="card-title">求购类型<text class="field-required">*</text></text>
+        <text class="card-sub">{{wantCategory ? '' : '请先选择'}}</text>
+      </view>
+      <view class="want-seg">
+        <view
+          class="want-seg-item goods {{wantCategory === 'goods' ? 'active' : ''}}"
+          data-value="goods"
+          bindtap="onWantCategoryTap"
+        >
+          <text class="ws-icon">📦</text>
+          <text class="ws-label">物品求购</text>
+        </view>
+        <view
+          class="want-seg-item skill {{wantCategory === 'skill' ? 'active' : ''}}"
+          data-value="skill"
+          bindtap="onWantCategoryTap"
+        >
+          <text class="ws-icon">🎓</text>
+          <text class="ws-label">技能求助</text>
+        </view>
+      </view>
+      <view class="want-seg-hint">{{wantCategory === 'skill' ? '想找人帮忙 / 找同学提供服务，选「技能求助」' : (wantCategory === 'goods' ? '想收实物闲置物品，选「物品求购」' : '请选择：收实物选「物品求购」，找人帮忙选「技能求助」')}}</view>
+    </view>
+
+    <!-- 图片上传区（闲置转让 / 以物易物 / 技能服务） -->
+    <view class="form-card" wx:if="{{mode !== 'want'}}">
+      <view class="card-head">
+        <text class="card-title">{{mode === 'skill' ? '作品 / 服务图片' : '商品图片'}}</text>
         <text class="card-sub">已添加 {{images.length}} 张</text>
       </view>
       <view class="image-grid">
@@ -54,7 +89,7 @@
       </view>
       <view class="want-image-hint">
         <text class="hint-icon">💡</text>
-        <text class="hint-text">可上传想要的物品参考图，帮助对方快速了解</text>
+        <text class="hint-text">{{wantCategory === 'skill' ? '可上传作品 / 服务参考图，帮助对方了解你的需求' : '可上传想要的物品参考图，帮助对方快速了解'}}</text>
       </view>
       <view class="image-grid">
         <view class="image-cell" wx:for="{{images}}" wx:key="index" wx:for-item="img" wx:for-index="idx">
@@ -76,32 +111,80 @@
     <!-- 基本信息 -->
     <view class="form-card">
       <view class="card-head">
-        <text class="card-title">{{mode === 'sell' ? '基本信息' : '求购信息'}}</text>
+        <text class="card-title">{{mode === 'sell' ? '基本信息' : (mode === 'want' ? '求购信息' : (mode === 'skill' ? '服务信息' : '易物信息'))}}</text>
       </view>
 
       <!-- 标题 -->
       <view class="field-row">
-        <text class="field-label">{{mode === 'sell' ? '标题' : '想要'}}</text>
+        <text class="field-label">{{mode === 'want' ? '想要' : '标题'}}</text>
         <view class="field-input-wrap">
-          <input class="field-input" placeholder="{{mode === 'sell' ? '简明扼要，让买家一眼动心' : '描述你想找的物品'}}" value="{{title}}" bindinput="onTitleInput" maxlength="30"/>
+          <input class="field-input" placeholder="{{mode === 'want' ? '描述你想找的物品' : '简明扼要，让人一眼动心'}}" value="{{title}}" bindinput="onTitleInput" maxlength="30"/>
           <text class="field-counter">{{title.length}}/30</text>
         </view>
       </view>
 
-      <!-- 分类选择 -->
+      <!-- 分类选择：求购 + 技能求助时列出技能分类，其余列出物品分类 -->
       <view class="field-row">
-        <text class="field-label">分类</text>
-        <picker mode="selector" range="{{categoryList}}" range-key="name" bindchange="onCategoryChange">
-          <view class="field-picker {{selectedCategory ? '' : 'placeholder'}}">
-            <text>{{selectedCategory ? selectedCategory.name : '选择分类'}}</text>
+        <text class="field-label">{{mode === 'want' && wantCategory === 'skill' ? '技能分类' : '分类'}}</text>
+        <picker mode="selector" range="{{pickerRange}}" range-key="name" bindchange="onCategoryChange">
+          <view class="field-picker {{(mode === 'want' && wantCategory === 'skill') ? (wantSkillCategory ? '' : 'placeholder') : (selectedCategory ? '' : 'placeholder')}}">
+            <text wx:if="{{mode === 'want' && wantCategory === 'skill'}}">{{wantSkillCategory || '选择技能分类'}}</text>
+            <text wx:else>{{selectedCategory ? selectedCategory.name : '选择分类'}}</text>
             <text class="picker-arrow">›</text>
           </view>
         </picker>
       </view>
 
+      <!-- 图书专区：适用专业（可多选，非必填） -->
+      <view class="field-row column" wx:if="{{isBookCategory}}">
+        <text class="field-label">适用专业<text class="field-optional">（可多选）</text></text>
+        <view class="major-picker">
+          <view class="major-line">
+            <text class="major-line-label">学院</text>
+            <scroll-view class="major-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+              <view class="major-row">
+                <view
+                  class="major-chip {{currentCollege === item ? 'active' : ''}}"
+                  wx:for="{{collegeList}}"
+                  wx:key="*this"
+                  data-college="{{item}}"
+                  bindtap="selectBookCollege"
+                >{{item}}</view>
+              </view>
+            </scroll-view>
+          </view>
+
+          <view class="major-line" wx:if="{{currentCollege}}">
+            <text class="major-line-label">专业</text>
+            <scroll-view class="major-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+              <view class="major-row">
+                <view
+                  class="major-chip major {{item.checked ? 'active' : ''}}"
+                  wx:for="{{majorOptions}}"
+                  wx:key="name"
+                  data-major="{{item.name}}"
+                  bindtap="toggleMajor"
+                >{{item.name}}</view>
+              </view>
+            </scroll-view>
+          </view>
+
+          <view class="major-selected" wx:if="{{selectedMajors.length > 0}}">
+            <view
+              class="major-tag"
+              wx:for="{{selectedMajors}}"
+              wx:key="*this"
+              data-major="{{item}}"
+              bindtap="removeMajor"
+            >{{item}}<text class="major-tag-x">×</text></view>
+          </view>
+          <view class="major-tip" wx:else>选填：选好后，买家可按专业筛选和搜索到这本书</view>
+        </view>
+      </view>
+
       <!-- 成色/需求 -->
-      <view class="field-row column" wx:if="{{mode === 'sell'}}">
-        <text class="field-label">成色</text>
+      <view class="field-row column" wx:if="{{mode === 'sell' || mode === 'exchange'}}">
+        <text class="field-label">成色<text class="field-optional">（选填）</text></text>
         <view class="condition-chips">
           <view 
             class="chip {{condition === item ? 'active' : ''}}" 
@@ -134,13 +217,108 @@
         </view>
       </view>
 
-      <!-- 联系方式 -->
+      <!-- 联系方式：统一使用账号微信号（只读，可在「个人信息」修改） -->
       <view class="field-row">
         <text class="field-label">联系方式</text>
         <view class="field-input-wrap">
-          <input class="field-input" placeholder="微信号/手机号" value="{{contact}}" bindinput="onContactInput"/>
+          <text class="contact-readonly {{wechatId ? '' : 'empty'}}">{{wechatId || '未填写微信号，请先到「个人信息」完善'}}</text>
         </view>
       </view>
+    </view>
+
+    <!-- 技能服务：报价模式 + 金额 + 可服务时间 -->
+    <view class="form-card" wx:if="{{mode === 'skill'}}">
+      <view class="card-head">
+        <text class="card-title">服务报价</text>
+        <text class="card-sub">面议可不填金额</text>
+      </view>
+
+      <view class="field-row">
+        <text class="field-label">技能分类</text>
+        <picker mode="selector" range="{{skillOptions}}" value="{{skillIndex}}" bindchange="onSkillChange">
+          <view class="field-picker {{skillIndex > -1 ? '' : 'placeholder'}}">
+            <text>{{skillIndex > -1 ? skillOptions[skillIndex] : '选择技能分类（选填）'}}</text>
+            <text class="picker-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="field-row">
+        <text class="field-label">报价模式</text>
+        <picker mode="selector" range="{{priceUnits}}" range-key="label" value="{{priceUnitIndex}}" bindchange="onPriceUnitChange">
+          <view class="field-picker">
+            <text>{{priceUnits[priceUnitIndex].label}}</text>
+            <text class="picker-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="field-row" wx:if="{{priceUnit !== 'negotiable'}}">
+        <text class="field-label">金额（元）</text>
+        <view class="price-wrap">
+          <text class="price-symbol">¥</text>
+          <input class="price-input" type="digit" placeholder="0.00" value="{{price}}" bindinput="onPriceInput"/>
+        </view>
+      </view>
+
+      <!-- 该类目参考价（仅提示，不做校验与拦截） -->
+      <view class="price-ref-tip" wx:if="{{priceRefText}}">{{priceRefText}}</view>
+
+      <view class="field-row">
+        <text class="field-label">可服务时间</text>
+        <view class="field-input-wrap">
+          <input class="field-input" placeholder="如：周末 / 工作日晚（选填）" value="{{availableTime}}" bindinput="onAvailableTimeInput" maxlength="60"/>
+        </view>
+      </view>
+
+      <view class="card-hint" wx:if="{{!isExpert}}">⚠️ 你还没有完成技能达人入驻，发布前会引导你去申请</view>
+    </view>
+
+    <!-- 以物易物：期望交换物品 + 可接受补差价 -->
+    <view class="form-card" wx:if="{{mode === 'exchange'}}">
+      <view class="card-head">
+        <text class="card-title">交换需求</text>
+        <text class="card-sub">期望交换物品必填</text>
+      </view>
+
+      <view class="field-row column">
+        <text class="field-label">期望交换物品</text>
+        <view class="field-input-wrap">
+          <input
+            class="field-input"
+            placeholder="想换什么？如：高数教材、蓝牙耳机、台灯"
+            value="{{exchangeWant}}"
+            bindinput="onExchangeWantInput"
+            maxlength="60"
+          />
+          <text class="field-counter">{{exchangeWant.length}}/60</text>
+        </view>
+        <view class="tag-group">
+          <text class="tag-hint">常用标签：</text>
+          <view
+            class="quick-tag"
+            wx:for="{{exchangeTags}}"
+            wx:key="*this"
+            data-tag="{{item}}"
+            bindtap="appendExchangeTag"
+          >{{item}}</view>
+        </view>
+      </view>
+
+      <view class="field-row">
+        <text class="field-label">补差价</text>
+        <view class="price-wrap">
+          <text class="price-symbol">¥</text>
+          <input
+            class="price-input"
+            type="digit"
+            placeholder="选填"
+            value="{{priceDiff}}"
+            bindinput="onPriceDiffInput"
+          />
+        </view>
+      </view>
+      <view class="card-hint">选填：对方物品价值不足时，你可接受的补差价金额（元）</view>
     </view>
 
     <!-- 价格参考（仅发布闲置模式） -->
@@ -195,12 +373,12 @@
     <!-- 商品描述 -->
     <view class="form-card">
       <view class="card-head">
-        <text class="card-title">{{mode === 'sell' ? '商品描述' : '需求描述'}}</text>
+        <text class="card-title">{{mode === 'sell' ? '商品描述' : (mode === 'want' ? '需求描述' : (mode === 'skill' ? '服务描述' : '物品描述'))}}</text>
         <text class="card-sub">{{description.length}}/500</text>
       </view>
       <textarea 
         class="desc-area"
-        placeholder="{{mode === 'sell' ? '详细描述品牌、型号、入手时间、使用情况、成色等信息...' : '详细描述你想要的物品、预算、成色要求等...'}}"
+        placeholder="{{mode === 'want' ? '详细描述你想要的物品、预算、成色要求等...' : '详细描述品牌、型号、入手时间、使用情况、成色等信息...'}}"
         value="{{description}}"
         bindinput="onDescInput"
         maxlength="500"
@@ -208,7 +386,7 @@
       <!-- 快捷标签 -->
       <view class="tag-group" wx:if="{{description.length < 10}}">
         <text class="tag-hint">快速添加：</text>
-        <block wx:if="{{mode === 'sell'}}">
+        <block wx:if="{{mode === 'sell' || mode === 'exchange'}}">
           <view class="quick-tag" bindtap="appendDesc" data-text="全新未拆封">全新</view>
           <view class="quick-tag" bindtap="appendDesc" data-text="仅使用几次">几乎全新</view>
           <view class="quick-tag" bindtap="appendDesc" data-text="原价买入">有入手记录</view>
@@ -242,17 +420,24 @@
 
   <!-- 底部发布按钮 -->
   <view class="bottom-action safe-bottom">
-    <view class="action-hint" wx:if="{{!canSubmit}}">至少填写一项信息即可发布</view>
+    <view class="action-hint" wx:if="{{!canSubmit}}">
+      {{mode === 'sell' ? '请填写有效的价格' : (mode === 'exchange' ? '请填写期望交换的物品' : '至少填写一项信息即可发布')}}
+    </view>
     <button
-      class="publish-btn {{mode === 'want' ? 'want' : ''}}"
+      class="publish-btn {{mode === 'want' ? 'want' : (mode === 'exchange' ? 'exchange' : (mode === 'skill' ? 'skill' : ''))}}"
       bindtap="submitForm"
       disabled="{{!canSubmit || isSubmitting}}"
     >
       <text wx:if="{{isSubmitting}}">发布中...</text>
       <text wx:elif="{{isEdit}}">保存修改</text>
       <text wx:elif="{{mode === 'want'}}">发布求购</text>
+      <text wx:elif="{{mode === 'skill'}}">发布服务</text>
+      <text wx:elif="{{mode === 'exchange'}}">发布易物</text>
       <text wx:else>立即发布</text>
     </button>
     <view class="free-tag">✓ 免费发布 · 不收取任何费用</view>
   </view>
+
+  <!-- 缩略图生成用的离屏画布：不可见、不参与布局，仅用于导出列表/气泡用的小图 -->
+  <canvas type="2d" id="thumbCanvas" class="thumb-canvas"></canvas>
 </view>

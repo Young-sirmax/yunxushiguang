@@ -58,7 +58,7 @@ page {
 .seg.want.active {
   background: var(--want-grad);
   color: #fff;
-  box-shadow: 0 10rpx 30rpx rgba(0, 168, 160, 0.28);
+  box-shadow: 0 10rpx 30rpx rgba(161, 140, 209, 0.28);
 }
 
 .seg-badge {
@@ -159,7 +159,7 @@ page {
 
 .empty-btn.want {
   background: var(--want-grad);
-  box-shadow: 0 10rpx 30rpx rgba(0, 168, 160, 0.26);
+  box-shadow: 0 10rpx 30rpx rgba(161, 140, 209, 0.26);
 }
 
 .empty-btn:active {
@@ -351,4 +351,63 @@ page {
   color: var(--text-light);
   font-weight: normal;
   margin-left: 8rpx;
+}
+
+/* === 以物易物：类型高亮 / 价格位文案 / 交易状态标签 === */
+.seg.exchange.active {
+  background: var(--exchange-grad);
+  color: #fff;
+  box-shadow: 0 10rpx 30rpx rgba(255, 154, 118, 0.3);
+}
+
+.seg.exchange.active .seg-badge {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--exchange);
+}
+
+.item-price.exchange {
+  color: var(--exchange);
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.item-status.trade {
+  background: #fef3c7;
+  color: #b45309;
+  font-weight: 600;
+}
+
+.empty-btn.exchange {
+  background: var(--exchange-grad);
+  box-shadow: 0 10rpx 30rpx rgba(255, 154, 118, 0.28);
+}
+
+/* 技能服务：类型高亮 / 报价位 */
+.seg.skill.active {
+  background: var(--skill-grad);
+  color: #fff;
+  box-shadow: 0 10rpx 30rpx rgba(132, 193, 255, 0.32);
+}
+
+.seg.skill.active .seg-badge {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--skill);
+}
+
+.item-price.skill {
+  color: var(--skill);
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.empty-btn.skill {
+  background: var(--skill-grad);
+  box-shadow: 0 10rpx 30rpx rgba(132, 193, 255, 0.3);
+}
+
+.list-hint {
+  text-align: center;
+  font-size: 23rpx;
+  color: #94a3b8;
+  padding: 16rpx 0 8rpx;
 }

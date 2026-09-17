@@ -23,18 +23,32 @@
       <input class="form-input" placeholder="对外展示的昵称" value="{{nickName}}" bindinput="onNickNameInput"/>
     </view>
 
-    <!-- 联系方式 -->
+    <!-- 手机号（仅用于账号找回，不对外展示） -->
     <view class="form-item">
-      <text class="form-label">联系方式 <text class="required">*</text></text>
-      <input class="form-input" placeholder="微信号或手机号（4-30位）" value="{{contact}}" bindinput="onContactInput"/>
-      <text wx:if="{{contactError}}" class="error-text">{{contactError}}</text>
+      <text class="form-label">手机号 <text class="required">*</text></text>
+      <input class="form-input" type="number" maxlength="11" placeholder="仅用于账号找回，不对外展示" value="{{phone}}" bindinput="onPhoneInput"/>
+      <text wx:if="{{phoneError}}" class="error-text">{{phoneError}}</text>
+    </view>
+
+    <!-- 微信号（对外展示，供交易对方复制） -->
+    <view class="form-item">
+      <text class="form-label">微信号 <text class="required">*</text></text>
+      <input class="form-input" placeholder="字母开头，6-20位字母/数字/_-" value="{{wechatId}}" bindinput="onWechatInput"/>
+      <text wx:if="{{wechatIdError}}" class="error-text">{{wechatIdError}}</text>
+    </view>
+
+    <!-- 二次确认微信号 -->
+    <view class="form-item">
+      <text class="form-label">确认微信号 <text class="required">*</text></text>
+      <input class="form-input" placeholder="请再次输入微信号" value="{{wechatConfirm}}" bindinput="onWechatConfirmInput"/>
+      <text wx:if="{{wechatConfirmError}}" class="error-text">{{wechatConfirmError}}</text>
     </view>
 
     <!-- 隐私协议 -->
     <view class="privacy-agree">
       <checkbox checked="{{agreed}}" bindtap="toggleAgree"/>
       <view class="privacy-text">
-        我已阅读并同意<text class="link" bindtap="goPrivacy">《隐私政策》</text>
+        我已阅读并同意<text class="link" bindtap="goPrivacy">《用户协议与隐私政策》</text>
       </view>
     </view>
 

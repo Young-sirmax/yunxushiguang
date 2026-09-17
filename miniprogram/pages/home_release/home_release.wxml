@@ -1,44 +1,55 @@
-<!--pages/home_release/home_release.wxml  我发布的信息（闲置商品 / 求购物品）-->
+<!--pages/home_release/home_release.wxml  我发布的信息（闲置转让 / 求购 / 以物易物 / 技能服务）-->
 <view class="page-container">
-  <!-- 双分类切换 -->
+  <!-- 四分类切换 -->
   <view class="top-wrap">
     <view class="seg-bar">
       <view class="seg sell {{tab === 'sell' ? 'active' : ''}}" data-tab="sell" bindtap="switchTab">
-        <text class="seg-name">📦 闲置商品</text>
+        <text class="seg-name">📦 闲置</text>
         <text class="seg-badge" wx:if="{{sellCount > 0}}">{{sellCount}}</text>
       </view>
       <view class="seg want {{tab === 'want' ? 'active' : ''}}" data-tab="want" bindtap="switchTab">
-        <text class="seg-name">🔍 求购物品</text>
+        <text class="seg-name">🔍 求购</text>
         <text class="seg-badge" wx:if="{{wantCount > 0}}">{{wantCount}}</text>
+      </view>
+      <view class="seg exchange {{tab === 'exchange' ? 'active' : ''}}" data-tab="exchange" bindtap="switchTab">
+        <text class="seg-name">🔁 易物</text>
+        <text class="seg-badge" wx:if="{{exchangeCount > 0}}">{{exchangeCount}}</text>
+      </view>
+      <view class="seg skill {{tab === 'skill' ? 'active' : ''}}" data-tab="skill" bindtap="switchTab">
+        <text class="seg-name">🎓 技能</text>
+        <text class="seg-badge" wx:if="{{skillCount > 0}}">{{skillCount}}</text>
       </view>
     </view>
     <view class="publish-quick" bindtap="goPublish">
       <text class="quick-plus">＋</text>
-      <text class="quick-txt">{{tab === 'want' ? '求购' : '发布'}}</text>
+      <text class="quick-txt">发布</text>
     </view>
   </view>
 
   <!-- 空状态 -->
   <view class="tab-empty" wx:if="{{list.length === 0 && deletedList.length === 0 && !loading}}">
-    <text class="empty-emoji">{{tab === 'want' ? '🔍' : '📦'}}</text>
-    <text class="empty-title">{{tab === 'want' ? '还没有求购物品' : '还没有发布闲置'}}</text>
-    <text class="empty-hint">{{tab === 'want' ? '发布你的求购需求，让闲置卖家主动联系你' : '把闲置挂出来，让心仪的人找到它'}}</text>
-    <view class="empty-btn {{tab === 'want' ? 'want' : 'sell'}}" bindtap="goPublish">
-      {{tab === 'want' ? '发布求购' : '发布闲置'}}
+    <text class="empty-emoji">{{tab === 'want' ? '🔍' : (tab === 'exchange' ? '🔁' : (tab === 'skill' ? '🎓' : '📦'))}}</text>
+    <text class="empty-title">{{tab === 'want' ? '还没有求购物品' : (tab === 'exchange' ? '还没有以物易物' : (tab === 'skill' ? '还没有发布技能服务' : '还没有发布闲置'))}}</text>
+    <text class="empty-hint">{{tab === 'want' ? '发布你的求购需求，让闲置卖家主动联系你' : (tab === 'exchange' ? '把闲置挂出来，换你需要的东西' : (tab === 'skill' ? '成为技能达人，让同学找到你' : '把闲置挂出来，让心仪的人找到它'))}}</text>
+    <view class="empty-btn {{tab === 'sell' ? 'sell' : (tab === 'want' ? 'want' : (tab === 'skill' ? 'skill' : 'exchange'))}}" bindtap="goPublish">
+      {{tab === 'want' ? '发布求购' : (tab === 'exchange' ? '发布易物' : (tab === 'skill' ? '发布服务' : '发布闲置'))}}
     </view>
   </view>
 
   <!-- 进行中的信息 -->
   <view class="commodity-list" wx:if="{{list.length > 0}}">
     <view class="item-card" wx:for="{{list}}" wx:key="_id">
-      <image class="item-img" src="{{item.images[0] || '/images/default-goods.png'}}" mode="aspectFill"/>
+      <image class="item-img img-ph" src="{{item.cover || '/images/default-goods.png'}}" mode="aspectFill"/>
       <view class="item-info">
         <text class="item-title">{{item.title}}</text>
         <view class="item-mid">
-          <text class="item-price" wx:if="{{item.type !== 'want'}}">¥{{item.price}}</text>
-          <text class="item-price want" wx:else>求购中</text>
+          <text class="item-price" wx:if="{{item.type === 'sell'}}">¥{{item.price}}</text>
+          <text class="item-price want" wx:elif="{{item.type === 'want'}}">求购中</text>
+          <text class="item-price exchange" wx:elif="{{item.type === 'exchange'}}">🔁 换：{{item.exchange_want || '面议'}}</text>
+          <text class="item-price skill" wx:else>🎓 {{item.priceText || '面议'}}</text>
           <view class="item-status-row">
-            <text class="item-status {{item.statusClass}}" wx:if="{{item.status !== 'onSale' || item.type !== 'want'}}">{{item.statusText}}</text>
+            <text class="item-status {{item.statusClass}}" wx:if="{{item.status !== 'onSale' || item.type === 'sell'}}">{{item.statusText}}</text>
+            <text class="item-status trade" wx:if="{{item.tradeStatusText}}">{{item.tradeStatusText}}</text>
             <view class="verified-mini" wx:if="{{item.isVerified}}">✓ 已认证</view>
           </view>
         </view>
@@ -56,6 +67,8 @@
     </view>
   </view>
 
+  <view class="list-hint" wx:if="{{list.length >= 20}}">仅展示最近 20 条，较早的信息请先删除整理</view>
+
   <!-- 已删除信息 -->
   <view class="section-title" wx:if="{{deletedList.length > 0}}">
     已删除信息
@@ -63,11 +76,13 @@
   </view>
   <view class="commodity-list" wx:if="{{deletedList.length > 0}}">
     <view class="item-card deleted" wx:for="{{deletedList}}" wx:key="_id">
-      <image class="item-img" src="{{item.images[0] || '/images/default-goods.png'}}" mode="aspectFill"/>
+      <image class="item-img img-ph" src="{{item.cover || '/images/default-goods.png'}}" mode="aspectFill"/>
       <view class="item-info">
         <text class="item-title">{{item.title}}</text>
-        <text class="item-price" wx:if="{{item.type !== 'want'}}">¥{{item.price}}</text>
-        <text class="item-price want" wx:else>求购信息</text>
+        <text class="item-price" wx:if="{{item.type === 'sell'}}">¥{{item.price}}</text>
+        <text class="item-price want" wx:elif="{{item.type === 'want'}}">求购信息</text>
+        <text class="item-price exchange" wx:elif="{{item.type === 'exchange'}}">🔁 换：{{item.exchange_want || '面议'}}</text>
+        <text class="item-price skill" wx:else>🎓 {{item.priceText || '面议'}}</text>
         <text class="item-status deleted-status">已删除</text>
       </view>
       <view class="item-actions">

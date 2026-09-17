@@ -1,1 +1,8 @@
-{"navigationStyle": "custom", "enablePullDownRefresh": false, "navigationBarTitleText": "云叙石光"}
+{
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": false,
+  "navigationBarTitleText": "云叙石光",
+  "usingComponents": {
+    "preview-card": "/components/preview-card/index"
+  }
+}

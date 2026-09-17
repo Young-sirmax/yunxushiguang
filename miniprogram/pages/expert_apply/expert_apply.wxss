@@ -1,0 +1,274 @@
+/* pages/expert_apply/expert_apply.wxss —— 技能达人入驻申请 */
+page {
+  background: #f5f7fa;
+}
+
+.page-container {
+  min-height: 100vh;
+  padding-bottom: 200rpx;
+  background: #f5f7fa;
+}
+
+/* 顶部 */
+.ea-hero {
+  position: relative;
+  height: 220rpx;
+  overflow: hidden;
+}
+
+.ea-hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #ffb347 0%, #ff8a00 55%, #ff7a59 100%);
+  border-bottom-left-radius: 48rpx;
+  border-bottom-right-radius: 48rpx;
+}
+
+.ea-hero-inner {
+  position: relative;
+  z-index: 1;
+  padding: 60rpx 40rpx 40rpx;
+}
+
+.ea-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8rpx;
+}
+
+.ea-sub {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 卡片 */
+.ea-card {
+  background: #fff;
+  border-radius: 28rpx;
+  padding: 32rpx;
+  margin: -40rpx 24rpx 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.04);
+  position: relative;
+  z-index: 2;
+}
+
+.ea-card + .ea-card {
+  margin-top: 0;
+}
+
+.ea-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.ea-card-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.ea-card-sub {
+  font-size: 24rpx;
+  color: #9999aa;
+}
+
+/* 技能 chips */
+.ea-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.ea-chip {
+  padding: 14rpx 30rpx;
+  border-radius: 40rpx;
+  background: #f5f7fa;
+  font-size: 27rpx;
+  color: #555566;
+  border: 2rpx solid transparent;
+  transition: all 0.2s ease;
+}
+
+.ea-chip.active {
+  background: var(--skill-grad);
+  color: var(--skill);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+/* 介绍 */
+.ea-textarea {
+  width: 100%;
+  height: 220rpx;
+  background: #f8f8f8;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  box-sizing: border-box;
+  font-size: 29rpx;
+  line-height: 1.6;
+  color: #1a1a2e;
+}
+
+/* 证明图 */
+.ea-certs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.ea-cert-cell {
+  position: relative;
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #f5f5fa;
+}
+
+.ea-cert-img {
+  width: 100%;
+  height: 100%;
+}
+
+.ea-cert-del {
+  position: absolute;
+  top: 6rpx;
+  right: 6rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 28rpx;
+  line-height: 40rpx;
+  text-align: center;
+}
+
+.ea-cert-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx dashed #d0d0d8;
+  background: #fafafa;
+}
+
+.ea-add-plus {
+  font-size: 52rpx;
+  color: #b0b0c0;
+  line-height: 1;
+}
+
+.ea-add-label {
+  font-size: 22rpx;
+  color: #9999aa;
+  margin-top: 8rpx;
+}
+
+.ea-tip {
+  margin-top: 18rpx;
+  font-size: 23rpx;
+  color: #9999aa;
+}
+
+/* 表单字段 */
+.ea-field {
+  display: flex;
+  align-items: center;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #f5f5fa;
+  min-height: 80rpx;
+}
+
+.ea-field:last-child {
+  border-bottom: none;
+}
+
+.ea-label {
+  width: 180rpx;
+  flex-shrink: 0;
+  font-size: 28rpx;
+  color: #555566;
+}
+
+.ea-picker {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 30rpx;
+  color: #1a1a2e;
+}
+
+.ea-arrow {
+  font-size: 32rpx;
+  color: #cccce0;
+}
+
+.ea-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #f8f8f8;
+  border-radius: 16rpx;
+  padding: 0 24rpx;
+  height: 84rpx;
+}
+
+.ea-yen {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #ff7a59;
+  margin-right: 8rpx;
+}
+
+.ea-input {
+  flex: 1;
+  font-size: 32rpx;
+  color: #1a1a2e;
+}
+
+.ea-note {
+  margin: 8rpx 32rpx 0;
+  font-size: 23rpx;
+  color: #9999aa;
+  line-height: 1.6;
+}
+
+/* 底部按钮 */
+.ea-bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 24rpx;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 -6rpx 24rpx rgba(15, 27, 45, 0.06);
+}
+
+.ea-submit {
+  width: 100%;
+  height: 92rpx;
+  border-radius: 999rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--skill-grad);
+  box-shadow: 0 10rpx 30rpx rgba(132, 193, 255, 0.36);
+}
+
+.ea-submit[disabled] {
+  background: #e5e7eb;
+  color: #9ca3af;
+  box-shadow: none;
+}

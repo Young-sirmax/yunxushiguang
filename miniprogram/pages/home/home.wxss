@@ -73,6 +73,83 @@ page {
   box-shadow: 0 8rpx 32rpx rgba(0, 40, 25, 0.25);
 }
 
+/* 头像改由官方 chooseAvatar 按钮承载，点击即弹系统头像选择器 */
+.avatar-tap {
+  padding: 0;
+  margin: 0 28rpx 0 0;
+  background: transparent;
+  border: none;
+  line-height: normal;
+  border-radius: 0;
+  /* button 默认 overflow:hidden 会裁掉头像投影 */
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.avatar-tap::after {
+  border: none;
+}
+
+/* 按下有缩放+高亮反馈，杜绝“点了没反应”的观感 */
+.avatar-tap:active {
+  opacity: 0.85;
+  transform: scale(0.94);
+}
+
+/* 上传中按钮被 disabled，但样式保持原样（只靠遮罩转圈表达进行中） */
+.avatar-tap[disabled] {
+  opacity: 1;
+  background: transparent;
+}
+
+.avatar-box {
+  position: relative;
+  display: flex;
+}
+
+/* 间距交给按钮承担，遮罩才能与头像严格对齐 */
+.avatar-box .user-avatar {
+  margin-right: 0;
+}
+
+/* 字母头像兜底：昵称首字符 + 稳定底色 */
+.avatar-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 52rpx;
+  font-weight: 600;
+}
+
+.avatar-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-spinner {
+  width: 36rpx;
+  height: 36rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: avatar-spin 0.8s linear infinite;
+}
+
+@keyframes avatar-spin {
+  to { transform: rotate(360deg); }
+}
+
 .user-meta {
   display: flex;
   flex-direction: column;
@@ -445,3 +522,23 @@ page {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* 技能达人 / 评价入口图标 */
+.icon-expert { background: var(--skill-grad); }
+.icon-star { background: linear-gradient(135deg, #ffd166, #ff9a3c); }
+
+/* 维护模式横幅 */
+.maintenance-banner {
+  background: #fff7e6;
+  padding: 18rpx 28rpx;
+  border-bottom: 1rpx solid #ffe0b2;
+}
+
+.maintenance-text {
+  font-size: 24rpx;
+  color: #b45309;
+  line-height: 1.5;
+}
+
+/* 批量上架入口图标 */
+.icon-batch { background: linear-gradient(135deg, #4facfe, #00c6fb); }
