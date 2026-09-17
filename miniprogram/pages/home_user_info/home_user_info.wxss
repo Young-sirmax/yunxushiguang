@@ -107,20 +107,47 @@
   border: 2rpx solid var(--border);
 }
 
-.avatar-placeholder {
-  width: 100rpx;
-  height: 100rpx;
-  border-radius: 50%;
-  background: #f1f5f9;
+/* 字母头像兜底：昵称首字符 + 稳定底色 */
+.avatar-letter {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2rpx dashed var(--text-light);
+  color: #fff;
+  font-size: 44rpx;
+  font-weight: 600;
+  border: none;
 }
 
-.avatar-icon {
-  font-size: 40rpx;
-  color: var(--text-light);
+/* 遮罩与头像严格对齐，上传中盖一层转圈 */
+.avatar-box {
+  position: relative;
+  display: flex;
+}
+
+.avatar-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: avatar-spin 0.8s linear infinite;
+}
+
+@keyframes avatar-spin {
+  to { transform: rotate(360deg); }
 }
 
 .picker-value {
@@ -513,6 +540,8 @@
   border: none;
   line-height: normal;
   border-radius: 0;
+  /* button 默认 overflow:hidden，避免裁掉头像描边/遮罩 */
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -520,6 +549,16 @@
 .avatar-btn::after {
   border: none;
 }
+/* 按下有缩放+高亮反馈，杜绝“点了没反应”的观感 */
 .avatar-btn:active {
-  opacity: 0.75;
+  opacity: 0.85;
+  transform: scale(0.92);
+}
+.avatar-btn {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+/* 上传中按钮被 disabled，但样式保持原样（只靠遮罩转圈表达进行中） */
+.avatar-btn[disabled] {
+  opacity: 1;
+  background: transparent;
 }

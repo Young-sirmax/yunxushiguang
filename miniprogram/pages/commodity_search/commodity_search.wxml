@@ -3,7 +3,7 @@
   <view class="search-bar">
     <view class="search-box">
       <text class="search-icon">🔍</text>
-      <input placeholder="搜索物品 / 求购信息" value="{{keyword}}" focus="{{focusInput}}" bindfocus="onInputFocus" bindblur="onInputBlur" bindinput="onInput" confirm-type="search" bindconfirm="doSearch"/>
+      <input placeholder="搜索物品 / 专业 / 求购信息" value="{{keyword}}" focus="{{focusInput}}" bindfocus="onInputFocus" bindblur="onInputBlur" bindinput="onInput" confirm-type="search" bindconfirm="doSearch"/>
       <text class="clear-btn" wx:if="{{keyword}}" bindtap="clearKeyword">×</text>
     </view>
     <text class="cancel-btn" bindtap="goBack">取消</text>
@@ -11,16 +11,21 @@
 
   <view class="result-list" wx:if="{{results.length > 0}}">
     <view class="commodity-card" wx:for="{{results}}" wx:key="_id" bindtap="goDetail" data-id="{{item._id}}">
-      <image class="card-img" src="{{item.images[0] || '/images/default-goods.png'}}" mode="aspectFill"/>
+      <image class="card-img img-ph" src="{{item.cover || '/images/default-goods.png'}}" mode="aspectFill"/>
       <view class="card-info">
         <text class="card-title">{{item.title}}</text>
         <view class="price-group">
           <text class="card-price want" wx:if="{{item.type === 'want'}}">求购中</text>
+          <text class="card-price exchange" wx:elif="{{item.type === 'exchange'}}">🔁 换：{{item.exchange_want || '面议'}}</text>
+          <text class="card-price skill" wx:elif="{{item.type === 'skill'}}">🎓 {{item.priceText}}</text>
           <text class="card-price" wx:else>¥{{item.price}}</text>
-          <text class="original-price" wx:if="{{item.originalPrice && item.type !== 'want'}}">¥{{item.originalPrice}}</text>
+          <text class="original-price" wx:if="{{item.originalPrice && item.type === 'sell'}}">¥{{item.originalPrice}}</text>
         </view>
-        <view class="card-tags" wx:if="{{item.isVerified}}">
-          <text class="verified-tag">✓ 已认证</text>
+        <view class="card-tags" wx:if="{{item.type !== 'sell' || item.tradeStatusText || item.isVerified || item.majorText}}">
+          <text class="type-tag {{item.type}}" wx:if="{{item.type !== 'sell'}}">{{item.typeLabel}}</text>
+          <text class="trade-tag" wx:if="{{item.tradeStatusText}}">{{item.tradeStatusText}}</text>
+          <text class="verified-tag" wx:if="{{item.isVerified}}">✓ 已认证</text>
+          <text class="major-tag" wx:if="{{item.majorText}}">📚 {{item.majorText}}</text>
         </view>
       </view>
     </view>

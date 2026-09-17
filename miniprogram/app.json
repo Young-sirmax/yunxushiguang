@@ -13,7 +13,11 @@
     "pages/admin/admin",
     "pages/home_feedback/home_feedback",
     "pages/home_favorite/home_favorite",
-    "pages/privacy/privacy"
+    "pages/privacy/privacy",
+    "pages/expert_apply/expert_apply",
+    "pages/expert_home/expert_home",
+    "pages/my_reviews/my_reviews",
+    "pages/admin_batch/admin_batch"
   ],
   "window": {
     "backgroundTextStyle": "dark",

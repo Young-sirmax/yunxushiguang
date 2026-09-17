@@ -1,0 +1,28 @@
+<!--pages/my_reviews/my_reviews.wxml  我收到的评价-->
+<view class="page-container">
+  <view class="mr-header">
+    <view class="mr-summary">
+      <text class="mr-summary-label">综合评分</text>
+      <text class="mr-summary-value">{{ratingText || '暂无评价'}}</text>
+    </view>
+    <text class="mr-count">共 {{total}} 条评价</text>
+  </view>
+
+  <view class="mr-list" wx:if="{{list.length > 0}}">
+    <view class="mr-card" wx:for="{{list}}" wx:key="_id">
+      <view class="mr-card-head">
+        <image class="mr-avatar" src="{{item.raterAvatar || '/images/default-avatar.png'}}" mode="aspectFill"/>
+        <text class="mr-name">{{item.raterName || '匿名同学'}}</text>
+        <text class="mr-stars">{{item.stars}}</text>
+      </view>
+      <text class="mr-comment">{{item.comment}}</text>
+      <text class="mr-time">{{item.timeText}}</text>
+    </view>
+  </view>
+
+  <view class="mr-empty" wx:if="{{list.length === 0 && !loading}}">
+    <text class="mr-empty-icon">💬</text>
+    <text class="mr-empty-text">还没有收到评价</text>
+    <text class="mr-empty-hint">完成技能服务后，同学可以给你评价</text>
+  </view>
+</view>

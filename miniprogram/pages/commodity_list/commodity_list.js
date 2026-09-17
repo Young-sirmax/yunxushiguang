@@ -1,6 +1,10 @@
 // pages/commodity_list/commodity_list.js
 const API = require('../../api/api.js');
 const { formatDate } = require('../../utils/util.js');
+const { COLLEGE_LIST, getMajorsByCollege, isBookCategoryName } = require('../../utils/majors.js');
+const { buildDisplayKeyword } = require('../../utils/displayKeyword.js');
+const { strokeTypeRing } = require('../../utils/theme.js');
+const imageView = require('../../utils/imageView.js');
 
 // 颜色调色板
 const COLOR_PALETTE = [
@@ -19,6 +23,31 @@ const TOUCH_RADIUS = 90;   // 手指影响的半径
 const WIND_PROB = 0.02;    // 微风触发概率（每帧）
 const WIND_FORCE = 0.18;   // 微风脉冲强度（偶尔上飘，制造轻飘飘感）
 const MAX_SPEED = 2.4;     // 速度软上限（px/帧）
+
+// 泡泡统一尺寸：直径 220rpx（所有商品大小完全一致，不再与价格相关）
+const BUBBLE_DIAMETER_RPX = 220;
+
+// 屏幕宽度（px），用于 rpx → px 换算（canvas 绘制使用 CSS px）
+function getWindowWidth() {
+  try {
+    if (wx.getWindowInfo) return wx.getWindowInfo().windowWidth;
+    return wx.getSystemInfoSync().windowWidth;
+  } catch (err) {
+    return 375;
+  }
+}
+
+// rpx → px
+function rpxToPx(rpx) {
+  return (getWindowWidth() / 750) * rpx;
+}
+
+// 技能报价文案：按次 / 按小时 / 面议
+function formatSkillPrice(unit, price) {
+  const amount = Number(price) || 0;
+  if (unit === 'negotiable' || !amount) return '面议';
+  return '¥' + amount + (unit === 'per_hour' ? '/小时' : '/次');
+}
 
 // 圆堆积算法 - 生成不重叠的圆形布局
 function computePacking(circles, containerW, containerH) {
@@ -56,8 +85,14 @@ function computePacking(circles, containerW, containerH) {
       }
       
       if (attempt === maxAttempts - 1) {
-        circle.x = containerW / 2;
-        circle.y = containerH / 2;
+        // 兜底：仍放在容器内，但给每个圆一个分散的锚点。
+        // 若全部叠在正中心同一点，物理悬浮弹簧会互相拉扯导致抖动。
+        const angle = Math.random() * Math.PI * 2;
+        const spread = Math.random() * 0.26;
+        const maxX = Math.max(circle.radius, containerW - circle.radius);
+        const maxY = Math.max(circle.radius, containerH - circle.radius);
+        circle.x = Math.min(Math.max(containerW / 2 + Math.cos(angle) * containerW * spread, circle.radius), maxX);
+        circle.y = Math.min(Math.max(containerH / 2 + Math.sin(angle) * containerH * spread, circle.radius), maxY);
       }
     }
   }
@@ -166,7 +201,7 @@ function physicsUpdate(circles, containerW, containerH) {
 }
 
 // Canvas渲染
-function renderCircles(ctx, circles, containerW, containerH, expandState) {
+function renderCircles(ctx, circles, containerW, containerH, expandState, preview) {
   ctx.clearRect(0, 0, containerW, containerH);
 
   // 绘制背景
@@ -175,6 +210,13 @@ function renderCircles(ctx, circles, containerW, containerH, expandState) {
   gradient.addColorStop(1, '#e8ecf1');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, containerW, containerH);
+
+  // 焦点态：alpha 0→1 平滑过渡（长按预览时，其他泡泡变暗/轻微模糊）
+  const focusAlpha = (preview && preview.circleId && preview.alpha > 0.01) ? preview.alpha : 0;
+  const canBlur = focusAlpha > 0 && ('filter' in ctx);
+  if (canBlur) {
+    ctx.filter = `blur(${(2.5 * focusAlpha).toFixed(2)}px)`;
+  }
 
   // 展开动画中的圆形最后绘制（在最上层）
   let expandingCircle = null;
@@ -186,7 +228,38 @@ function renderCircles(ctx, circles, containerW, containerH, expandState) {
       continue; // 跳过，稍后单独渲染
     }
 
+    // 焦点泡泡先跳过，等遮罩铺好后再清晰重绘到最上层
+    if (focusAlpha > 0 && preview.circleId === circle._id) continue;
+
+    if (focusAlpha > 0) ctx.globalAlpha = 1 - 0.5 * focusAlpha;
     drawSingleCircle(ctx, circle);
+    if (focusAlpha > 0) ctx.globalAlpha = 1;
+  }
+
+  if (canBlur) ctx.filter = 'none';
+
+  // 焦点态：整体压暗 + 焦点泡泡放大 1.1 倍并高亮描边
+  if (focusAlpha > 0) {
+    ctx.fillStyle = `rgba(15, 27, 45, ${(0.3 * focusAlpha).toFixed(3)})`;
+    ctx.fillRect(0, 0, containerW, containerH);
+
+    const focused = circles.find(c => c._id === preview.circleId);
+    if (focused) {
+      const scale = 1 + 0.1 * focusAlpha; // 微反馈：scale → 1.1
+      ctx.save();
+      ctx.translate(focused.center.x, focused.center.y);
+      ctx.scale(scale, scale);
+      ctx.translate(-focused.center.x, -focused.center.y);
+      drawSingleCircle(ctx, focused);
+
+      // 高亮描边
+      ctx.beginPath();
+      ctx.arc(focused.center.x, focused.center.y, focused.radius + 3, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${(0.9 * focusAlpha).toFixed(2)})`;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.restore();
+    }
   }
 
   // 渲染展开中的圆形
@@ -216,10 +289,8 @@ function drawSingleCircle(ctx, circle) {
   ctx.fillStyle = fillGradient;
   ctx.fill();
 
-  // 一圈清透的高光边，像薄薄的泡泡膜
-  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
+  // 类型渐变描边：闲置=绿青 / 求购=紫 / 以物易物=橙 / 技能=蓝（低饱和、沿圆周方向）
+  strokeTypeRing(ctx, cx, cy, r, circle.type, 3);
 
   // 左上角小高光，增强立体感
   ctx.save();
@@ -303,19 +374,28 @@ function drawExpandingCircle(ctx, circle, es, containerW, containerH) {
   ctx.arc(cx, cy, r * 0.92, 0, Math.PI * 2);
   ctx.clip();
 
+  const label = circle.label || '';
   const fontSize = Math.max(12, r * 0.09);
   ctx.fillStyle = '#fff';
   ctx.font = `bold ${fontSize}px sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
-  const titleText = circle.title.length > 8 ? circle.title.substring(0, 7) + '..' : circle.title;
-  ctx.fillText(titleText, cx, cy + contentR * 0.15);
+  ctx.fillText(label, cx, cy + contentR * 0.15);
 
   const priceFontSize = Math.max(14, r * 0.12);
-  ctx.fillStyle = circle.type === 'want' ? '#2dd8c0' : '#FFD700';
+  ctx.fillStyle = circle.type === 'want' ? '#2dd8c0'
+    : (circle.type === 'exchange' ? '#c4b5fd' : (circle.type === 'skill' ? '#ffd166' : '#FFD700'));
   ctx.font = `bold ${priceFontSize}px sans-serif`;
-  ctx.fillText(circle.type === 'want' ? '求购中' : '¥' + circle.price, cx, cy + contentR * 0.5);
+  ctx.fillText(
+    circle.type === 'want'
+      ? '求购中'
+      : (circle.type === 'exchange'
+        ? '🔁 易物'
+        : (circle.type === 'skill' ? formatSkillPrice(circle.priceUnit, circle.price) : '¥' + circle.price)),
+    cx,
+    cy + contentR * 0.5
+  );
 
   ctx.font = `${Math.max(10, r * 0.07)}px sans-serif`;
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
@@ -331,6 +411,8 @@ function drawCircleContent(ctx, circle) {
   const contentR = r * 0.75;
   
   const isWant = circle.type === 'want';
+  const isExchange = circle.type === 'exchange';
+  const isSkill = circle.type === 'skill';
   const isVerified = circle.isVerified;
   
   ctx.save();
@@ -376,15 +458,21 @@ function drawCircleContent(ctx, circle) {
   ctx.arc(cx, cy, titleR, 0, Math.PI * 2);
   ctx.clip();
   
-  const fontSize = Math.max(12, r * 0.09);
+  // 展示短标题（数据层已算好）：超长时缩字号而不是截断
+  const label = circle.label || '';
+  const maxTextWidth = contentR * 1.6;
+  let titleFontSize = Math.max(13, r * 0.1);
   ctx.fillStyle = '#fff';
-  ctx.font = `bold ${fontSize}px sans-serif`;
+  ctx.font = `bold ${titleFontSize}px sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  
+  while (label && ctx.measureText(label).width > maxTextWidth && titleFontSize > 9) {
+    titleFontSize -= 1;
+    ctx.font = `bold ${titleFontSize}px sans-serif`;
+  }
+
   const titleY = cy + contentR * 0.15;
-  const titleText = circle.title.length > 8 ? circle.title.substring(0, 7) + '..' : circle.title;
-  ctx.fillText(titleText, cx, titleY);
+  ctx.fillText(label, cx, titleY);
   
   const priceY = cy + contentR * 0.5;
   const priceFontSize = Math.max(14, r * 0.12);
@@ -393,6 +481,14 @@ function drawCircleContent(ctx, circle) {
   if (isWant) {
     ctx.fillStyle = '#00b3a6';
     ctx.fillText('求购中', cx, priceY);
+  } else if (isExchange) {
+    // 以物易物：不显示价格，显示类型角标
+    ctx.fillStyle = '#c4b5fd';
+    ctx.fillText('🔁 易物', cx, priceY);
+  } else if (isSkill) {
+    // 技能服务：显示报价模式（¥xx/次 · ¥xx/小时 · 面议）
+    ctx.fillStyle = '#ffd166';
+    ctx.fillText(formatSkillPrice(circle.priceUnit, circle.price), cx, priceY);
   } else {
     ctx.fillStyle = '#FFD700';
     ctx.fillText('¥' + circle.price, cx, priceY);
@@ -405,9 +501,14 @@ function drawCircleContent(ctx, circle) {
   let tagText = '';
   if (isWant) {
     tagText = '求购信息';
+  } else if (isExchange) {
+    tagText = '以物易物';
+  } else if (isSkill) {
+    tagText = '技能服务';
   } else {
     tagText = circle.condition || '';
   }
+  if (isSkill && circle.isExpert) tagText += ' 🎓达人';
   if (isVerified) tagText += ' ✓已认证';
   ctx.fillText(tagText, cx, tagY);
   
@@ -470,12 +571,29 @@ Page({
   data: {
     categoryList: [],
     currentCategory: '',
-    currentType: '', // 类型筛选：'' 全部 | 'sell' 闲置 | 'want' 求购
+    currentType: '', // 类型筛选：'' 全部 | 'sell' 闲置 | 'want' 求购 | 'exchange' 易物 | 'skill' 技能
+    // 求购二级分区：'' 未启用 | 'goods' 物品求购 | 'skill' 技能求助
+    currentWantCategory: '',
+    wantCategoryOptions: [
+      { value: 'goods', icon: '📦', label: '物品求购' },
+      { value: 'skill', icon: '🎓', label: '技能求助' }
+    ],
+    // 图书专区：仅在「书籍教材」类目下展开的二级筛选（学院 → 专业）
+    isBookCategory: false,
+    collegeList: COLLEGE_LIST,
+    currentCollege: '',
+    majorList: [],
+    currentMajor: '',
     commodityList: [],
     page: 1,
     pageSize: 20,
     hasMore: true,
-    isRefreshing: false
+    isRefreshing: false,
+    // 长按预览卡片（居中弹层）：数据驱动
+    previewShow: false,
+    previewItem: null,
+    // 预览图预热：离屏 <image> 提前把图片拉进 image 组件缓存（长按瞬间就开始加载）
+    preloadSrcs: []
   },
 
   canvas: null,
@@ -489,6 +607,9 @@ Page({
   animationId: null,
   isAnimating: false,
   positionCache: null, // 保存圆形布局 {id -> {x, y}}
+  previewAlpha: 0,     // 焦点态程度：0 普通浏览 → 1 长按预览
+  previewCircle: null, // 当前长按预览的泡泡
+  isPreviewing: false, // 是否处于长按预览（预览时冻结物理）
 
   onLoad() {
     // 开启右上角菜单的“转发给朋友 / 分享到朋友圈”，否则微信不会显示分享入口
@@ -552,16 +673,30 @@ Page({
 
   startRenderLoop() {
     const render = () => {
+      // 焦点态淡入淡出（0 正常 → 1 长按预览）
+      const focusTarget = this.isPreviewing ? 1 : 0;
+      this.previewAlpha += (focusTarget - this.previewAlpha) * 0.18;
+      if (Math.abs(focusTarget - this.previewAlpha) < 0.01) {
+        this.previewAlpha = focusTarget;
+      }
+
       if (this.isAnimating) {
         // 展开动画中
         this.updateExpandAnimation();
-      } else {
-        // 正常物理模拟
+      } else if (!this.isPreviewing) {
+        // 正常物理模拟（预览时冻结画面，卡片锚点不飘）
         physicsUpdate(this.canvasCircles, this.containerSize.w, this.containerSize.h);
       }
-      
-      renderCircles(this.ctx, this.canvasCircles, this.containerSize.w, this.containerSize.h, this.expandState);
-      
+
+      renderCircles(
+        this.ctx,
+        this.canvasCircles,
+        this.containerSize.w,
+        this.containerSize.h,
+        this.expandState,
+        { circleId: this.previewCircle ? this.previewCircle._id : null, alpha: this.previewAlpha }
+      );
+
       this.animationId = this.canvas.requestAnimationFrame(render);
     };
     render();
@@ -586,6 +721,9 @@ Page({
       const res = await API.getCommodityList({
         categoryId: this.data.currentCategory,
         type: this.data.currentType,
+        // 求购分区（物品求购 / 技能求助）仅在求购类型下生效
+        wantCategory: this.data.currentType === 'want' ? this.data.currentWantCategory : '',
+        majors: this.buildMajorFilter(),
         page: this.data.page,
         pageSize: this.data.pageSize
       });
@@ -627,6 +765,8 @@ Page({
       const res = await API.getCommodityList({
         categoryId: this.data.currentCategory,
         type: this.data.currentType,
+        wantCategory: this.data.currentType === 'want' ? this.data.currentWantCategory : '',
+        majors: this.buildMajorFilter(),
         page: 1,
         pageSize: this.data.pageSize
       });
@@ -652,6 +792,9 @@ Page({
   },
 
   buildCanvasCircles(list, rebuildLayout = true) {
+    // 列表重建（切分类/切类型/刷新）时先收起预览卡，避免卡片指向已消失的商品
+    this.closePreviewCard();
+
     if (!this.containerSize.w || !this.containerSize.h || list.length === 0) {
       this.canvasCircles = [];
       return;
@@ -673,24 +816,12 @@ Page({
       Object.assign(oldLayoutMap, this.positionCache);
     }
 
-    // 计算价格范围，用于映射半径
-    let minPrice = Infinity, maxPrice = -Infinity;
-    for (const item of list) {
-      const price = parseFloat(item.price) || 0;
-      minPrice = Math.min(minPrice, price);
-      maxPrice = Math.max(maxPrice, price);
-    }
-    if (minPrice === maxPrice) maxPrice = minPrice + 1;
-
-    const minR = 45;
-    const maxR = 100;
+    // 所有商品泡泡统一大小：直径固定 220rpx，半径与价格无关
+    const bubbleRadius = rpxToPx(BUBBLE_DIAMETER_RPX) / 2;
     const containerW = this.containerSize.w - 40;
     const containerH = this.containerSize.h - 40;
 
     const tempCircles = list.map((item) => {
-      const price = parseFloat(item.price) || 0;
-      const normalizedPrice = (price - minPrice) / (maxPrice - minPrice);
-      const radius = minR + normalizedPrice * (maxR - minR);
       let color = oldLayoutMap[item._id] ? oldLayoutMap[item._id].color : null;
       if (!color) {
         color = item.type === 'want' ? '#00a8a0' : COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
@@ -709,15 +840,38 @@ Page({
         timeText: item.timeText,
         images: item.images,
         type: item.type || 'sell',
+        // 求购分区：goods 物品求购 / skill 技能求助（卡片角标与配色使用）
+        wantCategory: item.want_category || '',
+        // 气泡展示短标题：优先用服务端写入的 display_keyword，老数据现场兜底（逻辑在数据层，不在渲染里）
+        label: item.display_keyword || buildDisplayKeyword({
+          title: item.title,
+          type: item.type || 'sell',
+          categoryName: item.categoryName,
+          skillName: ''
+        }),
+        major: item.major || [], // 图书专区：适用专业（数组）
+        // 以物易物与交易状态
+        exchangeWant: item.exchange_want || '',
+        priceDiff: item.accept_price_diff || null,
+        tradeStatus: item.tradeStatus || 'open',
+        // 技能服务：达人角标 / 报价模式 / 可服务时间
+        isExpert: !!item.isExpert,
+        priceUnit: item.price_unit || '',
+        availableTime: item.available_time || '',
         privileges: item.privileges || [],
         isVerified: item.isStudentVerified || false,
         rewardAmount: item.rewardAmount || 0,
-        radius: radius,
+        radius: bubbleRadius,
         color: color,
         x: x,
         y: y,
         imageLoaded: false,
-        imagePath: item.images && item.images[0] ? item.images[0] : null
+        // 列表只下发缩略图 cover（老数据回退首图原图），详情页才加载完整图片数组
+        imagePath: item.cover || '',
+        // 列表图原始 fileID：链接过期后按 id 重新解析
+        imageId: item.coverId || '',
+        // 详情页首图（原图）fileID：长按预览时预热它，进详情可秒开
+        fullImageId: item.fullCoverId || ''
       };
     });
 
@@ -785,7 +939,11 @@ Page({
 
   loadImage(circle) {
     if (!circle.imagePath) return;
-    
+    this.loadCanvasImage(circle, circle.imagePath);
+  },
+
+  // 画布图片加载：失败时（多半是临时链接过期）按 fileID 重新解析并重试一次
+  loadCanvasImage(circle, url) {
     const img = this.canvas.createImage();
     img.onload = () => {
       circle.imageObj = img;
@@ -793,8 +951,22 @@ Page({
     };
     img.onerror = () => {
       circle.imageLoaded = false;
+      this.retryBubbleImage(circle);
     };
-    img.src = circle.imagePath;
+    img.src = url;
+  },
+
+  async retryBubbleImage(circle) {
+    if (!circle.imageId || circle._imgRetried) return; // 每张图只重试一次
+    circle._imgRetried = true;
+    try {
+      const url = await imageView.refreshUrl(circle.imageId);
+      if (!url) return;
+      circle.imagePath = url;
+      this.loadCanvasImage(circle, url);
+    } catch (err) {
+      // 重试失败：保持占位绘制，不影响其它气泡
+    }
   },
 
   // 触摸事件处理
@@ -822,6 +994,20 @@ Page({
         break;
       }
     }
+
+    // 先收起可能还开着的预览卡（内部会清掉未执行的定时器）
+    clearTimeout(this._longPressTimer);
+    this.closePreviewCard();
+    this._gestureHadPreview = false; // 本次手势是否出现过预览卡（出现过则不跳详情）
+
+    // 点击空白处（没命中任何泡泡）到此为止：卡片已收起，也不触发长按预览
+    if (!this.touchedCircle) return;
+
+    // 长按 400ms：弹出居中预览卡片；拖动或快速点击不会触发
+    this._longPressTimer = setTimeout(() => {
+      if (this.isDragging || this.isAnimating || this.data.previewShow) return;
+      if (this.touchedCircle) this.showPreviewCard(this.touchedCircle);
+    }, 400);
   },
 
   onTouchMove(e) {
@@ -840,10 +1026,22 @@ Page({
     const dy = y - this.lastTouchPos.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
     
+    // 累计位移超过 10px：取消长按定时器；若预览已打开则同步关闭
+    if (this.touchStartPos) {
+      const mdx = x - this.touchStartPos.x;
+      const mdy = y - this.touchStartPos.y;
+      if (Math.sqrt(mdx * mdx + mdy * mdy) > 10) {
+        clearTimeout(this._longPressTimer);
+        this.closePreviewCard();
+      }
+    }
+
     // 如果移动距离大，不是点击
     if (dist > 8) {
       this.isDragging = true;
-      
+      clearTimeout(this._longPressTimer);
+      this.closePreviewCard();
+
       // 对附近的圆形施加推力
       for (const circle of this.canvasCircles) {
         const cdx = x - circle.center.x;
@@ -867,13 +1065,20 @@ Page({
   onTouchEnd(e) {
     if (this.isAnimating) return;
 
+    clearTimeout(this._longPressTimer);
+
     const touchDuration = Date.now() - this.lastTouchTime;
     const wasDragging = this.isDragging;
+    // 本次手势只要出现过预览卡就不跳详情（即使中途因移动而收起）
+    const wasLongPress = !!this._gestureHadPreview;
     this.isDragging = false;
+
+    // 松手即收起卡片（先取 wasLongPress，再收起）
+    this.closePreviewCard();
 
     // 校验：触摸结束时手指是否仍在同一圆形内（防止误触）
     let validClick = false;
-    if (!wasDragging && touchDuration < 500 && this.touchedCircle) {
+    if (!wasDragging && !wasLongPress && touchDuration < 500 && this.touchedCircle) {
       validClick = true;
     }
 
@@ -884,6 +1089,96 @@ Page({
     this.lastTouchPos = null;
     this.touchedCircle = null;
     this.touchStartPos = null;
+  },
+
+  // 离屏预热：把图片塞进 <image> 组件缓存，长按预览/进详情时无需再等下载
+  queuePreload(src) {
+    if (!src) return;
+    if (this.data.preloadSrcs.indexOf(src) > -1) return;
+    // 只保留最近 6 张，避免长期占用内存
+    this.setData({ preloadSrcs: this.data.preloadSrcs.concat(src).slice(-6) });
+  },
+
+  // 长按：弹出居中预览卡片（数据驱动，同时点亮焦点泡泡）
+  showPreviewCard(circle) {
+    this._longPressShown = true;
+    this._gestureHadPreview = true;
+    this.previewCircle = circle;   // 画布焦点：该泡泡放大 1.1 倍并高亮描边
+    this.isPreviewing = true;
+
+    // 长按触发的同时就开始加载预览图，不等卡片动画完成（图未就绪时卡片先显示骨架）
+    this.queuePreload(circle.imagePath);
+    imageView.preload(circle.imagePath);
+
+    // 预览打开期间，顺手把"详情页首图（原图）"解析并预热好，点进详情可秒开
+    const detailId = circle.fullImageId || circle.imageId;
+    if (detailId) {
+      imageView.resolveIds([detailId]).then(map => {
+        const url = map[detailId];
+        if (url) {
+          this.queuePreload(url);
+          imageView.preload(url);
+        }
+      });
+    }
+
+    const isWant = circle.type === 'want';
+    const isExchange = circle.type === 'exchange';
+    const isSkill = circle.type === 'skill';
+
+    let priceText = '¥' + (circle.price || 0);
+    if (isWant) priceText = '求购中';
+    else if (isExchange) priceText = '想换：' + (circle.exchangeWant || '面议');
+    else if (isSkill) priceText = formatSkillPrice(circle.priceUnit, circle.price);
+
+    this.setData({
+      previewShow: true,
+      previewItem: {
+        _id: circle._id,
+        image: circle.imagePath || '',
+        title: circle.title,
+        priceText,
+        condition: isSkill ? '' : (circle.condition || ''),
+        verified: !!circle.isVerified,
+        expert: !!circle.isExpert,
+        type: circle.type,
+        // 求购分区：物品求购 → 角标「求购」，技能求助 → 角标「求助」
+        wantCategory: isWant ? (circle.wantCategory || 'goods') : '',
+        typeLabel: isWant
+          ? (circle.wantCategory === 'skill' ? '求助' : '求购')
+          : (isExchange ? '易物' : (isSkill ? '技能' : '闲置')),
+        exchangeWant: isExchange ? (circle.exchangeWant || '') : '',
+        availableTime: isSkill ? (circle.availableTime || '') : ''
+      }
+    });
+
+    wx.vibrateShort({ type: 'light' });
+  },
+
+  // 关闭预览卡片
+  closePreviewCard() {
+    this._longPressShown = false;
+    this._gestureHadPreview = this._gestureHadPreview || this.isPreviewing;
+    this.isPreviewing = false;
+    this.previewCircle = null;
+
+    if (this.data.previewShow) {
+      this.setData({ previewShow: false, previewItem: null });
+    }
+  },
+
+  // 点击遮罩：仅关闭
+  onPreviewClose() {
+    this.closePreviewCard();
+  },
+
+  // 点击卡片：进详情
+  onPreviewOpenCard(e) {
+    const id = e.detail && e.detail.id;
+    this.closePreviewCard();
+    if (id) {
+      wx.navigateTo({ url: `/pages/commodity_detail/commodity_detail?id=${id}` });
+    }
   },
 
   // 展开动画：圆形从原位置移到屏幕中心，再向四周扩大撑满屏幕
@@ -934,14 +1229,85 @@ Page({
 
   switchCategory(e) {
     const id = e.currentTarget.dataset.id;
+    // 是否是「书籍教材」类目：决定是否展开二级专业筛选
+    const category = (this.data.categoryList || []).find(c => c._id === id);
+    const isBookCategory = !!category && isBookCategoryName(category.name);
     this.setData({
       currentCategory: id,
+      isBookCategory,
+      currentCollege: '',
+      currentMajor: '',
+      majorList: [],
       page: 1,
       commodityList: [],
       hasMore: true
     });
     this.positionCache = null; // 切换分类时清空位置缓存，重新布局
     this.loadCommodityList(true, true);
+    this.refreshCanvasSize(); // 二级筛选展开/收起会改变画布高度，需要重新量尺寸
+  },
+
+  // 选择学院（二级筛选第一级）
+  selectCollege(e) {
+    const college = e.currentTarget.dataset.college || '';
+    if (college === this.data.currentCollege) return;
+    this.setData({
+      currentCollege: college,
+      currentMajor: '',
+      majorList: college ? getMajorsByCollege(college) : [],
+      page: 1,
+      commodityList: [],
+      hasMore: true
+    });
+    this.positionCache = null;
+    this.loadCommodityList(true, true);
+    this.refreshCanvasSize(); // 专业行出现/消失，画布高度随之变化
+  },
+
+  // 选择专业（二级筛选第二级）
+  selectMajor(e) {
+    const major = e.currentTarget.dataset.major || '';
+    if (major === this.data.currentMajor) return;
+    this.setData({
+      currentMajor: major,
+      page: 1,
+      commodityList: [],
+      hasMore: true
+    });
+    this.positionCache = null;
+    this.loadCommodityList(true, true);
+  },
+
+  // 组装专业过滤参数：优先按具体专业，其次按整个学院，未筛选则不过滤
+  buildMajorFilter() {
+    const { isBookCategory, currentMajor, currentCollege } = this.data;
+    if (!isBookCategory) return [];
+    if (currentMajor) return [currentMajor];
+    if (currentCollege) return getMajorsByCollege(currentCollege);
+    return [];
+  },
+
+  // 二级筛选展开/收起后重新测量画布，避免画布被拉伸变形
+  refreshCanvasSize() {
+    clearTimeout(this._resizeTimer);
+    this._resizeTimer = setTimeout(() => this.resizeCanvas(), 60);
+  },
+
+  resizeCanvas() {
+    if (!this.canvas || !this.ctx) return;
+    wx.createSelectorQuery().select('#commodityCanvas')
+      .fields({ node: true, size: true, rect: true })
+      .exec((res) => {
+        if (!res[0] || !res[0].width || !res[0].height) return;
+        const { width, height, left, top } = res[0];
+        const dpr = wx.getSystemInfoSync().pixelRatio;
+        this.containerSize = { w: width, h: height };
+        this.canvasRect = { left, top };
+        this.canvas.width = width * dpr;
+        this.canvas.height = height * dpr;
+        // 用 setTransform 重置矩阵（不能用 scale，避免多次调用把缩放叠加）
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      });
   },
 
   switchType(e) {
@@ -949,11 +1315,27 @@ Page({
     if (this.data.currentType === type) return;
     this.setData({
       currentType: type,
+      // 切到求购：默认展示「物品求购」分区
+      currentWantCategory: type === 'want' ? 'goods' : '',
       page: 1,
       commodityList: [],
       hasMore: true
     });
     this.positionCache = null; // 切换类型时清空位置缓存，重新布局
+    this.loadCommodityList(true, true);
+  },
+
+  // 求购二级筛选：物品求购 / 技能求助
+  switchWantCategory(e) {
+    const value = e.currentTarget.dataset.value;
+    if (this.data.currentWantCategory === value) return;
+    this.setData({
+      currentWantCategory: value,
+      page: 1,
+      commodityList: [],
+      hasMore: true
+    });
+    this.positionCache = null;
     this.loadCommodityList(true, true);
   },
 
@@ -995,13 +1377,17 @@ Page({
       });
       return;
     }
-    const type = this.data.currentType === 'want' ? 'want' : (this.data.currentType === 'sell' ? 'sell' : '');
+    // 按当前筛选的类型预选发布类型（闲置 / 求购 / 以物易物）
+    const current = this.data.currentType;
+    const type = ['sell', 'want', 'exchange', 'skill'].indexOf(current) > -1 ? current : '';
     wx.navigateTo({
       url: '/pages/commodity_release/commodity_release' + (type ? '?type=' + type : '')
     });
   },
 
   onUnload() {
+    clearTimeout(this._longPressTimer);
+    clearTimeout(this._resizeTimer);
     if (this.animationId && this.canvas) {
       this.canvas.cancelAnimationFrame(this.animationId);
     }

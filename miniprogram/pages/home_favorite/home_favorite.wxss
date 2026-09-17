@@ -208,3 +208,24 @@
   font-size: 26rpx;
   color: var(--text-light);
 }
+/* === 以物易物 / 交易状态 === */
+.item-price.exchange {
+  color: var(--exchange);
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.item-trade-status {
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.item-price.skill {
+  color: var(--skill);
+  font-size: 26rpx;
+  font-weight: 600;
+}

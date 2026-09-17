@@ -6,7 +6,8 @@ page {
 .release-page {
   min-height: 100vh;
   background: #f5f7fa;
-  padding-bottom: 200rpx;
+  /* 底部固定操作栏高度（约 240rpx）+ 安全区，避免说明文字被遮住 */
+  padding-bottom: calc(280rpx + env(safe-area-inset-bottom));
 }
 
 /* === 顶部渐变区 === */
@@ -555,7 +556,7 @@ page {
 /* 求购模式下主按钮使用青蓝渐变，强化“求购”心智 */
 .publish-btn.want {
   background: var(--want-grad);
-  box-shadow: 0 8rpx 28rpx rgba(0, 168, 160, 0.3);
+  box-shadow: 0 8rpx 28rpx rgba(161, 140, 209, 0.3);
 }
 
 .publish-btn.want[disabled] {
@@ -851,4 +852,216 @@ page {
   color: var(--primary);
   margin-top: 12rpx;
   font-weight: 500;
+}
+/* === 图书专区：适用专业（多选） === */
+.field-optional {
+  font-size: 22rpx;
+  color: #9999aa;
+  font-weight: 400;
+}
+
+.major-picker {
+  width: 100%;
+}
+
+.major-line {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.major-line-label {
+  flex-shrink: 0;
+  width: 72rpx;
+  font-size: 24rpx;
+  color: #9999aa;
+  line-height: 56rpx;
+}
+
+.major-scroll {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.major-row {
+  display: flex;
+}
+
+.major-chip {
+  display: inline-block;
+  padding: 12rpx 24rpx;
+  margin-right: 14rpx;
+  font-size: 24rpx;
+  color: #555566;
+  background: #f5f7fa;
+  border-radius: 40rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.major-chip.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+/* 专业行用青蓝区分层级 */
+.major-chip.major.active {
+  background: var(--want-soft);
+  color: var(--want);
+  border-color: var(--want);
+}
+
+.major-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 6rpx;
+}
+
+.major-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 18rpx;
+  font-size: 23rpx;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 40rpx;
+}
+
+.major-tag-x {
+  margin-left: 10rpx;
+  font-size: 26rpx;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.major-tip {
+  font-size: 23rpx;
+  color: #9999aa;
+  line-height: 1.6;
+  margin-top: 4rpx;
+}
+
+/* === 以物易物：类型高亮 / 只读联系方式 === */
+.mode-item.exchange.active .mode-label {
+  color: var(--exchange);
+}
+
+.publish-btn.exchange {
+  background: var(--exchange-grad);
+  box-shadow: 0 8rpx 28rpx rgba(255, 154, 118, 0.34);
+}
+
+.publish-btn.exchange[disabled] {
+  background: linear-gradient(135deg, #ffe6d8, #ffdcc9);
+  box-shadow: none;
+}
+
+.contact-readonly {
+  flex: 1;
+  font-size: 30rpx;
+  color: #1a1a2e;
+  word-break: break-all;
+}
+
+.contact-readonly.empty {
+  font-size: 26rpx;
+  color: #e08c00;
+}
+
+/* === 技能服务：类型高亮 / 发布按钮 === */
+.mode-item.skill.active .mode-label {
+  color: var(--skill);
+}
+
+.publish-btn.skill {
+  background: var(--skill-grad);
+  box-shadow: 0 8rpx 28rpx rgba(132, 193, 255, 0.36);
+}
+
+.publish-btn.skill[disabled] {
+  background: linear-gradient(135deg, #dfeaff, #d3e2ff);
+  box-shadow: none;
+}
+
+/* 技能参考价提示（灰色引导文案） */
+.price-ref-tip {
+  padding: 4rpx 0 16rpx 160rpx;
+  font-size: 23rpx;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+/* === 缩略图生成用的离屏画布：移出可视区域，避免影响布局 === */
+.thumb-canvas {
+  position: fixed;
+  left: -9999rpx;
+  top: 0;
+  width: 320px;
+  height: 320px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* === 求购分区：物品求购 / 技能求助（紫系深浅区分） === */
+.field-required {
+  color: var(--danger);
+  font-size: 28rpx;
+  margin-left: 6rpx;
+}
+
+.want-seg {
+  display: flex;
+  gap: 20rpx;
+}
+
+.want-seg-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 26rpx 0;
+  border-radius: 24rpx;
+  background: #f5f7fa;
+  border: 2rpx solid transparent;
+  transition: all 0.2s ease;
+}
+
+.want-seg-item .ws-icon {
+  font-size: 44rpx;
+  margin-bottom: 8rpx;
+}
+
+.want-seg-item .ws-label {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.want-seg-item.goods.active {
+  background: var(--want-grad);
+  box-shadow: 0 8rpx 22rpx rgba(161, 140, 209, 0.3);
+}
+
+.want-seg-item.skill.active {
+  background: var(--want-deep-grad);
+  box-shadow: 0 8rpx 22rpx rgba(124, 92, 191, 0.3);
+}
+
+.want-seg-item.active .ws-label {
+  color: #fff;
+  font-weight: 600;
+}
+
+.want-seg-hint {
+  margin-top: 18rpx;
+  font-size: 24rpx;
+  color: var(--text-light);
+  line-height: 1.6;
 }

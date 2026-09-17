@@ -374,3 +374,26 @@
   margin-top: 48rpx;
   letter-spacing: 1rpx;
 }
+
+/* 平台定位卡片 & 文案强调 & 官方微信 */
+.position-card {
+  margin-top: 24rpx;
+}
+
+.para-strong {
+  color: #14202f;
+  font-weight: 600;
+}
+
+.contact-value.wechat {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.feature-icon-wrap.icon-exchange {
+  background: linear-gradient(135deg, #ffd194, #ff9a76);
+}
+
+.feature-icon-wrap.icon-skill {
+  background: linear-gradient(135deg, #a1c4fd, #84c1ff);
+}

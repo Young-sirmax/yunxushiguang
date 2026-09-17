@@ -160,9 +160,11 @@ exports.main = async (event, context) => {
       realName: u.realName || '',
       studentId: u.studentId || '',
       universityName: u.universityName || '',
-      contact: u.contact || '',
+      phone: u.phone || '',
+      wechat_id: u.wechat_id || '',
       isAdmin: !!u.isAdmin,
       banned: !!u.banned,
+      expert_status: u.expert_status || 'none',
       isStudentVerified: !!u.isStudentVerified,
       studentVerifyStatus: u.studentVerifyStatus || '',
       createTime: u.createTime || null

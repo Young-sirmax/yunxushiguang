@@ -1,17 +1,31 @@
 <!--pages/home/home.wxml-->
 <view class="page-container">
+  <!-- 维护模式提示 -->
+  <view class="maintenance-banner" wx:if="{{maintenance}}">
+    <text class="maintenance-text">🛠️ {{maintenanceNotice || '系统维护中，浏览不受影响，发布等操作请稍后再试'}}</text>
+  </view>
+
   <!-- 渐变头部 -->
   <view class="home-header">
     <view class="header-bg-grad"></view>
     <view class="user-info" wx:if="{{isLoggedIn}}">
-      <image class="user-avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}"/>
+      <!-- 头像用官方 chooseAvatar 按钮承载：点击即弹系统头像选择器 -->
+      <button class="avatar-tap" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" disabled="{{avatarUploading}}">
+        <view class="avatar-box">
+          <image wx:if="{{avatar.useImage}}" class="user-avatar" src="{{avatar.src}}" mode="aspectFill" binderror="onAvatarError"/>
+          <view wx:else class="user-avatar avatar-letter" style="background:{{avatar.color}}">{{avatar.letter}}</view>
+          <view wx:if="{{avatarUploading}}" class="avatar-mask">
+            <view class="avatar-spinner"></view>
+          </view>
+        </view>
+      </button>
       <view class="user-meta">
         <view class="user-name-row">
           <text class="user-name">{{userInfo.nickName || '未登录'}}</text>
           <view wx:if="{{userInfo.isStudentVerified}}" class="verify-mini-badge">✓ 已认证</view>
           <view wx:elif="{{userInfo.studentVerifyStatus === 'pending'}}" class="verify-mini-badge pending">审核中</view>
         </view>
-        <text class="user-school">{{userInfo.universityName || (userInfo.contact ? '点击完善资料' : '')}}</text>
+        <text class="user-school">{{userInfo.universityName || (userInfo.wechat_id ? '' : '点击完善资料')}}</text>
       </view>
     </view>
     <view class="user-info" wx:else>
@@ -60,6 +74,24 @@
     <view class="menu-item" bindtap="goMyWant">
       <view class="menu-icon-wrap icon-want"><text class="menu-icon">🔍</text></view>
       <text class="menu-text">我的求购</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goExpert">
+      <view class="menu-icon-wrap icon-expert"><text class="menu-icon">🎓</text></view>
+      <text class="menu-text">技能达人入驻</text>
+      <view wx:if="{{expertStatusText}}" class="menu-verify-badge {{expertStatusClass}}">{{expertStatusText}}</view>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goMyReviews">
+      <view class="menu-icon-wrap icon-star"><text class="menu-icon">⭐</text></view>
+      <text class="menu-text">我收到的评价</text>
+      <view wx:if="{{ratingText}}" class="menu-verify-badge">{{ratingText}}</view>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" wx:if="{{canBatch}}" bindtap="goBatchUpload">
+      <view class="menu-icon-wrap icon-batch"><text class="menu-icon">📥</text></view>
+      <text class="menu-text">批量上架</text>
+      <view class="menu-verify-badge">代上架</view>
       <text class="menu-arrow">›</text>
     </view>
     <view class="menu-item" wx:if="{{isAdmin}}" bindtap="goAdmin">

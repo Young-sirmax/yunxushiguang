@@ -10,7 +10,7 @@
       </view>
       <view class="search-input-box" bindtap="goSearch">
         <text class="search-icon">🔍</text>
-        <text class="search-placeholder">搜索闲置物品 / 求购信息</text>
+        <text class="search-placeholder">搜索物品 / 专业 / 求购信息</text>
       </view>
 
       <!-- 类型筛选：全部 / 闲置 / 求购 -->
@@ -18,6 +18,22 @@
         <view class="type-item {{currentType === '' ? 'active' : ''}}" data-type="" bindtap="switchType">全部</view>
         <view class="type-item sell {{currentType === 'sell' ? 'active' : ''}}" data-type="sell" bindtap="switchType">📦 闲置</view>
         <view class="type-item want {{currentType === 'want' ? 'active' : ''}}" data-type="want" bindtap="switchType">🔍 求购</view>
+        <view class="type-item exchange {{currentType === 'exchange' ? 'active' : ''}}" data-type="exchange" bindtap="switchType">🔁 易物</view>
+        <view class="type-item skill {{currentType === 'skill' ? 'active' : ''}}" data-type="skill" bindtap="switchType">🎓 技能</view>
+      </view>
+
+      <!-- 求购二级分区：物品求购 / 技能求助（仅选中「求购」时出现） -->
+      <view class="want-seg" wx:if="{{currentType === 'want'}}">
+        <view
+          class="want-seg-item goods {{currentWantCategory === 'goods' ? 'active' : ''}}"
+          data-value="goods"
+          bindtap="switchWantCategory"
+        >📦 物品求购</view>
+        <view
+          class="want-seg-item skill {{currentWantCategory === 'skill' ? 'active' : ''}}"
+          data-value="skill"
+          bindtap="switchWantCategory"
+        >🎓 技能求助</view>
       </view>
     </view>
   </view>
@@ -40,6 +56,43 @@
     </view>
   </scroll-view>
 
+  <!-- 图书专区：选中「书籍教材」后展开的二级筛选（学院 → 专业） -->
+  <view class="book-filter" wx:if="{{isBookCategory}}">
+    <scroll-view class="book-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="book-row">
+        <view
+          class="book-chip {{currentCollege === '' ? 'active' : ''}}"
+          data-college=""
+          bindtap="selectCollege"
+        >全部学院</view>
+        <view
+          class="book-chip {{currentCollege === item ? 'active' : ''}}"
+          wx:for="{{collegeList}}"
+          wx:key="*this"
+          data-college="{{item}}"
+          bindtap="selectCollege"
+        >{{item}}</view>
+      </view>
+    </scroll-view>
+
+    <scroll-view class="book-scroll" scroll-x enhanced show-scrollbar="{{false}}" wx:if="{{currentCollege}}">
+      <view class="book-row">
+        <view
+          class="book-chip major {{currentMajor === '' ? 'active' : ''}}"
+          data-major=""
+          bindtap="selectMajor"
+        >全部专业</view>
+        <view
+          class="book-chip major {{currentMajor === item ? 'active' : ''}}"
+          wx:for="{{majorList}}"
+          wx:key="*this"
+          data-major="{{item}}"
+          bindtap="selectMajor"
+        >{{item}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
   <!-- 物理圆形商品画布 -->
   <view class="canvas-container">
     <canvas 
@@ -52,6 +105,14 @@
       bindtouchcancel="onTouchEnd"
     ></canvas>
     
+    <!-- 长按预览卡片：居中弹层，脱离手指遮挡 -->
+    <preview-card
+      show="{{previewShow}}"
+      item="{{previewItem}}"
+      bind:close="onPreviewClose"
+      bind:opencard="onPreviewOpenCard"
+    />
+
     <!-- 加载状态 -->
     <view class="load-more" wx:if="{{commodityList.length > 0}}">
       <text wx:if="{{hasMore}}">上拉加载更多...</text>
@@ -60,9 +121,9 @@
 
     <!-- 空状态 -->
     <view class="empty-state" wx:if="{{commodityList.length === 0 && !isRefreshing}}">
-      <text class="empty-icon">{{currentType === 'want' ? '🔍' : (currentType === 'sell' ? '📦' : '📭')}}</text>
-      <text class="empty-text">{{currentType === 'want' ? '暂无求购信息' : (currentType === 'sell' ? '暂无闲置信息' : '暂无信息')}}</text>
-      <text class="empty-sub">{{currentType === 'want' ? '发布一条求购，让闲置主动来找你' : '快来发布第一条信息吧！'}}</text>
+      <text class="empty-icon">{{currentType === 'want' ? '🔍' : (currentType === 'sell' ? '📦' : (currentType === 'exchange' ? '🔁' : (currentType === 'skill' ? '🎓' : '📭')))}}</text>
+      <text class="empty-text">{{currentType === 'want' ? '暂无求购信息' : (currentType === 'sell' ? '暂无闲置信息' : (currentType === 'exchange' ? '暂无以物易物信息' : (currentType === 'skill' ? '暂无技能服务' : '暂无信息')))}}</text>
+      <text class="empty-sub">{{currentType === 'want' ? '发布一条求购，让闲置主动来找你' : (currentType === 'exchange' ? '发布以物易物，用闲置换你需要的东西' : (currentType === 'skill' ? '成为技能达人，让同学找到你' : '快来发布第一条信息吧！'))}}</text>
     </view>
   </view>
 
@@ -74,4 +135,13 @@
       <text class="publish-text">发布信息</text>
     </view>
   </view>
+
+  <!-- 图片预热：离屏小图（不可见、不占位），长按瞬间即开始加载预览图 -->
+  <image
+    wx:for="{{preloadSrcs}}"
+    wx:key="*this"
+    class="preload-img"
+    src="{{item}}"
+    mode="aspectFill"
+  />
 </view>

@@ -6,17 +6,22 @@
 
   <view class="favorite-list" wx:if="{{list.length > 0}}">
     <view class="favorite-card" wx:for="{{list}}" wx:key="_id">
-      <image class="item-img" src="{{item.commodityImage || '/images/default-goods.png'}}" mode="aspectFill" bindtap="goDetail" data-id="{{item.commodityId}}"/>
+      <image class="item-img img-ph" src="{{item.commodityImage || '/images/default-goods.png'}}" mode="aspectFill" bindtap="goDetail" data-id="{{item.commodityId}}"/>
       <view class="item-info">
         <text class="item-title">{{item.commodityTitle}}</text>
         <view class="item-price-row">
           <text class="item-price want" wx:if="{{item.commodityType === 'want'}}">求购中</text>
+          <text class="item-price exchange" wx:elif="{{item.commodityType === 'exchange'}}">🔁 换：{{item.commodityExchangeWant || '面议'}}</text>
+          <text class="item-price skill" wx:elif="{{item.commodityType === 'skill'}}">🎓 {{item.priceText}}</text>
           <text class="item-price" wx:else>¥{{item.commodityPrice}}</text>
-          <text class="item-original-price" wx:if="{{item.commodityOriginalPrice && item.commodityType !== 'want'}}">¥{{item.commodityOriginalPrice}}</text>
+          <text class="item-original-price" wx:if="{{item.commodityOriginalPrice && item.commodityType === 'sell'}}">¥{{item.commodityOriginalPrice}}</text>
         </view>
         <view class="item-meta-row">
-          <text class="item-condition" wx:if="{{item.commodityCondition && item.commodityType !== 'want'}}">{{item.commodityCondition}}</text>
+          <text class="item-condition" wx:if="{{item.commodityCondition && item.commodityType === 'sell'}}">{{item.commodityCondition}}</text>
           <text class="item-condition" wx:if="{{item.commodityType === 'want'}}">求购信息</text>
+          <text class="item-condition" wx:if="{{item.commodityType === 'exchange'}}">以物易物</text>
+          <text class="item-condition" wx:if="{{item.commodityType === 'skill'}}">技能服务</text>
+          <text class="item-trade-status" wx:if="{{item.tradeStatusText}}">{{item.tradeStatusText}}</text>
           <view class="verified-mini" wx:if="{{item.commodityIsVerified}}">✓ 已认证</view>
         </view>
         <text class="item-time">{{item.timeText}}</text>

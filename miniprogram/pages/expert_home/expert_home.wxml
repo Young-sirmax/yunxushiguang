@@ -1,0 +1,85 @@
+<!--pages/expert_home/expert_home.wxml  技能达人主页-->
+<view class="page-container">
+  <!-- 头部 -->
+  <view class="eh-header">
+    <view class="eh-header-bg"></view>
+    <view class="eh-profile">
+      <image class="eh-avatar" src="{{user.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"/>
+      <view class="eh-meta">
+        <view class="eh-name-row">
+          <text class="eh-name">{{user.nickName || '匿名用户'}}</text>
+          <view class="eh-expert-badge" wx:if="{{user.expert_status === 'approved'}}">🎓 技能达人</view>
+        </view>
+        <view class="eh-sub">
+          <text class="eh-school" wx:if="{{user.universityName}}">{{user.universityName}}</text>
+          <text class="eh-rating" wx:if="{{ratingText}}">⭐ {{ratingText}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 技能标签 -->
+  <view class="eh-card" wx:if="{{skills.length > 0}}">
+    <view class="eh-card-title">技能标签</view>
+    <view class="eh-skills">
+      <view class="eh-skill" wx:for="{{skills}}" wx:key="*this">{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 介绍 -->
+  <view class="eh-card" wx:if="{{user.expert_intro}}">
+    <view class="eh-card-title">个人介绍</view>
+    <text class="eh-intro">{{user.expert_intro}}</text>
+    <view class="eh-quote" wx:if="{{user.expert_available_time}}">🕒 可服务时间：{{user.expert_available_time}}</view>
+  </view>
+
+  <!-- 作品 / 证明图 -->
+  <view class="eh-card" wx:if="{{certs.length > 0}}">
+    <view class="eh-card-title">作品 / 证明</view>
+    <view class="eh-certs">
+      <image
+        class="eh-cert"
+        wx:for="{{certs}}"
+        wx:key="*this"
+        src="{{item}}"
+        mode="aspectFill"
+        data-index="{{index}}"
+        bindtap="previewCert"
+      />
+    </view>
+  </view>
+
+  <!-- TA 的技能服务 -->
+  <view class="eh-card">
+    <view class="eh-card-title">TA 的技能服务</view>
+    <view class="eh-empty" wx:if="{{posts.length === 0}}">暂无技能服务</view>
+    <view class="eh-post" wx:for="{{posts}}" wx:key="_id" data-id="{{item._id}}" bindtap="goDetail">
+      <image class="eh-post-img img-ph" src="{{item.cover || '/images/default-goods.png'}}" mode="aspectFill"/>
+      <view class="eh-post-info">
+        <text class="eh-post-title">{{item.title}}</text>
+        <text class="eh-post-price">{{item.priceText}}</text>
+        <text class="eh-post-time">{{item.timeText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 评价列表 -->
+  <view class="eh-card">
+    <view class="eh-card-title">评价（{{reviews.length}}）</view>
+    <view class="eh-empty" wx:if="{{reviews.length === 0}}">还没有评价</view>
+    <view class="eh-review" wx:for="{{reviews}}" wx:key="_id">
+      <view class="eh-review-head">
+        <image class="eh-review-avatar" src="{{item.raterAvatar || '/images/default-avatar.png'}}" mode="aspectFill"/>
+        <text class="eh-review-name">{{item.raterName || '匿名同学'}}</text>
+        <text class="eh-review-stars">{{item.stars}}</text>
+      </view>
+      <text class="eh-review-text">{{item.comment}}</text>
+      <text class="eh-review-time">{{item.timeText}}</text>
+    </view>
+  </view>
+
+  <!-- 自己的主页：快捷入口 -->
+  <view class="eh-actions" wx:if="{{isSelf}}">
+    <view class="eh-action-btn" bindtap="goApply">编辑入驻资料</view>
+  </view>
+</view>

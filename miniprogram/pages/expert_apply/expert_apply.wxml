@@ -1,0 +1,97 @@
+<!--pages/expert_apply/expert_apply.wxml  技能达人入驻申请-->
+<view class="page-container">
+  <view class="ea-hero">
+    <view class="ea-hero-bg"></view>
+    <view class="ea-hero-inner">
+      <view class="ea-title">🎓 技能达人入驻</view>
+      <view class="ea-sub">填写技能与报价，让同学快速找到你</view>
+    </view>
+  </view>
+
+  <!-- 技能分类（多选） -->
+  <view class="ea-card">
+    <view class="ea-card-head">
+      <text class="ea-card-title">技能分类</text>
+      <text class="ea-card-sub">至少选 1 项</text>
+    </view>
+    <view class="ea-chips">
+      <view
+        class="ea-chip {{item.checked ? 'active' : ''}}"
+        wx:for="{{skillOptions}}"
+        wx:key="name"
+        data-name="{{item.name}}"
+        bindtap="toggleSkill"
+      >{{item.name}}</view>
+    </view>
+  </view>
+
+  <!-- 个人介绍 -->
+  <view class="ea-card">
+    <view class="ea-card-head">
+      <text class="ea-card-title">个人介绍</text>
+      <text class="ea-card-sub">{{introLen}}/200</text>
+    </view>
+    <textarea
+      class="ea-textarea"
+      placeholder="介绍你的技能水平、经验、可提供的服务内容…"
+      value="{{intro}}"
+      maxlength="200"
+      bindinput="onIntroInput"
+    />
+  </view>
+
+  <!-- 证明图 -->
+  <view class="ea-card">
+    <view class="ea-card-head">
+      <text class="ea-card-title">证明图（选填）</text>
+      <text class="ea-card-sub">{{certs.length}}/4</text>
+    </view>
+    <view class="ea-certs">
+      <view class="ea-cert-cell" wx:for="{{certs}}" wx:key="*this">
+        <image class="ea-cert-img" src="{{item}}" mode="aspectFill" data-index="{{index}}" bindtap="previewCert"/>
+        <view class="ea-cert-del" catchtap="deleteCert" data-index="{{index}}">×</view>
+      </view>
+      <view class="ea-cert-cell ea-cert-add" wx:if="{{certs.length < 4}}" bindtap="chooseCerts">
+        <text class="ea-add-plus">+</text>
+        <text class="ea-add-label">上传</text>
+      </view>
+    </view>
+    <view class="ea-tip">可上传证书、获奖证明或作品图</view>
+  </view>
+
+  <!-- 报价 -->
+  <view class="ea-card">
+    <view class="ea-card-head">
+      <text class="ea-card-title">参考报价</text>
+    </view>
+    <view class="ea-field">
+      <text class="ea-label">报价模式</text>
+      <picker mode="selector" range="{{priceUnits}}" range-key="label" value="{{priceUnitIndex}}" bindchange="onPriceUnitChange">
+        <view class="ea-picker">{{priceUnits[priceUnitIndex].label}}<text class="ea-arrow">›</text></view>
+      </picker>
+    </view>
+    <view class="ea-field" wx:if="{{priceUnit !== 'negotiable'}}">
+      <text class="ea-label">金额（元）</text>
+      <view class="ea-input-wrap">
+        <text class="ea-yen">¥</text>
+        <input class="ea-input" type="digit" placeholder="0.00" value="{{price}}" bindinput="onPriceInput"/>
+      </view>
+    </view>
+    <view class="ea-field">
+      <text class="ea-label">可服务时间</text>
+      <input class="ea-input" placeholder="如：周末 / 工作日晚（选填）" value="{{availableTime}}" bindinput="onTimeInput"/>
+    </view>
+  </view>
+
+  <view class="ea-note">
+    平台仅提供信息撮合服务，技能服务的交易双方自行约定并承担交易责任。
+  </view>
+
+  <view class="ea-bottom safe-bottom">
+    <button
+      class="ea-submit {{canSubmit ? 'active' : ''}}"
+      bindtap="submit"
+      disabled="{{!canSubmit || isSubmitting}}"
+    >{{isSubmitting ? '提交中...' : (isEdit ? '更新入驻资料' : '提交并开通达人')}}</button>
+  </view>
+</view>

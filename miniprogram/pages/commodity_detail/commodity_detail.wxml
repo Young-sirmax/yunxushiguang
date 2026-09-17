@@ -1,11 +1,34 @@
 <!--pages/commodity_detail/commodity_detail.wxml-->
 <view class="page-container" wx:if="{{commodity}}">
-  <!-- 图片轮播 -->
+  <!-- 图片轮播：首图立即加载，其余懒加载；骨架占位 + 加载完成淡入 -->
   <swiper class="image-swiper" indicator-dots autoplay circular>
-    <swiper-item wx:for="{{commodity.images}}" wx:key="*this">
-      <image src="{{item}}" mode="aspectFill" class="swiper-img" bindtap="previewImage" data-url="{{item}}"/>
+    <swiper-item wx:for="{{images}}" wx:key="key">
+      <view class="swiper-cell">
+        <!-- 骨架：未加载完成时占位，避免白块等待 -->
+        <view class="img-skel" wx:if="{{imgStates[index] !== 'loaded'}}"></view>
+
+        <image
+          wx:if="{{imgStates[index] !== 'error'}}"
+          class="swiper-img img-fade {{imgStates[index] === 'loaded' ? 'is-loaded' : ''}}"
+          src="{{item.url}}"
+          mode="aspectFill"
+          lazy-load="{{index > 0}}"
+          data-index="{{index}}"
+          data-src="{{item.url}}"
+          data-url="{{item.url}}"
+          bindload="onImgLoad"
+          binderror="onImgError"
+          bindtap="previewImage"
+        />
+
+        <!-- 加载失败占位：点击可重试一次 -->
+        <view wx:else class="img-fail" data-index="{{index}}" bindtap="retryImage">
+          <text class="img-fail-icon">🖼️</text>
+          <text class="img-fail-text">图片加载失败，点击重试</text>
+        </view>
+      </view>
     </swiper-item>
-    <swiper-item wx:if="{{commodity.images.length === 0}}">
+    <swiper-item wx:if="{{images.length === 0}}">
       <image src="/images/default-goods.png" mode="aspectFill" class="swiper-img"/>
     </swiper-item>
   </swiper>
@@ -16,6 +39,12 @@
       <block wx:if="{{commodity.type === 'want'}}">
         <text class="price want">求购</text>
       </block>
+      <block wx:elif="{{commodity.type === 'exchange'}}">
+        <text class="price exchange">🔁 以物易物</text>
+      </block>
+      <block wx:elif="{{commodity.type === 'skill'}}">
+        <text class="price skill">🎓 {{skillPriceText}}</text>
+      </block>
       <block wx:else>
         <text class="price">¥{{commodity.price}}</text>
         <text class="original-price" wx:if="{{commodity.originalPrice}}">原价 ¥{{commodity.originalPrice}}</text>
@@ -24,11 +53,40 @@
     <text class="title">{{commodity.title}}</text>
     <view class="meta-row">
       <text class="meta-tag condition" wx:if="{{commodity.condition}}">{{commodity.condition}}</text>
-      <text class="meta-tag duration" wx:if="{{commodity.type !== 'want'}}">数量：{{commodity.quantity || 1}}</text>
+      <text class="meta-tag major" wx:if="{{commodity.majorText}}">📚 适用：{{commodity.majorText}}</text>
+      <text class="meta-tag duration" wx:if="{{commodity.type === 'sell'}}">数量：{{commodity.quantity || 1}}</text>
       <text class="meta-tag" wx:if="{{commodity.type === 'want'}}">求购信息</text>
+      <text class="meta-tag skill-cat" wx:if="{{commodity.skill_category}}">🎓 {{commodity.skill_category}}</text>
+      <!-- 交易状态：非可交易时展示状态标签 -->
+      <text class="meta-tag trade-status" wx:if="{{commodity.tradeStatusText}}">{{commodity.tradeStatusText}}</text>
       <text class="meta-time">{{timeText}}</text>
     </view>
-    <view class="price-note" wx:if="{{commodity.type !== 'want'}}">本平台仅为信息展示，价格与交易请买卖双方线下自行协商</view>
+
+    <!-- 以物易物：期望交换物品 / 可接受补差价 -->
+    <view class="exchange-box" wx:if="{{commodity.type === 'exchange'}}">
+      <view class="exchange-row">
+        <text class="exchange-label">对方期望交换</text>
+        <text class="exchange-value">{{commodity.exchange_want || '未填写'}}</text>
+      </view>
+      <view class="exchange-row" wx:if="{{commodity.accept_price_diff}}">
+        <text class="exchange-label">可接受补差价</text>
+        <text class="exchange-value">{{commodity.accept_price_diff}} 元</text>
+      </view>
+    </view>
+
+    <!-- 技能服务：报价 + 可服务时间 -->
+    <view class="exchange-box skill-box" wx:if="{{commodity.type === 'skill'}}">
+      <view class="exchange-row">
+        <text class="exchange-label">报价</text>
+        <text class="exchange-value">{{skillPriceText}}</text>
+      </view>
+      <view class="exchange-row" wx:if="{{commodity.available_time}}">
+        <text class="exchange-label">可服务时间</text>
+        <text class="exchange-value">{{commodity.available_time}}</text>
+      </view>
+    </view>
+
+    <view class="price-note" wx:if="{{commodity.type === 'sell'}}">本平台仅为信息展示，价格与交易请买卖双方线下自行协商</view>
   </view>
 
   <!-- 卖家信息 -->
@@ -40,21 +98,42 @@
         <view class="seller-name-row">
           <text class="seller-name">{{commodity.sellerName || '匿名用户'}}</text>
           <view class="verified-badge" wx:if="{{commodity.isVerified}}">✓ 已认证</view>
+          <view class="expert-badge" wx:if="{{commodity.isExpert}}">🎓 技能达人</view>
         </view>
-        <text class="seller-contact" wx:if="{{!isOwner}}">联系方式：{{commodity.sellerContact || '未填写'}}</text>
-        <text class="seller-contact" wx:if="{{isOwner}}">联系方式：{{commodity.sellerContact || '未填写'}}</text>
+
+        <!-- 达人：评分 + 主页入口 + 简介 -->
+        <view class="expert-entry" wx:if="{{commodity.isExpert}}" bindtap="goExpertHome">
+          <text class="expert-rating" wx:if="{{expertRatingText}}">⭐ {{expertRatingText}}</text>
+          <text class="expert-rating" wx:else>⭐ 暂无评价</text>
+          <text class="expert-link">查看达人主页 ›</text>
+        </view>
+        <text class="expert-intro" wx:if="{{commodity.isExpert && commodity.expertIntro}}">{{commodity.expertIntro}}</text>
+        <!-- 联系方式一律不明文平铺，仅通过下方按钮复制微信号 -->
+        <text class="seller-contact-hint">{{contactHint}}</text>
       </view>
-      <view class="copy-contact-btn" wx:if="{{!isOwner && commodity.sellerContact}}" bindtap="copyContact">
-        <text>复制</text>
+      <view
+        class="copy-contact-btn {{canCopyContact ? '' : 'disabled'}}"
+        wx:if="{{!isOwner}}"
+        bindtap="copyContact"
+      >
+        <text>{{canCopyContact ? '复制' : '暂无'}}</text>
       </view>
     </view>
     <view class="seller-tip" wx:if="{{!isOwner}}">
       <block wx:if="{{commodity.type === 'want'}}">
-        <text class="tip-text">想出售此物？复制联系方式后联系求购者</text>
+        <text class="tip-text">想出售此物？复制微信号后打开微信搜索添加对方</text>
+      </block>
+      <block wx:elif="{{commodity.type === 'exchange'}}">
+        <text class="tip-text">想和对方换物？复制微信号后打开微信搜索添加对方</text>
       </block>
       <block wx:else>
-        <text class="tip-text">复制联系方式后，可直接联系卖家约定交易</text>
+        <text class="tip-text">复制微信号后，可直接联系卖家约定交易</text>
       </block>
+    </view>
+
+    <!-- 评价入口：同一帖子仅能评价一次 -->
+    <view class="review-entry {{reviewed ? 'done' : ''}}" wx:if="{{!isOwner}}" bindtap="openReview">
+      <text>{{reviewed ? '✓ 已评价' : '⭐ 评价 TA'}}</text>
     </view>
   </view>
 
@@ -66,8 +145,30 @@
 
   <!-- 商品描述 -->
   <view class="desc-section card">
-    <view class="section-title">📝 {{commodity.type === 'want' ? '求购描述' : '商品描述'}}</view>
+    <view class="section-title">📝 {{commodity.type === 'want' ? '求购描述' : (commodity.type === 'exchange' ? '物品描述' : (commodity.type === 'skill' ? '服务描述' : '商品描述'))}}</view>
     <text class="desc-text">{{commodity.description || (commodity.type === 'want' ? '求购者暂未填写详细描述' : '卖家暂未填写描述')}}</text>
+  </view>
+
+  <!-- 发布者操作：标记交易状态 -->
+  <view class="owner-section card" wx:if="{{isOwner}}">
+    <view class="section-title">🏷️ 交易状态</view>
+    <view class="owner-trade-row">
+      <view
+        class="trade-chip {{commodity.tradeStatus === 'open' ? 'active' : ''}}"
+        data-status="open"
+        bindtap="changeTradeStatus"
+      >可交易</view>
+      <view
+        class="trade-chip {{commodity.tradeStatus === 'matched' ? 'active' : ''}}"
+        data-status="matched"
+        bindtap="changeTradeStatus"
+      >标记已预定</view>
+      <view
+        class="trade-chip {{commodity.tradeStatus === 'completed' ? 'active' : ''}}"
+        data-status="completed"
+        bindtap="changeTradeStatus"
+      >标记已完成</view>
+    </view>
   </view>
 
   <!-- 底部操作栏 -->
@@ -86,8 +187,12 @@
         <text class="action-text">分享</text>
       </button>
     </view>
-    <button class="trade-btn btn-primary" wx:if="{{!isOwner && commodity.sellerContact}}" bindtap="copyContact">
-      复制联系方式
+    <button
+      class="trade-btn {{canCopyContact ? 'btn-primary' : 'btn-default'}}"
+      wx:if="{{!isOwner}}"
+      bindtap="copyContact"
+    >
+      {{canCopyContact ? '复制微信号' : '对方暂未完善联系方式'}}
     </button>
     <button class="trade-btn btn-default" wx:if="{{isOwner}}" bindtap="editCommodity">
       编辑信息

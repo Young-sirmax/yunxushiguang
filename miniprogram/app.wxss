@@ -7,10 +7,36 @@ page {
   --primary-grad: linear-gradient(135deg, #3be6ad 0%, #00c17e 48%, #00b3a3 100%);
   --primary-grad-vivid: linear-gradient(160deg, #3ce8b2 0%, #00c17e 46%, #00a9c4 100%);
 
-  /* 求购专属：活力青蓝 */
-  --want: #00a8a0;
-  --want-grad: linear-gradient(135deg, #2dd8c0 0%, #00a8a0 100%);
-  --want-soft: #e0f7f5;
+  /* ===== 类型主题色（气泡描边 / 卡片角标统一色）=====
+     改色请同步 miniprogram/utils/theme.js 的 TYPE_THEME（canvas 读不到 CSS 变量） */
+  --type-sell-from: #7ee8c7;      /* 闲置：绿青 */
+  --type-sell-to: #4ecdc4;
+  --type-want-from: #c7b9ff;      /* 求购：紫 */
+  --type-want-to: #a18cd1;
+  --type-exchange-from: #ffd194;  /* 以物易物：橙 */
+  --type-exchange-to: #ff9a76;
+  --type-skill-from: #a1c4fd;     /* 技能服务：蓝 */
+  --type-skill-to: #84c1ff;
+
+  /* 求购（紫系） */
+  --want: #a18cd1;
+  --want-grad: linear-gradient(135deg, #c7b9ff 0%, #a18cd1 100%);
+  --want-soft: #f1ecfd;
+
+  /* 求购分区·技能求助（同紫系加深，与「物品求购」做深浅区分） */
+  --want-deep: #7c5cbf;
+  --want-deep-grad: linear-gradient(135deg, #9d7ee0 0%, #7c5cbf 100%);
+  --want-deep-soft: #ece5fa;
+
+  /* 以物易物（橙系）：文字用加深色保证可读，渐变保持低饱和 */
+  --exchange: #e8734a;
+  --exchange-grad: linear-gradient(135deg, #ffd194 0%, #ff9a76 100%);
+  --exchange-soft: #fff3e8;
+
+  /* 技能服务（蓝系） */
+  --skill: #4a90e2;
+  --skill-grad: linear-gradient(135deg, #a1c4fd 0%, #84c1ff 100%);
+  --skill-soft: #eaf3ff;
 
   /* 强调色：活力珊瑚橙 */
   --accent: #ff7a59;
@@ -402,4 +428,37 @@ page {
   0% { transform: scale(1); }
   50% { transform: scale(1.35); }
   100% { transform: scale(1); }
+}
+
+/* === 图片骨架 / 淡入（统一占位，杜绝白块等待） === */
+.img-skel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #eef2f6;
+  background-image: linear-gradient(100deg, rgba(238, 242, 246, 0) 30%, rgba(255, 255, 255, 0.75) 50%, rgba(238, 242, 246, 0) 70%);
+  background-size: 200% 100%;
+  animation: imgSkelSweep 1.4s ease-in-out infinite;
+}
+
+@keyframes imgSkelSweep {
+  from { background-position: 200% 0; }
+  to { background-position: -60% 0; }
+}
+
+/* 加载完成淡入：onload 后加上 .is-loaded */
+.img-fade {
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+.img-fade.is-loaded {
+  opacity: 1;
+}
+
+/* 静态占位底色：列表缩略图直接复用（零 JS 成本，也不会出现白块） */
+.img-ph {
+  background-color: #eef2f6;
 }

@@ -1,0 +1,178 @@
+/* components/preview-card/index.wxss —— 长按预览卡片 */
+.pc-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pcFadeIn 0.16s ease-out;
+}
+
+.pc-card {
+  position: relative;
+  width: 80vw;
+  border-radius: 16rpx;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.35);
+  animation: pcZoomIn 0.2s cubic-bezier(0.22, 0.9, 0.3, 1.05);
+}
+
+/* 类型角标：卡片左上角 */
+.pc-badge {
+  position: absolute;
+  top: 16rpx;
+  left: 16rpx;
+  z-index: 2;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(15, 27, 45, 0.65);
+}
+
+.pc-badge.want {
+  background: rgba(161, 140, 209, 0.9);
+}
+
+.pc-badge.exchange {
+  background: rgba(255, 154, 118, 0.92);
+}
+
+.pc-badge.skill {
+  background: rgba(255, 138, 0, 0.92);
+}
+
+/* 顶部商品图：等比缩放，最高 50vh；加载中先用骨架占好高度，避免白块与跳动 */
+.pc-media {
+  position: relative;
+  width: 100%;
+  max-height: 50vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f4f8f6, #e9f2ee);
+}
+
+.pc-media.is-loading {
+  min-height: 360rpx;
+}
+
+.pc-img {
+  width: 100%;
+  display: block;
+}
+
+.pc-img-empty {
+  height: 360rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pc-empty-icon {
+  font-size: 110rpx;
+  opacity: 0.5;
+}
+
+.pc-empty-text {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: var(--text-light, #94a3b8);
+}
+
+/* 信息区 */
+.pc-body {
+  padding: 24rpx 26rpx 26rpx;
+}
+
+.pc-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--text, #0f1b2d);
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.pc-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 14rpx;
+}
+
+.pc-price {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: var(--accent, #ff7a59);
+}
+
+.pc-price.want {
+  color: var(--want, #00a8a0);
+  font-size: 28rpx;
+}
+
+.pc-price.exchange {
+  color: var(--exchange);
+  font-size: 28rpx;
+}
+
+.pc-price.skill {
+  color: var(--skill);
+  font-size: 28rpx;
+}
+
+.pc-sep,
+.pc-condition {
+  font-size: 24rpx;
+  color: var(--text-secondary, #5a6b7f);
+}
+
+.pc-verified {
+  font-size: 21rpx;
+  font-weight: 600;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  color: var(--primary, #00c17e);
+  background: var(--primary-soft, #e0f8ef);
+}
+
+.pc-expert {
+  font-size: 21rpx;
+  font-weight: 600;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  color: var(--skill);
+  background: var(--skill-soft);
+}
+
+.pc-extra {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.pc-hint {
+  margin-top: 18rpx;
+  font-size: 22rpx;
+  color: var(--text-light, #94a3b8);
+  text-align: center;
+}
+
+@keyframes pcFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pcZoomIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to { opacity: 1; transform: scale(1); }
+}

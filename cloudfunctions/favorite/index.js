@@ -41,6 +41,11 @@ exports.main = async (event, context) => {
         commodityOriginalPrice: commodity.originalPrice || 0,
         commodityImage: (commodity.images && commodity.images[0]) || '',
         commodityCondition: commodity.condition || '',
+        // 类型与交易状态快照（列表卡片展示用）
+        commodityType: commodity.type || 'sell',
+        commodityPriceUnit: commodity.price_unit || '',
+        commodityTradeStatus: commodity.tradeStatus || 'open',
+        commodityExchangeWant: commodity.exchange_want || '',
         sellerName: commodity.sellerName || '',
         sellerOpenid: commodity._openid || '',
         createTime: db.serverDate()
