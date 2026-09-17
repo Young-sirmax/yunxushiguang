@@ -9,6 +9,9 @@ const timeText = (t) => {
   return formatDate(ts);
 };
 
+// 公益图书角默认空间（首个茶咖空间）。将来有多个图书角时，这里改成空间下拉选择即可。
+const DEFAULT_SPACE_ID = 'space_stnh_001';
+
 Page({
   data: {
     isAdmin: false,
@@ -30,7 +33,16 @@ Page({
     uTotal: 0,
     dataPage: 1,
     dataNoMore: false,
-    dataLoading: false
+    dataLoading: false,
+    // 留言审核（公益图书角）
+    spaceId: DEFAULT_SPACE_ID,
+    cmtTab: 'pending',      // pending | approved | rejected
+    cmtList: [],
+    cmtTotal: 0,
+    cmtPage: 1,
+    cmtNoMore: false,
+    cmtLoading: false,
+    commentPendingCount: 0  // 导航角标：待审留言数
   },
 
   onLoad() {
@@ -44,6 +56,7 @@ Page({
       if (res.code === 0 && res.data && res.data.isAdmin) {
         this.setData({ isAdmin: true });
         this.loadList();
+        this.refreshCommentBadge();
       }
     } catch (err) {
       console.error('管理员校验失败:', err);
@@ -68,6 +81,7 @@ Page({
         showToast('管理员登录成功');
         this.setData({ isAdmin: true, password: '' });
         this.loadList();
+        this.refreshCommentBadge();
       } else {
         showToast(res.msg || '登录失败');
       }
@@ -113,6 +127,9 @@ Page({
       this.loadData(true);
     } else if (module === 'verify') {
       this.loadList();
+    } else if (module === 'comment') {
+      this.refreshCommentBadge();
+      this.loadCommentList(true);
     } else {
       this.loadCommodityList();
     }
@@ -437,6 +454,127 @@ Page({
         }
       }
     });
+  },
+
+  // ===================== 留言审核（公益图书角） =====================
+
+  // 角标：进入管理页 / 切到本模块时刷新待审总数
+  async refreshCommentBadge() {
+    try {
+      const res = await API.adminCommentPending({ spaceId: this.data.spaceId, page: 1, pageSize: 1 });
+      if (res && res.code === 0) {
+        this.setData({ commentPendingCount: res.pendingCount || 0 });
+      }
+    } catch (err) {
+      console.error('留言角标加载失败:', err);
+    }
+  },
+
+  switchCommentTab(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (tab === this.data.cmtTab) return;
+    this.setData({ cmtTab: tab, cmtList: [], cmtTotal: 0, cmtPage: 1, cmtNoMore: false });
+    this.loadCommentList(true);
+  },
+
+  async loadCommentList(reset = true) {
+    const tab = this.data.cmtTab;
+    const page = reset ? 1 : (this.data.cmtPage + 1);
+    this.setData({ cmtLoading: true });
+    try {
+      const params = { spaceId: this.data.spaceId, page, pageSize: 20 };
+      const res = tab === 'pending'
+        ? await API.adminCommentPending(params)
+        : await API.adminCommentApproved(Object.assign({ status: tab }, params));
+      if (!res || res.code !== 0) {
+        showToast((res && res.msg) || '加载失败');
+        return;
+      }
+      const mapped = (res.data || []).map(item => Object.assign({}, item, {
+        timeText: timeText(item.createdAt)
+      }));
+      const nextList = reset ? mapped : this.data.cmtList.concat(mapped);
+      const total = res.total || 0;
+      this.setData({
+        cmtList: nextList,
+        cmtTotal: total,
+        cmtPage: page,
+        cmtNoMore: nextList.length >= total,
+        commentPendingCount: res.pendingCount === undefined ? this.data.commentPendingCount : res.pendingCount
+      });
+    } catch (err) {
+      showToast(err.message || '加载失败');
+    } finally {
+      this.setData({ cmtLoading: false });
+    }
+  },
+
+  loadMoreComment() {
+    if (this.data.cmtLoading || this.data.cmtNoMore) return;
+    this.loadCommentList(false);
+  },
+
+  // 审核动作：通过 / 拒绝 / 加精 / 取消加精 —— 成功后局部更新当前列表项，不整页重载
+  async doCommentReview(id, op) {
+    showLoading('处理中...');
+    try {
+      const res = await API.adminCommentReview(id, op);
+      hideLoading();
+      if (!res || res.code !== 0) {
+        showToast((res && res.msg) || '操作失败');
+        return;
+      }
+      showToast(res.msg || '操作成功');
+
+      const patch = res.data || {};
+      const list = this.data.cmtList.map(item => (item._id === id ? Object.assign({}, item, patch) : item));
+      // 待审 Tab 里「通过 / 拒绝」后该条已不属于本列表，直接移除，保持视图与数据一致
+      const stillVisible = !(this.data.cmtTab === 'pending' && (op === 'approve' || op === 'reject'));
+      if (stillVisible) {
+        this.setData({ cmtList: list });
+      } else {
+        this.setData({
+          cmtList: list.filter(item => item._id !== id),
+          cmtTotal: Math.max(0, this.data.cmtTotal - 1)
+        });
+      }
+      this.refreshCommentBadge();
+    } catch (err) {
+      hideLoading();
+      showToast(err.message || '操作失败');
+    }
+  },
+
+  approveComment(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '通过留言',
+      content: '确认通过这条留言？通过后将展示在书详情页的留言长帖里。',
+      confirmText: '通过',
+      confirmColor: '#00c17e',
+      success: (res) => {
+        if (res.confirm) this.doCommentReview(id, 'approve');
+      }
+    });
+  },
+
+  rejectComment(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '拒绝留言',
+      content: '确认拒绝这条留言？拒绝后不会对读者展示（留言不会删除，仅改状态）。',
+      confirmText: '拒绝',
+      confirmColor: '#f43f5e',
+      success: (res) => {
+        if (res.confirm) this.doCommentReview(id, 'reject');
+      }
+    });
+  },
+
+  starComment(e) {
+    const { id, starred } = e.currentTarget.dataset;
+    const isStarred = String(starred) === 'true';
+    this.doCommentReview(id, isStarred ? 'unstar' : 'star');
   },
 
   // ===== 商品审核 =====

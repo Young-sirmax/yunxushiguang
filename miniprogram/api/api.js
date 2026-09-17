@@ -49,6 +49,14 @@ const API = {
   getMyReceivedReviews: (params) => callCloudFunction('review', Object.assign({ action: 'myReceived' }, params)),
   checkReviewed: (postId) => callCloudFunction('review', { action: 'checkByPost', postId }),
 
+  // 公益图书角（用户侧，bookcorner 云函数）
+  getBookcornerSpace: (spaceId) => callCloudFunction('bookcorner', { action: 'getSpace', spaceId }),
+  getBookList: (params) => callCloudFunction('bookcorner', Object.assign({ action: 'getBooks' }, params)),
+  getBookDetail: (bookId) => callCloudFunction('bookcorner', { action: 'getBookDetail', bookId }),
+  getBookComments: (params) => callCloudFunction('bookcorner', Object.assign({ action: 'getComments' }, params)),
+  addBookComment: (bookId, content) => callCloudFunction('bookcorner', { action: 'addComment', bookId, content }),
+  addBookExchange: (params) => callCloudFunction('bookcorner', Object.assign({ action: 'addExchange' }, params)),
+
   // 全局配置（维护模式开关）
   getAppConfig: () => callCloudFunction('config', { action: 'get' }),
   // 联系方式复制限流（轻量防刷）
@@ -72,6 +80,11 @@ const API = {
   adminSetAdmin: (userId, isAdmin) => callCloudFunction('admin', { action: 'setAdmin', userId, isAdmin }),
   adminSetBan: (userId, banned) => callCloudFunction('admin', { action: 'setBan', userId, banned }),
   adminDeleteUser: (userId) => callCloudFunction('admin', { action: 'deleteUser', userId }),
+
+  // 管理员 · 公益图书角留言审核（commentReview 云函数）
+  adminCommentPending: (params) => callCloudFunction('commentReview', Object.assign({ action: 'getPending' }, params)),
+  adminCommentApproved: (params) => callCloudFunction('commentReview', Object.assign({ action: 'getApproved' }, params)),
+  adminCommentReview: (commentId, op) => callCloudFunction('commentReview', { action: op, commentId }),
 
   // 管理员 · 数据管理（商品/求购）
   adminListCommodity: (params) => callCloudFunction('commodity', Object.assign({ action: 'adminList' }, params)),
