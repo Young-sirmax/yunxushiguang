@@ -117,5 +117,20 @@ exports.main = async (event) => {
     return { code: 0, data: normalizeSensitiveWords(cfg && cfg.sensitiveWords) };
   }
 
+  // 引导初始化：把默认敏感词写进 config 记录（新环境第一次部署时用一次）。
+  // 只填空、绝不覆盖已有词表，因此可以安全地重复调用。
+  // 之后在控制台直接增删 sensitiveWords 即可，无需再调用本 action。
+  if (action === 'initSensitiveWords') {
+    const cfg = await readAppConfig();
+    if (!cfg) return { code: -1, msg: '缺少 key=app 的配置记录，请先在控制台创建' };
+    if (Array.isArray(cfg.sensitiveWords) && cfg.sensitiveWords.length > 0) {
+      return { code: 0, data: cfg.sensitiveWords, msg: '已存在词表，未覆盖' };
+    }
+    await db.collection('config').doc(cfg._id).update({
+      data: { sensitiveWords: DEFAULT_SENSITIVE_WORDS }
+    });
+    return { code: 0, data: DEFAULT_SENSITIVE_WORDS, msg: '已写入默认敏感词' };
+  }
+
   return { code: -1, msg: '未知操作' };
 };
