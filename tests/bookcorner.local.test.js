@@ -206,6 +206,9 @@ async function run() {
   const noBook = await fn.main({ action: 'addComment', bookId: 'book_x', content: 'hello' });
   check('书不存在时拒绝', noBook.code === -1, noBook);
 
+  const offShelf = await fn.main({ action: 'addComment', bookId: 'book_3', content: '下架书留言' });
+  check('下架书不能留言', offShelf.code === -1 && offShelf.msg.indexOf('下架') > -1, offShelf);
+
   currentOpenid = '';
   const noLogin = await fn.main({ action: 'addComment', bookId: 'book_1', content: 'hello' });
   check('未登录拒绝写操作', noLogin.code === -1 && noLogin.msg === '请先登录', noLogin);

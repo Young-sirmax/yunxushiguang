@@ -206,6 +206,8 @@ async function getBookDetail(event) {
   const bookRes = await db.collection('book').where({ _id: bookId }).limit(1).get();
   const book = bookRes.data[0];
   if (!book) return { code: -1, msg: '这本书不在书架上了' };
+  // 下架书（status='off'）不再接受新留言：下架通常是运营主动撤下，留言入口应收口
+  if (book.status !== 'on') return { code: -1, msg: '这本书已下架，暂时不能留言' };
 
   const commentRes = await db.collection('book_comment')
     .where({ bookId, status: 'approved' })
@@ -280,6 +282,8 @@ async function addComment(event, openid) {
   const bookRes = await db.collection('book').where({ _id: bookId }).limit(1).get();
   const book = bookRes.data[0];
   if (!book) return { code: -1, msg: '这本书不在书架上了' };
+  // 下架书（status='off'）不再接受新留言：下架通常是运营主动撤下，留言入口应收口
+  if (book.status !== 'on') return { code: -1, msg: '这本书已下架，暂时不能留言' };
 
   const user = await findUserByOpenid(openid);
   if (!user) return { code: -1, msg: '请先登录后再留言' };
