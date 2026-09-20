@@ -1,5 +1,6 @@
 // pages/bookcorner/detail.js —— 书详情 + 留言长帖（只展示已通过留言）
 const API = require('../../api/api.js');
+const NATIVE_COLORS = require('../../utils/nativeColors.js');
 const { showToast, formatDate } = require('../../utils/util.js');
 
 const PAGE_SIZE = 20;
@@ -105,7 +106,7 @@ Page({
       title: '需要登录',
       content: '登录后才能留下你的阅读感受',
       confirmText: '去登录',
-      confirmColor: '#00c17e',
+      confirmColor: NATIVE_COLORS.primary,
       success: (res) => {
         if (res.confirm) wx.navigateTo({ url: '/pages/index/index' });
       }

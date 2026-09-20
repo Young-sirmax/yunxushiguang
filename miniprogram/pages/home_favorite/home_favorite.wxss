@@ -49,7 +49,7 @@
   height: 160rpx;
   border-radius: 20rpx;
   margin-right: 24rpx;
-  background: #f1f5f9;
+  background: var(--fill);
   flex-shrink: 0;
 }
 
@@ -80,7 +80,7 @@
 
 .item-price {
   font-size: 32rpx;
-  color: var(--accent);
+  color: var(--price);
   font-weight: 700;
   margin-right: 12rpx;
 }
@@ -98,8 +98,8 @@
 
 .verified-mini {
   font-size: 20rpx;
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
   padding: 4rpx 14rpx;
   border-radius: var(--radius-pill);
   font-weight: 500;
@@ -113,8 +113,8 @@
 
 .item-condition {
   font-size: 22rpx;
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
   padding: 4rpx 14rpx;
   border-radius: var(--radius-pill);
   display: inline-block;
@@ -152,17 +152,17 @@
 .go-btn {
   background: var(--primary-grad);
   color: var(--white);
-  box-shadow: 0 4rpx 12rpx rgba(0, 193, 126, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(var(--primary-rgb), 0.3);
 }
 
 .remove-btn {
   background: var(--white);
-  color: var(--danger);
-  border: 2rpx solid rgba(244, 63, 94, 0.5);
+  color: var(--error);
+  border: 2rpx solid rgba(var(--price-rgb), 0.5);
 }
 
 .remove-btn:active {
-  background: var(--danger-soft);
+  background: var(--error-soft);
 }
 
 .empty-state {
@@ -210,7 +210,7 @@
 }
 /* === 以物易物 / 交易状态 === */
 .item-price.exchange {
-  color: var(--exchange);
+  color: var(--type-exchange-text);
   font-size: 24rpx;
   font-weight: 600;
 }
@@ -220,12 +220,12 @@
   padding: 4rpx 14rpx;
   border-radius: var(--radius-pill);
   font-weight: 600;
-  color: #b45309;
-  background: #fef3c7;
+  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */;
+  background: var(--warning-soft);
 }
 
 .item-price.skill {
-  color: var(--skill);
+  color: var(--type-skill-text);
   font-size: 26rpx;
   font-weight: 600;
 }

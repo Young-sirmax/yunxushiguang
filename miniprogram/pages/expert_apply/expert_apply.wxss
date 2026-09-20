@@ -1,12 +1,12 @@
 /* pages/expert_apply/expert_apply.wxss —— 技能达人入驻申请 */
 page {
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 .page-container {
   min-height: 100vh;
   padding-bottom: 200rpx;
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 /* 顶部 */
@@ -22,7 +22,8 @@ page {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #ffb347 0%, #ff8a00 55%, #ff7a59 100%);
+  /* 达人页保留「暖金 → 橙红」身份色：两端都取自语义令牌，不再自带一组金黄 */
+  background: linear-gradient(135deg, var(--warning) 0%, var(--price) 100%);
   border-bottom-left-radius: 48rpx;
   border-bottom-right-radius: 48rpx;
 }
@@ -36,7 +37,7 @@ page {
 .ea-title {
   font-size: 44rpx;
   font-weight: 700;
-  color: #fff;
+  color: var(--white);
   margin-bottom: 8rpx;
 }
 
@@ -47,7 +48,7 @@ page {
 
 /* 卡片 */
 .ea-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 28rpx;
   padding: 32rpx;
   margin: -40rpx 24rpx 24rpx;
@@ -70,12 +71,12 @@ page {
 .ea-card-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 .ea-card-sub {
   font-size: 24rpx;
-  color: #9999aa;
+  color: var(--text-light);
 }
 
 /* 技能 chips */
@@ -88,16 +89,16 @@ page {
 .ea-chip {
   padding: 14rpx 30rpx;
   border-radius: 40rpx;
-  background: #f5f7fa;
+  background: var(--bg);
   font-size: 27rpx;
-  color: #555566;
+  color: var(--text-secondary);
   border: 2rpx solid transparent;
   transition: all 0.2s ease;
 }
 
 .ea-chip.active {
-  background: var(--skill-grad);
-  color: var(--skill);
+  background: var(--type-skill-grad);
+  color: var(--type-skill-text);
   border-color: transparent;
   font-weight: 600;
 }
@@ -106,13 +107,13 @@ page {
 .ea-textarea {
   width: 100%;
   height: 220rpx;
-  background: #f8f8f8;
+  background: var(--bg);
   border-radius: 20rpx;
   padding: 24rpx;
   box-sizing: border-box;
   font-size: 29rpx;
   line-height: 1.6;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 /* 证明图 */
@@ -128,7 +129,7 @@ page {
   height: 160rpx;
   border-radius: 16rpx;
   overflow: hidden;
-  background: #f5f5fa;
+  background: var(--fill);
 }
 
 .ea-cert-img {
@@ -144,7 +145,7 @@ page {
   height: 40rpx;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.55);
-  color: #fff;
+  color: var(--white);
   font-size: 28rpx;
   line-height: 40rpx;
   text-align: center;
@@ -155,26 +156,26 @@ page {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2rpx dashed #d0d0d8;
-  background: #fafafa;
+  border: 2rpx dashed var(--fill-strong);
+  background: var(--bg);
 }
 
 .ea-add-plus {
   font-size: 52rpx;
-  color: #b0b0c0;
+  color: var(--text-light);
   line-height: 1;
 }
 
 .ea-add-label {
   font-size: 22rpx;
-  color: #9999aa;
+  color: var(--text-light);
   margin-top: 8rpx;
 }
 
 .ea-tip {
   margin-top: 18rpx;
   font-size: 23rpx;
-  color: #9999aa;
+  color: var(--text-light);
 }
 
 /* 表单字段 */
@@ -182,7 +183,7 @@ page {
   display: flex;
   align-items: center;
   padding: 22rpx 0;
-  border-bottom: 1rpx solid #f5f5fa;
+  border-bottom: 1rpx solid var(--fill);
   min-height: 80rpx;
 }
 
@@ -194,7 +195,7 @@ page {
   width: 180rpx;
   flex-shrink: 0;
   font-size: 28rpx;
-  color: #555566;
+  color: var(--text-secondary);
 }
 
 .ea-picker {
@@ -203,19 +204,19 @@ page {
   justify-content: space-between;
   align-items: center;
   font-size: 30rpx;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 .ea-arrow {
   font-size: 32rpx;
-  color: #cccce0;
+  color: var(--text-light);   /* 装饰箭头/图标：统一走「文字弱」，不再各写一种浅灰 */
 }
 
 .ea-input-wrap {
   flex: 1;
   display: flex;
   align-items: center;
-  background: #f8f8f8;
+  background: var(--bg);
   border-radius: 16rpx;
   padding: 0 24rpx;
   height: 84rpx;
@@ -224,20 +225,20 @@ page {
 .ea-yen {
   font-size: 34rpx;
   font-weight: 600;
-  color: #ff7a59;
+  color: var(--price);
   margin-right: 8rpx;
 }
 
 .ea-input {
   flex: 1;
   font-size: 32rpx;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 .ea-note {
   margin: 8rpx 32rpx 0;
   font-size: 23rpx;
-  color: #9999aa;
+  color: var(--text-light);
   line-height: 1.6;
 }
 
@@ -249,7 +250,7 @@ page {
   bottom: 0;
   padding: 20rpx 24rpx;
   background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 -6rpx 24rpx rgba(15, 27, 45, 0.06);
+  box-shadow: 0 -6rpx 24rpx rgba(var(--text-rgb), 0.06);
 }
 
 .ea-submit {
@@ -258,17 +259,17 @@ page {
   border-radius: 999rpx;
   font-size: 32rpx;
   font-weight: 600;
-  color: #fff;
+  color: var(--white);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--skill-grad);
-  box-shadow: 0 10rpx 30rpx rgba(132, 193, 255, 0.36);
+  background: var(--type-skill-text);
+  box-shadow: 0 10rpx 30rpx rgba(var(--type-skill-rgb), 0.36);
 }
 
 .ea-submit[disabled] {
-  background: #e5e7eb;
-  color: #9ca3af;
+  background: var(--fill-strong);
+  color: var(--text-light);
   box-shadow: none;
 }

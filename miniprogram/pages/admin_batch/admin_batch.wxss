@@ -1,13 +1,13 @@
 /* pages/admin_batch/admin_batch.wxss —— 管理员批量上架 */
 page {
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 .page-container {
   min-height: 100vh;
   padding: 24rpx;
   box-sizing: border-box;
-  background: #f5f7fa;
+  background: var(--bg);
   padding-bottom: 80rpx;
 }
 
@@ -16,8 +16,8 @@ page {
   display: flex;
   align-items: flex-start;
   gap: 12rpx;
-  background: #fff7e6;
-  border: 1rpx solid #ffe0b2;
+  background: var(--warning-soft);
+  border: 1rpx solid var(--price-soft);
   border-radius: 20rpx;
   padding: 20rpx 24rpx;
   margin-bottom: 24rpx;
@@ -31,7 +31,7 @@ page {
 .notice-text {
   flex: 1;
   font-size: 23rpx;
-  color: #b45309;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */;
   line-height: 1.6;
 }
 
@@ -39,7 +39,7 @@ page {
 .tab-bar {
   display: flex;
   padding: 6rpx;
-  background: #eef2f6;
+  background: var(--fill-strong);
   border-radius: 999rpx;
   margin-bottom: 24rpx;
 }
@@ -60,7 +60,7 @@ page {
 
 .tab-item.active {
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   box-shadow: var(--shadow-primary);
 }
 
@@ -77,11 +77,11 @@ page {
 }
 
 .card {
-  background: #fff;
+  background: var(--white);
   border-radius: 26rpx;
   padding: 28rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 6rpx 26rpx rgba(15, 27, 45, 0.05);
+  box-shadow: 0 6rpx 26rpx rgba(var(--text-rgb), 0.05);
 }
 
 .card.empty {
@@ -93,13 +93,13 @@ page {
 .card-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #14202f;
+  color: var(--text);
   margin-bottom: 8rpx;
 }
 
 .card-desc {
   font-size: 24rpx;
-  color: #94a3b8;
+  color: var(--text-light);
   line-height: 1.6;
   margin-bottom: 20rpx;
 }
@@ -110,8 +110,8 @@ page {
   gap: 14rpx;
   height: 88rpx;
   padding: 0 24rpx;
-  background: #f8fafc;
-  border: 2rpx dashed #d7dee8;
+  background: var(--bg);
+  border: 2rpx dashed var(--fill-strong);
   border-radius: 20rpx;
 }
 
@@ -122,13 +122,13 @@ page {
 .pick-text {
   flex: 1;
   font-size: 27rpx;
-  color: #3e4e62;
+  color: var(--text-secondary);
 }
 
 .tip {
   margin-top: 16rpx;
   font-size: 23rpx;
-  color: #94a3b8;
+  color: var(--text-light);
   line-height: 1.6;
 }
 
@@ -139,7 +139,7 @@ page {
 
 .row-item {
   padding: 18rpx 0;
-  border-bottom: 1rpx solid #f2f4f7;
+  border-bottom: 1rpx solid var(--fill);
 }
 
 .row-head {
@@ -152,52 +152,52 @@ page {
 
 .row-no {
   font-size: 22rpx;
-  color: #94a3b8;
+  color: var(--text-light);
 }
 
 .row-type {
   font-size: 20rpx;
   padding: 2rpx 12rpx;
   border-radius: 999rpx;
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
 }
 
 .row-img {
   font-size: 20rpx;
   padding: 2rpx 12rpx;
   border-radius: 999rpx;
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
 }
 
 .row-img.missing {
-  background: var(--danger-soft);
-  color: var(--danger);
+  background: var(--error-soft);
+  color: var(--error);
 }
 
 .row-img.none {
-  background: #eef1f5;
-  color: #94a3b8;
+  background: var(--fill);
+  color: var(--text-light);
 }
 
 .row-title {
   display: block;
   font-size: 27rpx;
-  color: #14202f;
+  color: var(--text);
   line-height: 1.5;
 }
 
 .row-skip {
   margin-top: 10rpx;
   font-size: 23rpx;
-  color: var(--danger);
+  color: var(--error);
 }
 
 .row-more {
   padding-top: 16rpx;
   font-size: 23rpx;
-  color: #94a3b8;
+  color: var(--text-light);
   text-align: center;
 }
 
@@ -208,7 +208,7 @@ page {
 
 .progress-bar {
   height: 16rpx;
-  background: #eef2f6;
+  background: var(--fill-strong);
   border-radius: 999rpx;
   overflow: hidden;
 }
@@ -224,40 +224,40 @@ page {
   display: block;
   margin-top: 10rpx;
   font-size: 23rpx;
-  color: #94a3b8;
+  color: var(--text-light);
   text-align: center;
 }
 
 .summary {
   margin-top: 18rpx;
   font-size: 25rpx;
-  color: #3e4e62;
+  color: var(--text-secondary);
 }
 
 .fail-title {
   margin-top: 22rpx;
   font-size: 27rpx;
   font-weight: 600;
-  color: var(--danger);
+  color: var(--error);
 }
 
 .fail-item {
   display: flex;
   gap: 14rpx;
   padding: 12rpx 0;
-  border-bottom: 1rpx solid #f7f9fc;
+  border-bottom: 1rpx solid var(--bg);
 }
 
 .fail-no {
   flex-shrink: 0;
   font-size: 23rpx;
-  color: #94a3b8;
+  color: var(--text-light);
 }
 
 .fail-err {
   flex: 1;
   font-size: 23rpx;
-  color: var(--danger);
+  color: var(--error);
   word-break: break-all;
 }
 
@@ -274,7 +274,7 @@ page {
   height: 160rpx;
   border-radius: 16rpx;
   overflow: hidden;
-  background: #f5f5fa;
+  background: var(--fill);
 }
 
 .img-thumb {
@@ -290,7 +290,7 @@ page {
   height: 40rpx;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.55);
-  color: #fff;
+  color: var(--white);
   font-size: 28rpx;
   line-height: 40rpx;
   text-align: center;
@@ -300,10 +300,10 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2rpx dashed #d7dee8;
-  background: #fafbfd;
+  border: 2rpx dashed var(--fill-strong);
+  background: var(--bg);
   font-size: 52rpx;
-  color: #b0b8c4;
+  color: var(--text-light);
 }
 
 .field {
@@ -311,7 +311,7 @@ page {
   align-items: center;
   min-height: 86rpx;
   padding: 16rpx 0;
-  border-bottom: 1rpx solid #f2f4f7;
+  border-bottom: 1rpx solid var(--fill);
 }
 
 .field:last-child {
@@ -327,7 +327,7 @@ page {
   width: 150rpx;
   flex-shrink: 0;
   font-size: 27rpx;
-  color: #7b8a9c;
+  color: var(--text-secondary);
 }
 
 .field.column .label {
@@ -338,13 +338,13 @@ page {
 .picker {
   flex: 1;
   font-size: 28rpx;
-  color: #14202f;
+  color: var(--text);
 }
 
 .textarea {
   width: 100%;
   height: 200rpx;
-  background: #f8fafc;
+  background: var(--bg);
   border-radius: 16rpx;
   padding: 20rpx;
   box-sizing: border-box;
@@ -367,7 +367,7 @@ page {
   height: 140rpx;
   border-radius: 16rpx;
   margin-right: 20rpx;
-  background: #f1f5f9;
+  background: var(--fill);
   flex-shrink: 0;
 }
 
@@ -380,7 +380,7 @@ page {
   display: block;
   font-size: 28rpx;
   font-weight: 600;
-  color: #14202f;
+  color: var(--text);
   line-height: 1.4;
   margin-bottom: 8rpx;
 }
@@ -388,7 +388,7 @@ page {
 .draft-price {
   font-size: 28rpx;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--price);
 }
 
 .draft-tags {
@@ -402,8 +402,8 @@ page {
   font-size: 21rpx;
   padding: 3rpx 14rpx;
   border-radius: 999rpx;
-  background: #f1f5f9;
-  color: #7b8a9c;
+  background: var(--fill);
+  color: var(--text-secondary);
 }
 
 .draft-actions {
@@ -420,13 +420,13 @@ page {
 }
 
 .mini-btn.primary {
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
 }
 
 .mini-btn.danger {
-  color: var(--danger);
-  background: var(--danger-soft);
+  color: var(--error);
+  background: var(--error-soft);
 }
 
 /* 通用按钮 */
@@ -437,7 +437,7 @@ page {
   border-radius: 999rpx;
   font-size: 30rpx;
   font-weight: 600;
-  color: #fff;
+  color: var(--white);
   background: var(--primary-grad);
   box-shadow: var(--shadow-primary);
 }
@@ -449,7 +449,7 @@ page {
   border-radius: 999rpx;
   font-size: 27rpx;
   font-weight: 600;
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
   margin-top: 18rpx;
 }

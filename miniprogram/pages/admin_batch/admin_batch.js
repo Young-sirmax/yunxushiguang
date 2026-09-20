@@ -9,6 +9,7 @@
 
 const app = getApp();
 const API = require('../../api/api.js');
+const NATIVE_COLORS = require('../../utils/nativeColors.js');
 const { showToast, showLoading, hideLoading } = require('../../utils/util.js');
 const { compressImages } = require('../../utils/image.js');
 const { formatSkillPrice } = require('../../utils/expert.js');
@@ -560,7 +561,7 @@ Page({
       title: '删除待上架',
       content: '将删除该条信息及其图片，且不可恢复。',
       confirmText: '删除',
-      confirmColor: '#f43f5e',
+      confirmColor: NATIVE_COLORS.error,
       success: async (res) => {
         if (!res.confirm) return;
         try {

@@ -32,7 +32,7 @@
 .update-date {
   text-align: center;
   font-size: 24rpx;
-  color: #aaa;
+  color: var(--text-light);
   margin-bottom: 40rpx;
 }
 
@@ -69,19 +69,19 @@
 
 .section-text.footnote {
   font-size: 24rpx;
-  color: #aaa;
+  color: var(--text-light);
   font-style: italic;
 }
 
 .section-list {
-  background: #f8f9fb;
+  background: var(--bg);
   border-radius: 16rpx;
   padding: 20rpx 24rpx;
 }
 
 .list-item {
   font-size: 26rpx;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.8;
   padding: 6rpx 0;
   display: flex;
@@ -95,7 +95,7 @@
 }
 
 .contact-card {
-  background: #f8f9fb;
+  background: var(--bg);
   border-radius: 16rpx;
   padding: 24rpx;
   display: flex;
@@ -105,28 +105,28 @@
 
 .contact-item-text {
   font-size: 26rpx;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .agreement-tip {
-  background: #fff8e1;
+  background: var(--warning-soft);
   border-radius: 16rpx;
   padding: 24rpx 28rpx;
-  border-left: 6rpx solid #ffb74d;
+  border-left: 6rpx solid var(--warning);
   margin-top: 20rpx;
 }
 
 .tip-title {
   font-size: 28rpx;
   font-weight: 600;
-  color: #e65100;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */;
   display: block;
   margin-bottom: 10rpx;
 }
 
 .tip-content {
   font-size: 24rpx;
-  color: #bf360c;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */;
   line-height: 1.7;
 }
 

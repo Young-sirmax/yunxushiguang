@@ -1,5 +1,6 @@
 // pages/admin/admin.js - 管理后台（学生认证审核 + 商品审核）
 const API = require('../../api/api.js');
+const NATIVE_COLORS = require('../../utils/nativeColors.js');
 const { showToast, showLoading, hideLoading, formatDate } = require('../../utils/util.js');
 
 const timeText = (t) => {
@@ -263,7 +264,7 @@ Page({
       editable: true,
       placeholderText: '例如：图片与描述不符、内容违规',
       confirmText: '驳回',
-      confirmColor: '#f43f5e',
+      confirmColor: NATIVE_COLORS.error,
       success: async (res) => {
         if (!res.confirm) return;
         this.doSetCommodityStatus(id, 'rejected', (res.content || '').trim());
@@ -311,7 +312,7 @@ Page({
       title: '永久删除商品',
       content: '将删除该信息文档及其云存储图片，且不可恢复。确定删除？',
       confirmText: '永久删除',
-      confirmColor: '#f43f5e',
+      confirmColor: NATIVE_COLORS.error,
       success: async (res) => {
         if (!res.confirm) return;
         showLoading('删除中...');
@@ -374,7 +375,7 @@ Page({
         ? '封禁后该账号将无法登录及发布信息（不影响浏览）。确定封禁？'
         : '确认解除该账号的封禁状态？',
       confirmText: '确定',
-      confirmColor: toBan ? '#f43f5e' : '#00c17e',
+      confirmColor: toBan ? NATIVE_COLORS.error : NATIVE_COLORS.primary,
       success: async (res) => {
         if (!res.confirm) return;
         showLoading('处理中...');
@@ -408,7 +409,7 @@ Page({
         ? '确认将该用户设为技能达人？对方即可发布技能服务。'
         : '确认撤销该用户的技能达人身份？其技能服务将无法继续发布。',
       confirmText: '确定',
-      confirmColor: toExpert ? '#ffb020' : '#f43f5e',
+      confirmColor: toExpert ? NATIVE_COLORS.warning : NATIVE_COLORS.error,
       success: async (res) => {
         if (!res.confirm) return;
         showLoading('处理中...');
@@ -435,7 +436,7 @@ Page({
       title: '删除用户',
       content: '将永久删除该用户及其发布的所有信息与图片，且不可恢复。确定删除？',
       confirmText: '永久删除',
-      confirmColor: '#f43f5e',
+      confirmColor: NATIVE_COLORS.error,
       success: async (res) => {
         if (!res.confirm) return;
         showLoading('删除中...');
@@ -551,7 +552,7 @@ Page({
       title: '通过留言',
       content: '确认通过这条留言？通过后将展示在书详情页的留言长帖里。',
       confirmText: '通过',
-      confirmColor: '#00c17e',
+      confirmColor: NATIVE_COLORS.primary,
       success: (res) => {
         if (res.confirm) this.doCommentReview(id, 'approve');
       }
@@ -564,7 +565,7 @@ Page({
       title: '拒绝留言',
       content: '确认拒绝这条留言？拒绝后不会对读者展示（留言不会删除，仅改状态）。',
       confirmText: '拒绝',
-      confirmColor: '#f43f5e',
+      confirmColor: NATIVE_COLORS.error,
       success: (res) => {
         if (res.confirm) this.doCommentReview(id, 'reject');
       }
@@ -611,7 +612,7 @@ Page({
         title: '确认上架',
         content: '确认该商品审核通过并上架展示？',
         confirmText: '通过',
-        confirmColor: '#00c17e',
+        confirmColor: NATIVE_COLORS.primary,
         success: async (res) => {
           if (!res.confirm) return;
           this.doAuditCommodity(id, 'approved', '');
@@ -624,7 +625,7 @@ Page({
         editable: true,
         placeholderText: '例如：图片模糊、描述不完整、违规内容',
         confirmText: '驳回',
-        confirmColor: '#f43f5e',
+        confirmColor: NATIVE_COLORS.error,
         success: async (res) => {
           if (!res.confirm) return;
           this.doAuditCommodity(id, 'rejected', (res.content || '').trim());
@@ -672,7 +673,7 @@ Page({
         ? '确认该用户学生身份认证通过？通过后其账号将显示"已认证"。'
         : '确认拒绝该用户的认证申请？拒绝后其可修改资料重新提交。',
       confirmText: isApprove ? '通过' : '拒绝',
-      confirmColor: isApprove ? '#00c17e' : '#f43f5e',
+      confirmColor: isApprove ? NATIVE_COLORS.primary : NATIVE_COLORS.error,
       success: async (res) => {
         if (!res.confirm) return;
         showLoading('处理中...');

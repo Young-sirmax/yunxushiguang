@@ -1,11 +1,11 @@
 /* pages/commodity_release/commodity_release.wxss */
 page {
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 .release-page {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--bg);
   /* 底部固定操作栏高度（约 240rpx）+ 安全区，避免说明文字被遮住 */
   padding-bottom: calc(280rpx + env(safe-area-inset-bottom));
 }
@@ -37,7 +37,7 @@ page {
 .header-title {
   font-size: 44rpx;
   font-weight: 700;
-  color: #fff;
+  color: var(--white);
   margin-bottom: 8rpx;
   text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.12);
 }
@@ -56,7 +56,7 @@ page {
 }
 
 .form-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 28rpx;
   padding: 32rpx;
   margin-bottom: 24rpx;
@@ -73,18 +73,18 @@ page {
 .card-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 .card-sub {
   font-size: 24rpx;
-  color: #9999aa;
+  color: var(--text-light);
 }
 
 .card-hint {
   margin-top: 20rpx;
   font-size: 24rpx;
-  color: #9999aa;
+  color: var(--text-light);
   line-height: 1.6;
 }
 
@@ -101,7 +101,7 @@ page {
   aspect-ratio: 1;
   border-radius: 16rpx;
   overflow: hidden;
-  background: #f5f5fa;
+  background: var(--fill);
 }
 
 .thumb-img {
@@ -135,7 +135,7 @@ page {
 }
 
 .del-icon {
-  color: #fff;
+  color: var(--white);
   font-size: 28rpx;
   line-height: 1;
   font-weight: 300;
@@ -145,8 +145,8 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2rpx dashed #d0d0d8;
-  background: #fafafa;
+  border: 2rpx dashed var(--fill-strong);
+  background: var(--bg);
 }
 
 .add-inner {
@@ -158,13 +158,13 @@ page {
 
 .add-plus {
   font-size: 56rpx;
-  color: #b0b0c0;
+  color: var(--text-light);
   line-height: 1;
 }
 
 .add-label {
   font-size: 22rpx;
-  color: #9999aa;
+  color: var(--text-light);
   margin-top: 8rpx;
 }
 
@@ -173,7 +173,7 @@ page {
   display: flex;
   align-items: center;
   padding: 24rpx 0;
-  border-bottom: 1rpx solid #f5f5fa;
+  border-bottom: 1rpx solid var(--fill);
   min-height: 80rpx;
 }
 
@@ -190,7 +190,7 @@ page {
   width: 160rpx;
   flex-shrink: 0;
   font-size: 28rpx;
-  color: #555566;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -208,12 +208,12 @@ page {
 .field-input {
   flex: 1;
   font-size: 30rpx;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 .field-counter {
   font-size: 22rpx;
-  color: #bbb;
+  color: var(--text-light);
   margin-left: 16rpx;
 }
 
@@ -223,16 +223,16 @@ page {
   justify-content: space-between;
   align-items: center;
   font-size: 30rpx;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 .field-picker.placeholder {
-  color: #9999aa;
+  color: var(--text-light);
 }
 
 .picker-arrow {
   font-size: 32rpx;
-  color: #cccce0;
+  color: var(--text-light);   /* 装饰箭头/图标：统一走「文字弱」，不再各写一种浅灰 */
 }
 
 /* === 成色芯片 === */
@@ -245,9 +245,9 @@ page {
 .chip {
   padding: 16rpx 32rpx;
   border-radius: 40rpx;
-  background: #f5f7fa;
+  background: var(--bg);
   font-size: 28rpx;
-  color: #555566;
+  color: var(--text-secondary);
   border: 2rpx solid transparent;
   transition: all 0.2s ease;
 }
@@ -257,7 +257,7 @@ page {
   color: var(--white);
   font-weight: 500;
   border-color: transparent;
-  box-shadow: 0 4rpx 16rpx rgba(0, 193, 126, 0.25);
+  box-shadow: 0 4rpx 16rpx rgba(var(--primary-rgb), 0.25);
 }
 
 /* === 价格输入 === */
@@ -265,7 +265,7 @@ page {
   flex: 1;
   display: flex;
   align-items: center;
-  background: #f8f8f8;
+  background: var(--bg);
   border-radius: 16rpx;
   padding: 0 24rpx;
   height: 88rpx;
@@ -274,7 +274,7 @@ page {
 .price-symbol {
   font-size: 36rpx;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--price);
   margin-right: 8rpx;
 }
 
@@ -282,12 +282,12 @@ page {
   flex: 1;
   font-size: 36rpx;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 .discount-tag {
   margin-left: 12rpx;
-  background: linear-gradient(135deg, #ff7a8a, #f43f5e);
+  background: var(--error-grad);
   color: var(--white);
   font-size: 22rpx;
   padding: 4rpx 16rpx;
@@ -295,14 +295,14 @@ page {
 }
 
 .discount-text {
-  color: #fff;
+  color: var(--white);
 }
 
 /* === 数量步进器 === */
 .stepper {
   display: flex;
   align-items: center;
-  background: #f8f8f8;
+  background: var(--bg);
   border-radius: 16rpx;
   overflow: hidden;
 }
@@ -314,13 +314,13 @@ page {
   align-items: center;
   justify-content: center;
   font-size: 40rpx;
-  color: #555566;
-  background: #f0f0f5;
+  color: var(--text-secondary);
+  background: var(--fill);
   user-select: none;
 }
 
 .step-btn:active {
-  background: #e8e8ef;
+  background: var(--fill);
 }
 
 .step-input {
@@ -328,14 +328,14 @@ page {
   text-align: center;
   font-size: 32rpx;
   font-weight: 500;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 /* === 智能定价 === */
 .smart-tip {
   display: flex;
   align-items: flex-start;
-  background: linear-gradient(135deg, #e8f8ef, #f0faf3);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg) 100%);
   border-radius: 20rpx;
   padding: 24rpx;
   margin-top: 24rpx;
@@ -356,20 +356,20 @@ page {
 
 .smart-title {
   font-size: 26rpx;
-  color: #555566;
+  color: var(--text-secondary);
   margin-right: 12rpx;
 }
 
 .smart-value {
   font-size: 34rpx;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--price);
   margin-right: 12rpx;
 }
 
 .smart-desc {
   font-size: 22rpx;
-  color: #9999aa;
+  color: var(--text-light);
   width: 100%;
   margin-top: 4rpx;
 }
@@ -378,13 +378,13 @@ page {
 .desc-area {
   width: 100%;
   height: 280rpx;
-  background: #f8f8f8;
+  background: var(--bg);
   border-radius: 20rpx;
   padding: 24rpx;
   box-sizing: border-box;
   font-size: 30rpx;
   line-height: 1.6;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 .tag-group {
@@ -397,14 +397,14 @@ page {
 
 .tag-hint {
   font-size: 24rpx;
-  color: #9999aa;
+  color: var(--text-light);
   margin-right: 4rpx;
 }
 
 .quick-tag {
   padding: 10rpx 24rpx;
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
   font-size: 24rpx;
   border-radius: var(--radius-pill);
   font-weight: 500;
@@ -436,7 +436,7 @@ page {
 
 .tip-text {
   font-size: 24rpx;
-  color: #9999aa;
+  color: var(--text-light);
   line-height: 1.6;
 }
 
@@ -446,7 +446,7 @@ page {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #fff;
+  background: var(--white);
   padding: 20rpx 32rpx 40rpx;
   box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.06);
   z-index: 100;
@@ -455,7 +455,7 @@ page {
 .action-hint {
   text-align: center;
   font-size: 24rpx;
-  color: #ff9900;
+  color: var(--price);
   margin-bottom: 12rpx;
 }
 
@@ -468,7 +468,7 @@ page {
   font-size: 32rpx;
   font-weight: 600;
   border: none;
-  box-shadow: 0 8rpx 28rpx rgba(7, 193, 96, 0.3);
+  box-shadow: 0 8rpx 28rpx rgba(var(--primary-rgb), 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -497,8 +497,8 @@ page {
 }
 
 .publish-btn[disabled] {
-  background: linear-gradient(135deg, #c8e6d4, #b8e6cc);
-  color: rgba(255, 255, 255, 0.85);
+  background: linear-gradient(135deg, var(--fill-strong) 0%, var(--fill) 100%);
+  color: var(--text-light);
   box-shadow: none;
 }
 
@@ -530,7 +530,7 @@ page {
 }
 
 .mode-item.active {
-  background: #fff;
+  background: var(--white);
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 }
 
@@ -540,7 +540,7 @@ page {
 
 .mode-label {
   font-size: 28rpx;
-  color: #fff;
+  color: var(--white);
   font-weight: 500;
 }
 
@@ -550,24 +550,24 @@ page {
 }
 
 .mode-item.want.active .mode-label {
-  color: var(--want);
+  color: var(--type-wanted-text);
 }
 
 /* 求购模式下主按钮使用青蓝渐变，强化“求购”心智 */
 .publish-btn.want {
-  background: var(--want-grad);
-  box-shadow: 0 8rpx 28rpx rgba(161, 140, 209, 0.3);
+  background: var(--type-wanted-grad);
+  box-shadow: 0 8rpx 28rpx rgba(var(--type-wanted-rgb), 0.3);
 }
 
 .publish-btn.want[disabled] {
-  background: linear-gradient(135deg, #c6e6e2, #b7dfdb);
+  background: linear-gradient(135deg, var(--type-idle-soft) 0%, var(--bg) 100%);
   box-shadow: none;
 }
 
 /* === 曝光特权 === */
 .privilege-badge {
-  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-  color: #ff6b35;
+  background: linear-gradient(135deg, var(--warning-soft) 0%, var(--bg) 100%);
+  color: var(--price);
   font-size: 22rpx;
   padding: 6rpx 20rpx;
   border-radius: 20rpx;
@@ -577,7 +577,7 @@ page {
 .privilege-desc {
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #fff8f0, #fff3e0);
+  background: linear-gradient(135deg, var(--warning-soft) 0%, var(--bg) 100%);
   border-radius: 16rpx;
   padding: 20rpx 24rpx;
   margin-bottom: 24rpx;
@@ -590,7 +590,7 @@ page {
 
 .priv-text {
   font-size: 26rpx;
-  color: #555566;
+  color: var(--text-secondary);
 }
 
 .privilege-list {
@@ -603,7 +603,7 @@ page {
 .privilege-item {
   display: flex;
   align-items: flex-start;
-  background: #f8f8fa;
+  background: var(--bg);
   border-radius: 20rpx;
   padding: 24rpx;
   border: 2rpx solid transparent;
@@ -611,7 +611,7 @@ page {
 }
 
 .privilege-item.active {
-  background: linear-gradient(135deg, #e5f8f1, #d5f2e6);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg) 100%);
   border-color: var(--primary);
 }
 
@@ -620,7 +620,7 @@ page {
   height: 48rpx;
   border-radius: 12rpx;
   background: var(--white);
-  border: 2rpx solid #d8dee8;
+  border: 2rpx solid var(--fill-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -650,18 +650,18 @@ page {
 .priv-name {
   font-size: 28rpx;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 .priv-price {
   font-size: 28rpx;
   font-weight: 700;
-  color: #ff6b35;
+  color: var(--price);
 }
 
 .priv-desc {
   font-size: 24rpx;
-  color: #9999aa;
+  color: var(--text-light);
   line-height: 1.5;
 }
 
@@ -669,7 +669,7 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  background: linear-gradient(135deg, var(--warning-soft) 0%, var(--bg) 100%);
   border-radius: 16rpx;
   padding: 20rpx 24rpx;
   margin-bottom: 20rpx;
@@ -677,17 +677,17 @@ page {
 
 .total-label {
   font-size: 26rpx;
-  color: #555566;
+  color: var(--text-secondary);
 }
 
 .total-value {
   font-size: 32rpx;
   font-weight: 700;
-  color: #ff6b35;
+  color: var(--price);
 }
 
 .privilege-guide {
-  background: #f8f8fa;
+  background: var(--bg);
   border-radius: 16rpx;
   padding: 20rpx 24rpx;
 }
@@ -695,14 +695,14 @@ page {
 .guide-title {
   font-size: 26rpx;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--text);
   margin-bottom: 12rpx;
   display: block;
 }
 
 .guide-step {
   font-size: 24rpx;
-  color: #555566;
+  color: var(--text-secondary);
   line-height: 1.8;
   display: block;
 }
@@ -711,7 +711,7 @@ page {
 .want-image-hint {
   display: flex;
   align-items: center;
-  background: #fff8f0;
+  background: var(--price-soft);
   border-radius: 16rpx;
   padding: 20rpx 24rpx;
   margin-bottom: 20rpx;
@@ -724,7 +724,7 @@ page {
 
 .hint-text {
   font-size: 24rpx;
-  color: #555566;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -733,12 +733,12 @@ page {
   justify-content: space-between;
   align-items: center;
   padding: 24rpx 0;
-  border-top: 1rpx solid #f5f5fa;
+  border-top: 1rpx solid var(--fill);
 }
 
 .reward-label {
   font-size: 28rpx;
-  color: #1a1a2e;
+  color: var(--text);
   font-weight: 500;
 }
 
@@ -750,35 +750,35 @@ page {
 .reward-chip {
   padding: 14rpx 28rpx;
   border-radius: 40rpx;
-  background: #f5f7fa;
+  background: var(--bg);
   font-size: 26rpx;
-  color: #555566;
+  color: var(--text-secondary);
   border: 2rpx solid transparent;
   transition: all 0.2s ease;
 }
 
 .reward-chip.active {
-  background: linear-gradient(135deg, #ff9900, #ff6b35);
-  color: #fff;
+  background: var(--price-grad);
+  color: var(--white);
   font-weight: 500;
   border-color: transparent;
-  box-shadow: 0 4rpx 16rpx rgba(255, 107, 53, 0.25);
+  box-shadow: 0 4rpx 16rpx rgba(var(--price-rgb), 0.25);
 }
 
 .reward-tip {
   display: flex;
   align-items: center;
-  background: #fff8f0;
+  background: var(--price-soft);
   border-radius: 16rpx;
   padding: 20rpx 24rpx;
   margin-top: 16rpx;
   font-size: 24rpx;
-  color: #555566;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
 .reward-tip.free {
-  background: #f0f7f3;
+  background: var(--primary-light);
 }
 
 .reward-tip .tip-icon {
@@ -788,7 +788,7 @@ page {
 
 .want-publish-fee {
   margin-top: 20rpx;
-  background: #f8f8fa;
+  background: var(--bg);
   border-radius: 16rpx;
   padding: 20rpx 24rpx;
 }
@@ -801,19 +801,19 @@ page {
 
 .fee-label {
   font-size: 26rpx;
-  color: #555566;
+  color: var(--text-secondary);
 }
 
 .fee-value {
   font-size: 26rpx;
   font-weight: 600;
-  color: #ff6b35;
+  color: var(--price);
 }
 
 .fee-tip {
   margin-top: 12rpx;
   font-size: 22rpx;
-  color: #9999aa;
+  color: var(--text-light);
   line-height: 1.5;
 }
 
@@ -822,7 +822,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff8f0;
+  background: var(--price-soft);
   border-radius: 16rpx;
   padding: 16rpx 24rpx;
   margin-bottom: 16rpx;
@@ -830,19 +830,19 @@ page {
 
 .cost-label {
   font-size: 26rpx;
-  color: #555566;
+  color: var(--text-secondary);
   margin-right: 8rpx;
 }
 
 .cost-value {
   font-size: 28rpx;
   font-weight: 700;
-  color: #ff6b35;
+  color: var(--price);
 }
 
 .cost-note {
   font-size: 22rpx;
-  color: #9999aa;
+  color: var(--text-light);
   margin-left: 8rpx;
 }
 
@@ -856,7 +856,7 @@ page {
 /* === 图书专区：适用专业（多选） === */
 .field-optional {
   font-size: 22rpx;
-  color: #9999aa;
+  color: var(--text-light);
   font-weight: 400;
 }
 
@@ -874,7 +874,7 @@ page {
   flex-shrink: 0;
   width: 72rpx;
   font-size: 24rpx;
-  color: #9999aa;
+  color: var(--text-light);
   line-height: 56rpx;
 }
 
@@ -893,8 +893,8 @@ page {
   padding: 12rpx 24rpx;
   margin-right: 14rpx;
   font-size: 24rpx;
-  color: #555566;
-  background: #f5f7fa;
+  color: var(--text-secondary);
+  background: var(--bg);
   border-radius: 40rpx;
   border: 2rpx solid transparent;
   transition: all 0.2s ease;
@@ -903,17 +903,17 @@ page {
 }
 
 .major-chip.active {
-  background: var(--primary-soft);
-  color: var(--primary);
-  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  border-color: var(--primary-dark);
   font-weight: 600;
 }
 
 /* 专业行用青蓝区分层级 */
 .major-chip.major.active {
-  background: var(--want-soft);
-  color: var(--want);
-  border-color: var(--want);
+  background: var(--type-wanted-soft);
+  color: var(--type-wanted-text);
+  border-color: var(--type-wanted-text);
 }
 
 .major-selected {
@@ -928,8 +928,8 @@ page {
   align-items: center;
   padding: 8rpx 18rpx;
   font-size: 23rpx;
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
   border-radius: 40rpx;
 }
 
@@ -942,50 +942,50 @@ page {
 
 .major-tip {
   font-size: 23rpx;
-  color: #9999aa;
+  color: var(--text-light);
   line-height: 1.6;
   margin-top: 4rpx;
 }
 
 /* === 以物易物：类型高亮 / 只读联系方式 === */
 .mode-item.exchange.active .mode-label {
-  color: var(--exchange);
+  color: var(--type-exchange-text);
 }
 
 .publish-btn.exchange {
-  background: var(--exchange-grad);
-  box-shadow: 0 8rpx 28rpx rgba(255, 154, 118, 0.34);
+  background: var(--type-exchange-grad);
+  box-shadow: 0 8rpx 28rpx rgba(var(--type-exchange-rgb), 0.34);
 }
 
 .publish-btn.exchange[disabled] {
-  background: linear-gradient(135deg, #ffe6d8, #ffdcc9);
+  background: linear-gradient(135deg, var(--type-exchange-soft) 0%, var(--bg) 100%);
   box-shadow: none;
 }
 
 .contact-readonly {
   flex: 1;
   font-size: 30rpx;
-  color: #1a1a2e;
+  color: var(--text);
   word-break: break-all;
 }
 
 .contact-readonly.empty {
   font-size: 26rpx;
-  color: #e08c00;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */;
 }
 
 /* === 技能服务：类型高亮 / 发布按钮 === */
 .mode-item.skill.active .mode-label {
-  color: var(--skill);
+  color: var(--type-skill-text);
 }
 
 .publish-btn.skill {
-  background: var(--skill-grad);
-  box-shadow: 0 8rpx 28rpx rgba(132, 193, 255, 0.36);
+  background: var(--type-skill-grad);
+  box-shadow: 0 8rpx 28rpx rgba(var(--type-skill-rgb), 0.36);
 }
 
 .publish-btn.skill[disabled] {
-  background: linear-gradient(135deg, #dfeaff, #d3e2ff);
+  background: linear-gradient(135deg, var(--type-skill-soft) 0%, var(--bg) 100%);
   box-shadow: none;
 }
 
@@ -993,7 +993,7 @@ page {
 .price-ref-tip {
   padding: 4rpx 0 16rpx 160rpx;
   font-size: 23rpx;
-  color: #94a3b8;
+  color: var(--text-light);
   line-height: 1.5;
 }
 
@@ -1010,7 +1010,7 @@ page {
 
 /* === 求购分区：物品求购 / 技能求助（紫系深浅区分） === */
 .field-required {
-  color: var(--danger);
+  color: var(--error);
   font-size: 28rpx;
   margin-left: 6rpx;
 }
@@ -1028,7 +1028,7 @@ page {
   justify-content: center;
   padding: 26rpx 0;
   border-radius: 24rpx;
-  background: #f5f7fa;
+  background: var(--bg);
   border: 2rpx solid transparent;
   transition: all 0.2s ease;
 }
@@ -1045,17 +1045,17 @@ page {
 }
 
 .want-seg-item.goods.active {
-  background: var(--want-grad);
-  box-shadow: 0 8rpx 22rpx rgba(161, 140, 209, 0.3);
+  background: var(--type-wanted-grad);
+  box-shadow: 0 8rpx 22rpx rgba(var(--type-wanted-rgb), 0.3);
 }
 
 .want-seg-item.skill.active {
-  background: var(--want-deep-grad);
-  box-shadow: 0 8rpx 22rpx rgba(124, 92, 191, 0.3);
+  background: var(--type-wanted-deep-grad);
+  box-shadow: 0 8rpx 22rpx rgba(var(--type-wanted-rgb), 0.3);
 }
 
 .want-seg-item.active .ws-label {
-  color: #fff;
+  color: var(--white);
   font-weight: 600;
 }
 

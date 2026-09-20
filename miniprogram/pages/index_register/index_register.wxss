@@ -38,13 +38,13 @@
 }
 
 .required {
-  color: var(--danger);
+  color: var(--error);
 }
 
 .form-input, .picker-value {
   height: 88rpx;
   line-height: 88rpx;
-  background: #f1f5f9;
+  background: var(--fill);
   border: 2rpx solid transparent;
   border-radius: var(--radius);
   padding: 0 24rpx;
@@ -56,7 +56,7 @@
 .form-input:focus {
   border-color: var(--primary);
   background: var(--white);
-  box-shadow: 0 0 0 6rpx rgba(0, 193, 126, 0.08);
+  box-shadow: 0 0 0 6rpx rgba(var(--primary-rgb), 0.08);
 }
 
 .picker-value {
@@ -102,7 +102,7 @@
   width: 120rpx;
   height: 120rpx;
   border-radius: 50%;
-  background: #f1f5f9;
+  background: var(--fill);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -112,7 +112,7 @@
 
 .avatar-placeholder:active {
   border-color: var(--primary);
-  background: var(--primary-soft);
+  background: var(--primary-light);
 }
 
 .avatar-icon {
@@ -123,7 +123,7 @@
 .error-text {
   display: block;
   font-size: 24rpx;
-  color: var(--danger);
+  color: var(--error);
   margin-top: 8rpx;
 }
 

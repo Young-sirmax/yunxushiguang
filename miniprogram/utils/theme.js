@@ -35,7 +35,7 @@ const TOKENS = {
 
 // 类型主题色：气泡渐变描边 / 填充 / 卡片角标共用
 const TYPE_THEME = {
-  idle: { from: '#7ee8c7', to: '#4ecdc4', label: '闲置', text: '#12a08e', soft: '#e6f7f2' },
+  idle: { from: '#7ee8c7', to: '#4ecdc4', label: '闲置', text: '#0e8c7c', soft: '#e6f7f2' },
   wanted: { from: '#c9beff', to: '#a78bfa', label: '求购', text: '#7b5bd6', soft: '#f1ecfe' },
   exchange: { from: '#ffd194', to: '#ffb37b', label: '易物', text: '#c4763c', soft: '#fff4e9' },
   skill: { from: '#a1c4fd', to: '#7fb3ff', label: '技能', text: '#4c86d9', soft: '#ebf3ff' }

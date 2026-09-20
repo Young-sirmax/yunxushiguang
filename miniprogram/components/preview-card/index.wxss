@@ -17,7 +17,7 @@
   position: relative;
   width: 80vw;
   border-radius: 16rpx;
-  background: #fff;
+  background: var(--white);
   overflow: hidden;
   box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.35);
   animation: pcZoomIn 0.2s cubic-bezier(0.22, 0.9, 0.3, 1.05);
@@ -33,20 +33,20 @@
   border-radius: 999rpx;
   font-size: 22rpx;
   font-weight: 600;
-  color: #fff;
-  background: rgba(15, 27, 45, 0.65);
+  color: var(--white);
+  background: rgba(var(--text-rgb), 0.65);
 }
 
 .pc-badge.want {
-  background: rgba(161, 140, 209, 0.9);
+  background: rgba(var(--type-wanted-rgb), 0.9);
 }
 
 .pc-badge.exchange {
-  background: rgba(255, 154, 118, 0.92);
+  background: rgba(var(--type-exchange-rgb), 0.92);
 }
 
 .pc-badge.skill {
-  background: rgba(255, 138, 0, 0.92);
+  background: rgba(var(--type-skill-rgb), 0.92);
 }
 
 /* 顶部商品图：等比缩放，最高 50vh；加载中先用骨架占好高度，避免白块与跳动 */
@@ -55,7 +55,7 @@
   width: 100%;
   max-height: 50vh;
   overflow: hidden;
-  background: linear-gradient(135deg, #f4f8f6, #e9f2ee);
+  background: var(--img-ph-grad);
 }
 
 .pc-media.is-loading {
@@ -83,7 +83,7 @@
 .pc-empty-text {
   margin-top: 12rpx;
   font-size: 24rpx;
-  color: var(--text-light, #94a3b8);
+  color: var(--text-light);
 }
 
 /* 信息区 */
@@ -94,7 +94,7 @@
 .pc-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: var(--text, #0f1b2d);
+  color: var(--text);
   line-height: 1.45;
   word-break: break-all;
 }
@@ -110,28 +110,28 @@
 .pc-price {
   font-size: 34rpx;
   font-weight: 800;
-  color: var(--accent, #ff7a59);
+  color: var(--price);
 }
 
 .pc-price.want {
-  color: var(--want, #00a8a0);
+  color: var(--type-wanted-text);
   font-size: 28rpx;
 }
 
 .pc-price.exchange {
-  color: var(--exchange);
+  color: var(--type-exchange-text);
   font-size: 28rpx;
 }
 
 .pc-price.skill {
-  color: var(--skill);
+  color: var(--type-skill-text);
   font-size: 28rpx;
 }
 
 .pc-sep,
 .pc-condition {
   font-size: 24rpx;
-  color: var(--text-secondary, #5a6b7f);
+  color: var(--text-secondary);
 }
 
 .pc-verified {
@@ -139,8 +139,8 @@
   font-weight: 600;
   padding: 4rpx 14rpx;
   border-radius: 999rpx;
-  color: var(--primary, #00c17e);
-  background: var(--primary-soft, #e0f8ef);
+  color: var(--primary-dark);
+  background: var(--primary-light);
 }
 
 .pc-expert {
@@ -148,8 +148,8 @@
   font-weight: 600;
   padding: 4rpx 14rpx;
   border-radius: 999rpx;
-  color: var(--skill);
-  background: var(--skill-soft);
+  color: var(--type-skill-text);
+  background: var(--type-skill-soft);
 }
 
 .pc-extra {
@@ -163,7 +163,7 @@
 .pc-hint {
   margin-top: 18rpx;
   font-size: 22rpx;
-  color: var(--text-light, #94a3b8);
+  color: var(--text-light);
   text-align: center;
 }
 

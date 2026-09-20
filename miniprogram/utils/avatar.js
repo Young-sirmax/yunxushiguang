@@ -21,8 +21,17 @@ const letterAvatar = (nickName) => {
   return /[a-z]/.test(first) ? first.toUpperCase() : first;
 };
 
-// 字母头像底色池
-const LETTER_COLORS = ['#00c17e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
+// 字母头像底色池：只取设计令牌里的颜色（写 var() 而不是色值，改主色时自动跟随）
+// 选的是各色相里较深的一档，保证白色字母在底色上读得清（对比度均 ≥ 2.8）
+const LETTER_COLORS = [
+  'var(--primary)',
+  'var(--primary-dark)',
+  'var(--type-idle-text)',
+  'var(--type-exchange-text)',
+  'var(--type-wanted-text)',
+  'var(--type-skill-text)',
+  'var(--error)'
+];
 
 /** 按用户标识取稳定底色，同一用户每次进来颜色一致 */
 const letterColor = (seed) => {

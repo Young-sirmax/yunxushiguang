@@ -170,18 +170,18 @@
 
 /* 已认证 = 成功语义（与主色同源，但走语义令牌，语义变了不会被主色误带） */
 .badge-verified {
-  color: var(--success);
+  color: var(--success-dark);
   background: var(--success-soft);
 }
 
 .badge-pending {
-  color: var(--warning);
+  color: var(--warning-dark);
   background: var(--warning-soft);
 }
 
 .badge-danger {
-  color: var(--danger);
-  background: var(--danger-soft);
+  color: var(--error);
+  background: var(--error-soft);
 }
 
 .badge-info {
@@ -191,7 +191,7 @@
 
 /* 交易状态标签：已预订 = 警告语义 / 已完成 = 中性弱化（不再抢价格与主色的视觉位） */
 .badge-booked {
-  color: var(--warning);
+  color: var(--warning-dark);
   background: var(--warning-soft);
 }
 
@@ -221,7 +221,7 @@
   width: 200rpx;
   height: 200rpx;
   border-radius: 50%;
-  background: var(--primary-soft);
+  background: var(--primary-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,7 +309,7 @@
 /* === 文本工具 === */
 .text-primary { color: var(--primary); }
 .text-warning { color: var(--warning); }
-.text-danger { color: var(--danger); }
+.text-danger { color: var(--error); }
 .text-secondary { color: var(--text-secondary); }
 .text-light { color: var(--text-light); }
 
