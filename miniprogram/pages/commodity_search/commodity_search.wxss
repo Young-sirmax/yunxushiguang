@@ -12,14 +12,14 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 2rpx 12rpx rgba(15, 27, 45, 0.04);
+  box-shadow: 0 2rpx 12rpx rgba(var(--text-rgb), 0.04);
 }
 
 .search-box {
   flex: 1;
   display: flex;
   align-items: center;
-  background: #f1f5f9;
+  background: var(--fill);
   border-radius: var(--radius-pill);
   padding: 14rpx 28rpx;
   border: 2rpx solid transparent;
@@ -29,7 +29,7 @@
 .search-box:focus-within {
   background: var(--white);
   border-color: var(--primary);
-  box-shadow: 0 0 0 6rpx rgba(0, 193, 126, 0.08);
+  box-shadow: 0 0 0 6rpx rgba(var(--primary-rgb), 0.08);
 }
 
 .search-icon {
@@ -85,7 +85,7 @@
   height: 160rpx;
   border-radius: 20rpx;
   margin-right: 20rpx;
-  background: #f1f5f9;
+  background: var(--fill);
   flex-shrink: 0;
 }
 
@@ -112,7 +112,7 @@
 .card-price {
   font-size: 32rpx;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--price);
   margin-right: 10rpx;
 }
 
@@ -129,8 +129,8 @@
 
 .verified-tag {
   font-size: 20rpx;
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
   padding: 4rpx 14rpx;
   border-radius: var(--radius-pill);
   font-weight: 500;
@@ -139,8 +139,8 @@
 /* 图书专区：适用专业标签 */
 .major-tag {
   font-size: 20rpx;
-  color: var(--want);
-  background: var(--want-soft);
+  color: var(--type-wanted-text);
+  background: var(--type-wanted-soft);
   padding: 4rpx 14rpx;
   border-radius: var(--radius-pill);
   font-weight: 500;
@@ -163,7 +163,7 @@
 }
 /* === 类型角标 / 交易状态 / 以物易物价格 === */
 .card-price.exchange {
-  color: var(--exchange);
+  color: var(--type-exchange-text);
   font-size: 24rpx;
 }
 
@@ -176,13 +176,13 @@
 }
 
 .type-tag.want {
-  color: var(--want);
-  background: var(--want-soft);
+  color: var(--type-wanted-text);
+  background: var(--type-wanted-soft);
 }
 
 .type-tag.exchange {
-  color: var(--exchange);
-  background: var(--exchange-soft);
+  color: var(--type-exchange-text);
+  background: var(--type-exchange-soft);
 }
 
 .trade-tag {
@@ -190,12 +190,12 @@
   padding: 4rpx 14rpx;
   border-radius: var(--radius-pill);
   font-weight: 600;
-  color: #b45309;
-  background: #fef3c7;
+  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */;
+  background: var(--warning-soft);
   flex-shrink: 0;
 }
 
 .card-price.skill {
-  color: var(--skill);
+  color: var(--type-skill-text);
   font-size: 24rpx;
 }

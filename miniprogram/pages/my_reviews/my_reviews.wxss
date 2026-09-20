@@ -1,17 +1,17 @@
 /* pages/my_reviews/my_reviews.wxss —— 我收到的评价 */
 page {
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 .page-container {
   min-height: 100vh;
   padding: 24rpx;
-  background: #f5f7fa;
+  background: var(--bg);
   box-sizing: border-box;
 }
 
 .mr-header {
-  background: #fff;
+  background: var(--white);
   border-radius: 28rpx;
   padding: 32rpx;
   margin-bottom: 24rpx;
@@ -27,22 +27,22 @@ page {
 
 .mr-summary-label {
   font-size: 26rpx;
-  color: #7b8a9c;
+  color: var(--text-secondary);
 }
 
 .mr-summary-value {
   font-size: 36rpx;
   font-weight: 700;
-  color: #ffb020;
+  color: var(--warning);
 }
 
 .mr-count {
   font-size: 24rpx;
-  color: #94a3b8;
+  color: var(--text-light);
 }
 
 .mr-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 24rpx;
   padding: 26rpx;
   margin-bottom: 20rpx;
@@ -60,25 +60,25 @@ page {
   height: 56rpx;
   border-radius: 50%;
   margin-right: 16rpx;
-  background: #f1f5f9;
+  background: var(--fill);
 }
 
 .mr-name {
   flex: 1;
   font-size: 27rpx;
-  color: #4a5a6e;
+  color: var(--text-secondary);
 }
 
 .mr-stars {
   font-size: 24rpx;
-  color: #ffb020;
+  color: var(--warning);
   letter-spacing: 2rpx;
 }
 
 .mr-comment {
   display: block;
   font-size: 28rpx;
-  color: #1a1a2e;
+  color: var(--text);
   line-height: 1.6;
   word-break: break-all;
 }
@@ -86,7 +86,7 @@ page {
 .mr-time {
   display: block;
   font-size: 22rpx;
-  color: #94a3b8;
+  color: var(--text-light);
   margin-top: 10rpx;
 }
 
@@ -106,11 +106,11 @@ page {
 .mr-empty-text {
   font-size: 30rpx;
   font-weight: 600;
-  color: #4a5a6e;
+  color: var(--text-secondary);
   margin-bottom: 10rpx;
 }
 
 .mr-empty-hint {
   font-size: 25rpx;
-  color: #94a3b8;
+  color: var(--text-light);
 }

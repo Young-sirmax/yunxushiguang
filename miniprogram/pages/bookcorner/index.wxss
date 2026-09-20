@@ -15,7 +15,7 @@ page {
   border-radius: var(--radius-lg);
   background: var(--primary-grad-vivid);
   box-shadow: var(--shadow-primary);
-  color: #fff;
+  color: var(--white);
   text-align: center;
 }
 
@@ -77,19 +77,19 @@ page {
   justify-content: center;
   font-size: 44rpx;
   font-weight: 800;
-  color: #fff;
+  color: var(--white);
   margin-right: 26rpx;
   flex-shrink: 0;
 }
 
 .zone-badge.zone-A {
   background: var(--primary-grad);
-  box-shadow: 0 8rpx 20rpx rgba(0, 193, 126, 0.28);
+  box-shadow: 0 8rpx 20rpx rgba(var(--primary-rgb), 0.28);
 }
 
 .zone-badge.zone-B {
-  background: var(--skill-grad);
-  box-shadow: 0 8rpx 20rpx rgba(74, 144, 226, 0.24);
+  background: var(--type-skill-grad);
+  box-shadow: 0 8rpx 20rpx rgba(var(--type-skill-rgb), 0.24);
 }
 
 .zone-info {

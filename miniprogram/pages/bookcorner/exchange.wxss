@@ -10,7 +10,7 @@ page {
 }
 
 .rule-card {
-  background: linear-gradient(180deg, #f2fdf8 0%, #ffffff 70%);
+  background: linear-gradient(180deg, var(--primary-light) 0%, var(--white) 70%);
 }
 
 .rule-title {
@@ -61,7 +61,7 @@ page {
   line-height: 88rpx;
   padding: 0 24rpx;
   border-radius: var(--radius);
-  background: #f1f5f9;
+  background: var(--fill);
   font-size: 28rpx;
   color: var(--text-secondary);
 }
@@ -103,7 +103,7 @@ page {
   padding: 26rpx 24rpx;
   border-radius: var(--radius-pill);
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   font-size: 27rpx;
   font-weight: 600;
   box-shadow: var(--shadow-primary);

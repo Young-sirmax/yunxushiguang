@@ -1,4 +1,5 @@
 const API = require('../../api/api.js');
+const NATIVE_COLORS = require('../../utils/nativeColors.js');
 const { formatDate, showToast } = require('../../utils/util.js');
 const { formatSkillPrice } = require('../../utils/expert.js');
 
@@ -88,7 +89,7 @@ Page({
     wx.showModal({
       title: '取消收藏',
       content: '确定要取消收藏这件商品吗？',
-      confirmColor: '#f43f5e',
+      confirmColor: NATIVE_COLORS.error,
       success: async (res) => {
         if (res.confirm) {
           try {

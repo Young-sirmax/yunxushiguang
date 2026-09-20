@@ -41,7 +41,7 @@ page {
   width: 360rpx;
   height: 360rpx;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(245, 166, 35, 0.32) 0%, rgba(245, 166, 35, 0) 65%);
+  background: radial-gradient(circle, rgba(var(--warning-rgb), 0.32) 0%, rgba(var(--warning-rgb), 0) 65%);
 }
 
 .hero-content {
@@ -488,7 +488,7 @@ page {
 
 .wf-tag.type-wanted-deep {
   color: var(--white);
-  background: var(--want-deep);
+  background: var(--type-wanted-deep);
 }
 
 .wf-tag.type-skill {
@@ -498,13 +498,13 @@ page {
 
 /* 已认证：成功语义 */
 .wf-tag.verified {
-  color: var(--success);
+  color: var(--success-dark);
   background: var(--success-soft);
 }
 
-/* 成色：中性弱化 */
+/* 成色：中性弱化（用文字次不用文字弱：2.3 的对比度在 20rpx 小字上读不出来） */
 .wf-tag.cond {
-  color: var(--text-light);
+  color: var(--text-secondary);
   background: var(--fill);
 }
 

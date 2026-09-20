@@ -14,7 +14,7 @@ page {
   padding: 32rpx 28rpx;
   border-radius: var(--radius-lg);
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   box-shadow: var(--shadow-primary);
 }
 
@@ -43,7 +43,7 @@ page {
 .cat-tab {
   padding: 12rpx 28rpx;
   border-radius: var(--radius-pill);
-  background: #fff;
+  background: var(--white);
   border: 1rpx solid var(--border);
   font-size: 26rpx;
   color: var(--text-secondary);
@@ -52,10 +52,10 @@ page {
 
 .cat-tab.active {
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   border-color: transparent;
   font-weight: 600;
-  box-shadow: 0 6rpx 16rpx rgba(0, 193, 126, 0.24);
+  box-shadow: 0 6rpx 16rpx rgba(var(--primary-rgb), 0.24);
 }
 
 .book-list {
@@ -98,8 +98,8 @@ page {
 .book-cat {
   flex-shrink: 0;
   font-size: 22rpx;
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
   border-radius: var(--radius-pill);
   padding: 4rpx 18rpx;
 }
@@ -117,7 +117,7 @@ page {
   padding: 24rpx;
   border-radius: var(--radius-pill);
   font-size: 27rpx;
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
   font-weight: 600;
 }

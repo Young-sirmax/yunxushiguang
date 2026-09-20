@@ -1,5 +1,6 @@
 // pages/bookcorner/exchange.js —— B区「拿一留一」换书登记
 const API = require('../../api/api.js');
+const NATIVE_COLORS = require('../../utils/nativeColors.js');
 const { showToast, showLoading, hideLoading } = require('../../utils/util.js');
 const { DEFAULT_SPACE_ID } = require('../../utils/bookcorner.js');
 
@@ -39,7 +40,7 @@ Page({
       title: '需要登录',
       content: '登录后才能登记换书',
       confirmText: '去登录',
-      confirmColor: '#00c17e',
+      confirmColor: NATIVE_COLORS.primary,
       success: (res) => {
         if (res.confirm) wx.navigateTo({ url: '/pages/index/index' });
       }

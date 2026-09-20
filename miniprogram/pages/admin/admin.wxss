@@ -52,9 +52,9 @@
 
 .admin-logout {
   font-size: 26rpx;
-  color: var(--danger);
+  color: var(--error);
   padding: 12rpx 20rpx;
-  background: rgba(255, 77, 79, 0.08);
+  background: rgba(var(--price-rgb), 0.08);
   border-radius: 32rpx;
 }
 
@@ -80,9 +80,9 @@
 
 .tab-item.active {
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   font-weight: 600;
-  box-shadow: 0 6rpx 16rpx rgba(7, 193, 96, 0.3);
+  box-shadow: 0 6rpx 16rpx rgba(var(--primary-rgb), 0.3);
 }
 
 /* ===== 列表 ===== */
@@ -184,7 +184,7 @@
 }
 
 .reject-reason {
-  color: var(--danger);
+  color: var(--error);
 }
 
 /* ===== 照片 ===== */
@@ -220,7 +220,7 @@
 .btn-approve {
   flex: 1;
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   border-radius: 40rpx;
   height: 76rpx;
   font-size: 30rpx;
@@ -228,7 +228,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6rpx 16rpx rgba(7, 193, 96, 0.3);
+  box-shadow: 0 6rpx 16rpx rgba(var(--primary-rgb), 0.3);
 }
 
 .btn-approve::after,
@@ -242,7 +242,7 @@
 
 .btn-reject {
   flex: 1;
-  background: linear-gradient(135deg, #ff7a8a, #f43f5e);
+  background: var(--error-grad);
   color: var(--white);
   border-radius: 40rpx;
   height: 76rpx;
@@ -251,7 +251,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6rpx 16rpx rgba(255, 77, 79, 0.25);
+  box-shadow: 0 6rpx 16rpx rgba(var(--price-rgb), 0.25);
 }
 
 .btn-reject:active {
@@ -267,12 +267,12 @@
 
 .audited-tag.approved {
   background: var(--primary-light);
-  color: var(--primary);
+  color: var(--primary-dark);
 }
 
 .audited-tag.rejected {
-  background: rgba(255, 77, 79, 0.08);
-  color: var(--danger);
+  background: rgba(var(--price-rgb), 0.08);
+  color: var(--error);
 }
 
 /* ===== 模块切换 ===== */
@@ -297,9 +297,9 @@
 
 .module-item.active {
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   font-weight: 600;
-  box-shadow: 0 6rpx 16rpx rgba(7, 193, 96, 0.3);
+  box-shadow: 0 6rpx 16rpx rgba(var(--primary-rgb), 0.3);
 }
 
 /* ===== 商品审核卡片 ===== */
@@ -341,7 +341,7 @@
 .commodity-price {
   font-size: 32rpx;
   font-weight: 700;
-  color: var(--danger);
+  color: var(--error);
   margin-bottom: 12rpx;
 }
 
@@ -357,7 +357,7 @@
 
 .commodity-tag {
   font-size: 22rpx;
-  color: var(--primary);
+  color: var(--primary-dark);
   background: var(--primary-light);
   padding: 4rpx 14rpx;
   border-radius: 20rpx;
@@ -397,7 +397,7 @@
 .sub-bar {
   display: flex;
   padding: 6rpx;
-  background: #eef2f6;
+  background: var(--fill-strong);
   border-radius: 999rpx;
   margin: 20rpx 0;
 }
@@ -415,7 +415,7 @@
 
 .sub-item.active {
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   box-shadow: var(--shadow-primary);
 }
 
@@ -429,7 +429,7 @@
 .search-input {
   flex: 1;
   height: 76rpx;
-  background: #fff;
+  background: var(--white);
   border-radius: 999rpx;
   padding: 0 28rpx;
   font-size: 26rpx;
@@ -442,7 +442,7 @@
   height: 76rpx;
   line-height: 76rpx;
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   font-size: 27rpx;
   font-weight: 600;
   border-radius: 999rpx;
@@ -468,7 +468,7 @@
   margin-right: 14rpx;
   font-size: 24rpx;
   color: var(--text-secondary);
-  background: #fff;
+  background: var(--white);
   border-radius: 999rpx;
   font-weight: 500;
   box-shadow: var(--shadow-sm);
@@ -476,7 +476,7 @@
 
 .data-tab.active {
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
 }
 
 /* 类型筛选 chips */
@@ -490,18 +490,18 @@
   padding: 12rpx 28rpx;
   font-size: 24rpx;
   color: var(--text-secondary);
-  background: #fff;
+  background: var(--white);
   border-radius: 999rpx;
   box-shadow: var(--shadow-sm);
 }
 
 .type-chip.active {
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
 }
 
 .type-chip.want.active {
-  background: var(--want-grad);
+  background: var(--type-wanted-grad);
 }
 
 /* 通用数据卡片 */
@@ -520,7 +520,7 @@
   width: 150rpx;
   height: 150rpx;
   border-radius: 18rpx;
-  background: #f1f5f9;
+  background: var(--fill);
   flex-shrink: 0;
   margin-right: 20rpx;
 }
@@ -550,8 +550,8 @@
 .data-kind {
   flex-shrink: 0;
   font-size: 20rpx;
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
   padding: 3rpx 14rpx;
   border-radius: 999rpx;
   margin-left: 12rpx;
@@ -559,19 +559,19 @@
 }
 
 .data-kind.want {
-  color: var(--want);
-  background: var(--want-soft);
+  color: var(--type-wanted-text);
+  background: var(--type-wanted-soft);
 }
 
 .data-price {
   font-size: 30rpx;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--price);
   margin-bottom: 8rpx;
 }
 
 .data-price.want {
-  color: var(--want);
+  color: var(--type-wanted-text);
 }
 
 .data-row {
@@ -588,11 +588,11 @@
   font-weight: 500;
 }
 
-.data-status.s-pendingReview { background: var(--warning-soft); color: var(--warning); }
-.data-status.s-onSale { background: var(--primary-soft); color: var(--primary); }
-.data-status.s-rejected { background: var(--danger-soft); color: var(--danger); }
-.data-status.s-deleted { background: #eef1f5; color: var(--text-light); }
-.data-status.s-sold { background: #eef1f5; color: var(--text-light); }
+.data-status.s-pendingReview { background: var(--warning-soft); color: var(--warning-dark); }
+.data-status.s-onSale { background: var(--primary-light); color: var(--primary-dark); }
+.data-status.s-rejected { background: var(--error-soft); color: var(--error); }
+.data-status.s-deleted { background: var(--fill); color: var(--text-light); }
+.data-status.s-sold { background: var(--fill); color: var(--text-light); }
 
 .data-sub {
   font-size: 22rpx;
@@ -636,18 +636,18 @@
 }
 
 .mini-btn.primary {
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
 }
 
 .mini-btn.warn {
-  color: #d97706;
+  color: var(--warning-dark);
   background: var(--warning-soft);
 }
 
 .mini-btn.danger {
-  color: var(--danger);
-  background: var(--danger-soft);
+  color: var(--error);
+  background: var(--error-soft);
 }
 
 .more-btn {
@@ -662,7 +662,7 @@
   width: 84rpx;
   height: 84rpx;
   border-radius: 50%;
-  background: #f1f5f9;
+  background: var(--fill);
   flex-shrink: 0;
   margin-right: 18rpx;
 }
@@ -707,34 +707,34 @@
   font-weight: 600;
 }
 
-.mini-tag.admin { color: #6d4fdc; background: #f1ecfd; }
-.mini-tag.ban { color: var(--danger); background: var(--danger-soft); }
-.mini-tag.verified { color: var(--primary); background: var(--primary-soft); }
+.mini-tag.admin { color: var(--type-wanted-to); background: var(--type-wanted-soft); }
+.mini-tag.ban { color: var(--error); background: var(--error-soft); }
+.mini-tag.verified { color: var(--primary-dark); background: var(--primary-light); }
 
 /* === 以物易物：类型筛选与标签 === */
 .type-chip.exchange.active {
-  background: var(--exchange-grad);
+  background: var(--type-exchange-grad);
 }
 
 .data-kind.exchange {
-  color: var(--exchange);
-  background: var(--exchange-soft);
+  color: var(--type-exchange-text);
+  background: var(--type-exchange-soft);
 }
 
 .data-price.exchange {
-  color: var(--exchange);
+  color: var(--type-exchange-text);
   font-size: 26rpx;
 }
 
 /* === 技能达人标签与操作 === */
 .mini-tag.expert {
-  color: var(--skill);
-  background: var(--skill-soft);
+  color: var(--type-skill-text);
+  background: var(--type-skill-soft);
 }
 
 .mini-btn.expert {
-  color: var(--skill);
-  background: var(--skill-soft);
+  color: var(--type-skill-text);
+  background: var(--type-skill-soft);
 }
 
 /* === 留言审核（公益图书角） === */
@@ -746,8 +746,8 @@
   padding: 0 8rpx;
   margin-left: 8rpx;
   border-radius: 16rpx;
-  background: var(--danger);
-  color: #fff;
+  background: var(--error);
+  color: var(--white);
   font-size: 20rpx;
   font-weight: 600;
   vertical-align: top;
@@ -793,8 +793,8 @@
 .comment-zone {
   margin-left: 10rpx;
   font-size: 20rpx;
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
   border-radius: 999rpx;
   padding: 2rpx 12rpx;
   flex-shrink: 0;
@@ -810,7 +810,7 @@
   font-size: 28rpx;
   color: var(--text);
   line-height: 1.6;
-  background: #f7f9fb;
+  background: var(--bg);
   border-radius: 16rpx;
   padding: 20rpx;
   margin-bottom: 16rpx;
@@ -835,19 +835,19 @@
 }
 
 .mini-tag.starred {
-  background: var(--sun-grad);
-  color: #7a4a00;
+  background: var(--warning-grad);
+  color: var(--warning);   /* 状态/提示语义，不是价格 */;
 }
 
 .mini-tag.rejected {
-  background: var(--danger-soft);
-  color: var(--danger);
+  background: var(--error-soft);
+  color: var(--error);
 }
 
 .btn-star {
   flex: 1;
-  background: var(--sun-grad);
-  color: #7a4a00;
+  background: var(--warning-grad);
+  color: var(--warning);   /* 状态/提示语义，不是价格 */;
   border-radius: 40rpx;
   height: 76rpx;
   font-size: 30rpx;
@@ -855,7 +855,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6rpx 16rpx rgba(255, 176, 32, 0.25);
+  box-shadow: 0 6rpx 16rpx rgba(var(--warning-rgb), 0.25);
 }
 
 .btn-star::after {

@@ -8,13 +8,22 @@
  * ⚠️ canvas 读不到 CSS 变量：气泡绘制用的类型色同步在
  *    miniprogram/utils/theme.js 的 TYPE_THEME / TOKENS 里，改色必须两处一起改。
  *
- * 色板结构：
- *   1. 品牌主色（primary 系列）
+ * 色板结构（共 8 组，只有一套名字，没有历史别名）：
+ *   1. 品牌主色（primary 系列：主色 / 浅底 / 深档 / 两条渐变）
  *   2. 价格色（price）
- *   3. 中性色（文字 / 分割线 / 背景 / 卡片）
- *   4. 语义色（成功 / 警告 / 错误）
- *   5. 类型色（气泡渐变 + 卡片角标共用同一组）
- *   6. 兼容别名（历史变量名 → 新令牌，避免一次性改动 32 个页面）
+ *   3. 中性色（文字 / 分割线 / 背景 / 卡片 / 填充）
+ *   4. 语义色（成功 / 警告 / 错误 / 信息，各带浅底与深档）
+ *   5. 类型色（气泡渐变 + 卡片角标共用同一组：from / to / text / soft / grad）
+ *   6. 圆角与阴影
+ *   7. RGB 分量（写半透明品牌色用，如 rgba(var(--primary-rgb), 0.2)）
+ *   8. 效果令牌（聚焦光晕 / 遮罩 / 浮层投影）
+ *
+ * 三条硬规则：
+ *   ① 页面里禁止出现十六进制与裸 rgb()/rgba()，一律 var()；
+ *   ② 浅底上的文字必须用该语义的「深档」（--warning-dark / --success-dark /
+ *      --type-*-text），直接拿主色压浅底只有 1.9~2.5 的对比度，读不出来；
+ *   ③ 改色只改本文件 + utils/theme.js（canvas 镜像）+ utils/nativeColors.js
+ *      （原生 API 镜像），不要再去页面里找。
  */
 
 page {
@@ -24,7 +33,6 @@ page {
   --primary: #22b07d;          /* 主色：比旧版 #00c17e 更沉，提质感 */
   --primary-light: #e9f7f0;    /* 主色浅底：选中底、标签底、图标底 */
   --primary-dark: #14915f;     /* 主色深：按下态 / 文字强调 */
-  --primary-soft: var(--primary-light);   /* 历史别名，等价于 primary-light */
   --primary-grad: linear-gradient(135deg, #35c592 0%, #22b07d 50%, #14915f 100%);
   --primary-grad-vivid: linear-gradient(160deg, #2fc08d 0%, #22b07d 45%, #14915f 100%);
 
@@ -32,9 +40,7 @@ page {
      全站价格（卡片价格、详情价格、求购预算）只能用这一个红橙。 */
   --price: #f5402f;
   --price-soft: #fdeceb;       /* 价格浅底（优惠角标 / 预算标签底） */
-  --accent: var(--price);      /* 历史别名：旧的强调色就是价格色 */
-  --accent-soft: var(--price-soft);
-  --accent-grad: linear-gradient(135deg, #ff6a52 0%, #f5402f 100%);
+  --price-grad: linear-gradient(135deg, #ff6a52 0%, #f5402f 100%);
 
   /* ===== 3. 中性色 ===== */
   --text: #1f2329;             /* 文字主 */
@@ -51,13 +57,17 @@ page {
      成功与主色同源，错误与价格色同源——刻意如此，避免色相数量膨胀。 */
   --success: #22b07d;
   --success-soft: var(--primary-light);
+  /* 浅底上的「深档」：浅底 + 同色文字会糊成一片（对比度 1.9），
+     所以每个语义色都配一个加深档专供「浅底上的文字」。层次与类型色的
+     from / to / text 三档一致，只是语义色只需要一档深。 */
+  --success-dark: var(--primary-dark);
   --warning: #f5a623;
   --warning-soft: #fff6e6;
+  --warning-dark: #b45309;    /* 原站「审核中 / 状态标签」用的就是这个琥珀深色 */
+  --warning-grad: linear-gradient(135deg, #ffc866 0%, var(--warning) 100%);
   --error: #f5402f;
   --error-soft: var(--price-soft);
   --error-grad: linear-gradient(135deg, #ff6a52 0%, #f5402f 100%);
-  --danger: var(--error);       /* 历史别名 */
-  --danger-soft: var(--error-soft);
   --info: #4c86d9;              /* 信息蓝：与「技能」类型同色相，不额外造色 */
   --info-soft: #ebf3ff;
 
@@ -66,7 +76,7 @@ page {
   /* 闲置 */
   --type-idle-from: #7ee8c7;
   --type-idle-to: #4ecdc4;
-  --type-idle-text: #12a08e;       /* 浅底上的可读文字色 */
+  --type-idle-text: #0e8c7c;       /* 浅底上的可读文字色 */
   --type-idle-soft: #e6f7f2;
   --type-idle-grad: linear-gradient(135deg, var(--type-idle-from) 0%, var(--type-idle-to) 100%);
   /* 以物易物 */
@@ -89,32 +99,14 @@ page {
   --type-skill-grad: linear-gradient(135deg, var(--type-skill-from) 0%, var(--type-skill-to) 100%);
 
   /* 求购二级分区·技能求助：求购紫的加深档（同色相，只压明度，不外扩） */
-  --want-deep: #6a4bc4;
-  --want-deep-soft: #ece6fb;
-  --want-deep-grad: linear-gradient(135deg, #9d7ee0 0%, #6a4bc4 100%);
+  --type-wanted-deep: #6a4bc4;
+  --type-wanted-deep-soft: #ece6fb;
+  --type-wanted-deep-grad: linear-gradient(135deg, #9d7ee0 0%, #6a4bc4 100%);
 
-  /* ----- 历史别名：类型色旧名 → 新令牌 -----
-     sell / want / exchange / skill 这套名字在 utils/theme.js 与旧代码里出现过，
-     统一指向同一组类型色，保证不会跑出两套色。 */
-  --type-sell-from: var(--type-idle-from);
-  --type-sell-to: var(--type-idle-to);
-  --type-want-from: var(--type-wanted-from);
-  --type-want-to: var(--type-wanted-to);
-  /* exchange / skill 的新旧名一致，无需再挂别名 */
-
-  --want: var(--type-wanted-text);
-  --want-grad: var(--type-wanted-grad);
-  --want-soft: var(--type-wanted-soft);
-  --exchange: var(--type-exchange-text);
-  --exchange-grad: var(--type-exchange-grad);
-  --exchange-soft: var(--type-exchange-soft);
-  --skill: var(--type-skill-text);
-  --skill-grad: var(--type-skill-grad);
-  --skill-soft: var(--type-skill-soft);
-
-  /* 点缀黄：不再另立色相，直接复用语义警告色 */
-  --sun: var(--warning);
-  --sun-grad: linear-gradient(135deg, #ffc866 0%, var(--warning) 100%);
+  /* 说明：早期的一批历史别名（--accent / --danger / --want / --exchange /
+     --skill / --sun / --primary-soft 等）在全站引用改名后已全部删除，
+     色板从此只有一套名字。utils/theme.js 里仍保留 sell/want 这套上游命名，
+     但它只用于「数据字段值 → 令牌」的映射（TYPE_KEY_MAP），不是颜色别名。 */
 
   /* ===== 6. 圆角 / 阴影（沿用既有体系，本次不动） ===== */
   --radius: 20rpx;
@@ -127,7 +119,6 @@ page {
      每个阴影都注释了用途，改色时只调不透明度即可。 */
   --shadow-sm: 0 1rpx 2rpx rgba(31, 35, 41, 0.04), 0 4rpx 12rpx rgba(31, 35, 41, 0.05);
   --shadow-card: 0 2rpx 4rpx rgba(31, 35, 41, 0.05), 0 12rpx 32rpx rgba(31, 35, 41, 0.08);
-  --shadow-hover: 0 4rpx 8rpx rgba(31, 35, 41, 0.06), 0 24rpx 48rpx rgba(31, 35, 41, 0.12);
   --shadow-primary: 0 10rpx 30rpx rgba(34, 176, 125, 0.28);   /* 主色按钮发光 */
   --shadow-danger: 0 10rpx 30rpx rgba(245, 64, 47, 0.24);     /* 危险按钮发光 */
 
@@ -137,6 +128,11 @@ page {
   --primary-rgb: 34, 176, 125;
   --price-rgb: 245, 64, 47;
   --text-rgb: 31, 35, 41;
+  --warning-rgb: 245, 166, 35;
+  --type-idle-rgb: 78, 205, 196;
+  --type-exchange-rgb: 255, 179, 123;
+  --type-wanted-rgb: 167, 139, 250;
+  --type-skill-rgb: 127, 179, 255;
 
   /* ===== 8. 效果令牌（描边光晕 / 遮罩 / 浮层投影）===== */
   --ring-primary: 0 0 0 6rpx rgba(34, 176, 125, 0.08);            /* 输入框聚焦光晕 */
@@ -144,6 +140,10 @@ page {
   --shadow-primary-active: 0 5rpx 16rpx rgba(34, 176, 125, 0.22); /* 主按钮按下 */
   --shadow-danger-active: 0 5rpx 16rpx rgba(245, 64, 47, 0.2);
   --shadow-float: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);               /* 搜索框 / 浮标 */
+  --shadow-hover: 0 4rpx 8rpx rgba(31, 35, 41, 0.06), 0 24rpx 48rpx rgba(31, 35, 41, 0.12);
+  /* ↑ --shadow-hover / --shadow-modal / --mask / --scrim-soft / --type-idle-rgb /
+     --type-wanted-deep-soft 是色板内置的备用档：当前页面没引用，留给后续新增
+     浮层、遮罩、加深档直接用，避免下次又出现「临时拼一个 rgba」。 */
   --shadow-modal: 0 24rpx 64rpx rgba(0, 0, 0, 0.35);              /* 长按预览弹卡 */
   --mask: rgba(0, 0, 0, 0.6);                                     /* 全屏遮罩 */
   --scrim: rgba(31, 35, 41, 0.65);                                /* 图上角标底 */

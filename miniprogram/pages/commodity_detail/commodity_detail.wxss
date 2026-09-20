@@ -18,7 +18,7 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background: #eef2f6;
+  background: var(--fill-strong);
   overflow: hidden;
 }
 
@@ -33,7 +33,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #f3f5f8;
+  background: var(--fill);
 }
 
 .img-fail-icon {
@@ -60,7 +60,7 @@
 .price {
   font-size: 48rpx;
   font-weight: 800;
-  color: var(--accent);
+  color: var(--price);
   margin-right: 16rpx;
   letter-spacing: 1rpx;
 }
@@ -90,7 +90,7 @@
   font-size: 22rpx;
   color: var(--text-secondary);
   line-height: 1.5;
-  background: #f6f8fb;
+  background: var(--bg);
   border-radius: var(--radius);
   padding: 14rpx 20rpx;
   margin-top: 12rpx;
@@ -121,8 +121,8 @@
 }
 
 .meta-tag.condition {
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
 }
 
 .meta-tag.duration {
@@ -150,23 +150,23 @@
 }
 
 .priv-tag.urgent {
-  background: linear-gradient(135deg, #ff7a8a, #f43f5e);
+  background: var(--error-grad);
   color: var(--white);
 }
 
 .priv-tag.top {
-  background: linear-gradient(135deg, #ff9900, #ff6b35);
-  color: #fff;
+  background: var(--price-grad);
+  color: var(--white);
 }
 
 .priv-tag.multi {
-  background: linear-gradient(135deg, #4facfe, #00c6fb);
-  color: #fff;
+  background: var(--type-skill-text);
+  color: var(--white);
 }
 
 .priv-tag.precision {
-  background: linear-gradient(135deg, #a18cd1, #fbc2eb);
-  color: #fff;
+  background: var(--type-wanted-text);
+  color: var(--white);
 }
 
 .seller-name-row {
@@ -182,7 +182,7 @@
   padding: 4rpx 14rpx;
   border-radius: var(--radius-pill);
   font-weight: 500;
-  box-shadow: 0 2rpx 8rpx rgba(0, 193, 126, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba(var(--primary-rgb), 0.3);
 }
 
 .seller-section, .location-section, .desc-section {
@@ -206,7 +206,7 @@
   height: 80rpx;
   border-radius: 50%;
   margin-right: 20rpx;
-  background: #f0f0f0;
+  background: var(--fill-strong);
 }
 
 .seller-meta {
@@ -244,7 +244,7 @@
   justify-content: space-between;
   padding: 12rpx 20rpx;
   padding-bottom: calc(12rpx + env(safe-area-inset-bottom));
-  box-shadow: 0 -4rpx 24rpx rgba(15, 27, 45, 0.08);
+  box-shadow: 0 -4rpx 24rpx rgba(var(--text-rgb), 0.08);
   border-top: 1rpx solid var(--border);
   z-index: 100;
 }
@@ -326,7 +326,7 @@
   font-size: 24rpx;
   border-radius: var(--radius-pill);
   flex-shrink: 0;
-  box-shadow: 0 4rpx 12rpx rgba(0, 193, 126, 0.25);
+  box-shadow: 0 4rpx 12rpx rgba(var(--primary-rgb), 0.25);
 }
 
 .copy-contact-btn:active {
@@ -336,7 +336,7 @@
 .seller-tip {
   margin-top: 16rpx;
   padding: 18rpx 22rpx;
-  background: var(--primary-soft);
+  background: var(--primary-light);
   border-radius: var(--radius);
 }
 
@@ -347,21 +347,21 @@
 }
 /* === 以物易物 / 交易状态 / 联系方式（仅复制不明文展示） === */
 .price.exchange {
-  color: var(--exchange);
+  color: var(--type-exchange-text);
   font-size: 36rpx;
   font-weight: 700;
 }
 
 .meta-tag.trade-status {
-  color: #b45309;
-  background: #fef3c7;
+  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */;
+  background: var(--warning-soft);
   font-weight: 600;
 }
 
 .exchange-box {
   margin-top: 20rpx;
   padding: 20rpx 24rpx;
-  background: #f6f3ff;
+  background: var(--type-wanted-soft);
   border-radius: 16rpx;
 }
 
@@ -379,13 +379,13 @@
   flex-shrink: 0;
   width: 180rpx;
   font-size: 26rpx;
-  color: #7c7a99;
+  color: var(--text-light);
 }
 
 .exchange-value {
   flex: 1;
   font-size: 26rpx;
-  color: #4b3f8f;
+  color: var(--type-wanted-deep);
   font-weight: 500;
   word-break: break-all;
 }
@@ -417,20 +417,20 @@
   border-radius: 999rpx;
   font-size: 26rpx;
   color: var(--text-secondary);
-  background: #f1f5f9;
+  background: var(--fill);
   transition: all 0.2s ease;
 }
 
 .trade-chip.active {
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   font-weight: 600;
   box-shadow: var(--shadow-primary);
 }
 
 /* === 技能服务 / 达人 / 评价 === */
 .skill-box .exchange-value {
-  color: var(--skill);
+  color: var(--type-skill-text);
 }
 
 .expert-badge {
@@ -438,8 +438,8 @@
   font-weight: 600;
   padding: 4rpx 14rpx;
   border-radius: 999rpx;
-  color: var(--skill);
-  background: var(--skill-soft);
+  color: var(--type-skill-text);
+  background: var(--type-skill-soft);
 }
 
 .expert-entry {
@@ -448,18 +448,18 @@
   justify-content: space-between;
   margin-top: 14rpx;
   padding: 14rpx 20rpx;
-  background: #fff8e6;
+  background: var(--warning-soft);
   border-radius: 16rpx;
 }
 
 .expert-rating {
   font-size: 24rpx;
-  color: var(--skill);
+  color: var(--type-skill-text);
 }
 
 .expert-link {
   font-size: 24rpx;
-  color: var(--skill);
+  color: var(--type-skill-text);
   font-weight: 600;
 }
 
@@ -480,23 +480,23 @@
   border-radius: 999rpx;
   font-size: 27rpx;
   font-weight: 600;
-  color: var(--skill);
-  background: var(--skill-soft);
+  color: var(--type-skill-text);
+  background: var(--type-skill-soft);
 }
 
 .review-entry.done {
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
 }
 
 .price.skill {
-  color: var(--skill);
+  color: var(--type-skill-text);
   font-size: 36rpx;
   font-weight: 700;
 }
 
 /* 技能分类标签 */
 .meta-tag.skill-cat {
-  color: var(--skill);
-  background: var(--skill-soft);
+  color: var(--type-skill-text);
+  background: var(--type-skill-soft);
 }

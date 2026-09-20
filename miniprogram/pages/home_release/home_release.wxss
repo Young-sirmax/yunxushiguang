@@ -1,13 +1,13 @@
 /* pages/home_release/home_release.wxss —— 我发布的信息（闲置商品 / 求购物品 双分类） */
 page {
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 .page-container {
   padding: 24rpx;
   padding-bottom: 60rpx;
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 /* === 顶部双分类切换条 === */
@@ -19,7 +19,7 @@ page {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #f5f7fa;
+  background: var(--bg);
   padding: 8rpx 0;
 }
 
@@ -27,7 +27,7 @@ page {
   flex: 1;
   display: flex;
   padding: 6rpx;
-  background: #eef2f6;
+  background: var(--fill-strong);
   border-radius: 999rpx;
 }
 
@@ -51,14 +51,14 @@ page {
 
 .seg.sell.active {
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   box-shadow: var(--shadow-primary);
 }
 
 .seg.want.active {
-  background: var(--want-grad);
-  color: #fff;
-  box-shadow: 0 10rpx 30rpx rgba(161, 140, 209, 0.28);
+  background: var(--type-wanted-text);
+  color: var(--white);
+  box-shadow: 0 10rpx 30rpx rgba(var(--type-wanted-rgb), 0.28);
 }
 
 .seg-badge {
@@ -66,8 +66,8 @@ page {
   height: 34rpx;
   padding: 0 10rpx;
   border-radius: 999rpx;
-  background: #dde4ec;
-  color: #7c8ba1;
+  background: var(--fill-strong);
+  color: var(--text-secondary);
   font-size: 22rpx;
   font-weight: 700;
   display: flex;
@@ -83,7 +83,7 @@ page {
 
 .seg.want.active .seg-badge {
   background: rgba(255, 255, 255, 0.95);
-  color: var(--want);
+  color: var(--type-wanted-text);
 }
 
 .publish-quick {
@@ -92,7 +92,7 @@ page {
   justify-content: center;
   gap: 4rpx;
   padding: 18rpx 26rpx;
-  background: #fff;
+  background: var(--white);
   border-radius: 999rpx;
   box-shadow: var(--shadow-sm);
   flex-shrink: 0;
@@ -148,7 +148,7 @@ page {
   border-radius: 999rpx;
   font-size: 30rpx;
   font-weight: 600;
-  color: #fff;
+  color: var(--white);
   transition: transform 0.2s;
 }
 
@@ -158,8 +158,8 @@ page {
 }
 
 .empty-btn.want {
-  background: var(--want-grad);
-  box-shadow: 0 10rpx 30rpx rgba(161, 140, 209, 0.26);
+  background: var(--type-wanted-grad);
+  box-shadow: 0 10rpx 30rpx rgba(var(--type-wanted-rgb), 0.26);
 }
 
 .empty-btn:active {
@@ -174,11 +174,11 @@ page {
 .item-card {
   display: flex;
   align-items: center;
-  background: #fff;
+  background: var(--white);
   border-radius: 28rpx;
   padding: 24rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 6rpx 24rpx rgba(15, 27, 45, 0.06);
+  box-shadow: 0 6rpx 24rpx rgba(var(--text-rgb), 0.06);
   transition: transform 0.2s ease;
 }
 
@@ -188,7 +188,7 @@ page {
 
 .item-card.deleted {
   opacity: 0.72;
-  background: #f6f8fb;
+  background: var(--bg);
 }
 
 .item-img {
@@ -196,7 +196,7 @@ page {
   height: 152rpx;
   border-radius: 20rpx;
   margin-right: 22rpx;
-  background: linear-gradient(135deg, #eef5f1, #e0f8ef);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg) 100%);
   flex-shrink: 0;
 }
 
@@ -226,12 +226,12 @@ page {
 
 .item-price {
   font-size: 32rpx;
-  color: var(--accent);
+  color: var(--price);
   font-weight: 800;
 }
 
 .item-price.want {
-  color: var(--want);
+  color: var(--type-wanted-text);
 }
 
 .item-status-row {
@@ -251,43 +251,43 @@ page {
 
 .verified-mini {
   font-size: 20rpx;
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
   padding: 5rpx 16rpx;
   border-radius: 999rpx;
   font-weight: 600;
 }
 
 .item-status.onsale {
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
 }
 
 .item-status.sold {
-  background: #eef1f5;
+  background: var(--fill);
   color: var(--text-light);
 }
 
 .item-status.deleted-status {
-  background: var(--danger-soft);
-  color: var(--danger);
+  background: var(--error-soft);
+  color: var(--error);
   margin-top: 10rpx;
   display: inline-block;
 }
 
 .item-status.pending {
   background: var(--warning-soft);
-  color: var(--warning);
+  color: var(--warning-dark);
 }
 
 .item-status.rejected {
-  background: var(--danger-soft);
-  color: var(--danger);
+  background: var(--error-soft);
+  color: var(--error);
 }
 
 .reject-reason {
   font-size: 22rpx;
-  color: var(--danger);
+  color: var(--error);
   margin-top: 8rpx;
   word-break: break-all;
 }
@@ -325,18 +325,18 @@ page {
 }
 
 .action-edit {
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--primary-dark);
+  background: var(--primary-light);
 }
 
 .action-delete {
-  color: var(--danger);
-  background: var(--danger-soft);
+  color: var(--error);
+  background: var(--error-soft);
 }
 
 .action-restore {
-  color: var(--want);
-  background: var(--want-soft);
+  color: var(--type-wanted-text);
+  background: var(--type-wanted-soft);
 }
 
 .section-title {
@@ -355,59 +355,59 @@ page {
 
 /* === 以物易物：类型高亮 / 价格位文案 / 交易状态标签 === */
 .seg.exchange.active {
-  background: var(--exchange-grad);
-  color: #fff;
-  box-shadow: 0 10rpx 30rpx rgba(255, 154, 118, 0.3);
+  background: var(--type-exchange-text);
+  color: var(--white);
+  box-shadow: 0 10rpx 30rpx rgba(var(--type-exchange-rgb), 0.3);
 }
 
 .seg.exchange.active .seg-badge {
   background: rgba(255, 255, 255, 0.95);
-  color: var(--exchange);
+  color: var(--type-exchange-text);
 }
 
 .item-price.exchange {
-  color: var(--exchange);
+  color: var(--type-exchange-text);
   font-size: 26rpx;
   font-weight: 600;
 }
 
 .item-status.trade {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--warning-soft);
+  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */;
   font-weight: 600;
 }
 
 .empty-btn.exchange {
-  background: var(--exchange-grad);
-  box-shadow: 0 10rpx 30rpx rgba(255, 154, 118, 0.28);
+  background: var(--type-exchange-grad);
+  box-shadow: 0 10rpx 30rpx rgba(var(--type-exchange-rgb), 0.28);
 }
 
 /* 技能服务：类型高亮 / 报价位 */
 .seg.skill.active {
-  background: var(--skill-grad);
-  color: #fff;
-  box-shadow: 0 10rpx 30rpx rgba(132, 193, 255, 0.32);
+  background: var(--type-skill-text);
+  color: var(--white);
+  box-shadow: 0 10rpx 30rpx rgba(var(--type-skill-rgb), 0.32);
 }
 
 .seg.skill.active .seg-badge {
   background: rgba(255, 255, 255, 0.95);
-  color: var(--skill);
+  color: var(--type-skill-text);
 }
 
 .item-price.skill {
-  color: var(--skill);
+  color: var(--type-skill-text);
   font-size: 26rpx;
   font-weight: 600;
 }
 
 .empty-btn.skill {
-  background: var(--skill-grad);
-  box-shadow: 0 10rpx 30rpx rgba(132, 193, 255, 0.3);
+  background: var(--type-skill-grad);
+  box-shadow: 0 10rpx 30rpx rgba(var(--type-skill-rgb), 0.3);
 }
 
 .list-hint {
   text-align: center;
   font-size: 23rpx;
-  color: #94a3b8;
+  color: var(--text-light);
   padding: 16rpx 0 8rpx;
 }
