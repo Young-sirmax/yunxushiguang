@@ -31,7 +31,8 @@ page {
   border-bottom-right-radius: 40rpx;
 }
 
-/* 活力光斑点缀 */
+/* 活力光斑点缀：复用语义警告色（不另立黄）
+   —— 半透明径向光晕，只能用 rgba，色值取自 --warning */
 .hero-bg::after {
   content: '';
   position: absolute;
@@ -40,7 +41,7 @@ page {
   width: 360rpx;
   height: 360rpx;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 197, 61, 0.35) 0%, rgba(255, 197, 61, 0) 65%);
+  background: radial-gradient(circle, rgba(245, 166, 35, 0.32) 0%, rgba(245, 166, 35, 0) 65%);
 }
 
 .hero-content {
@@ -57,23 +58,23 @@ page {
 .hero-title {
   font-size: 40rpx;
   font-weight: 800;
-  color: #fff;
+  color: var(--white);
   letter-spacing: 2rpx;
 }
 
 .hero-slogan {
   font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--on-dark);
   margin-left: 16rpx;
 }
 
 .search-input-box {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--on-dark-strong);
   border-radius: 40rpx;
   padding: 18rpx 28rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-float);
 }
 
 .search-icon {
@@ -86,12 +87,12 @@ page {
   color: var(--text-light);
 }
 
-/* === 类型筛选（全部 / 闲置 / 求购） === */
+/* === 类型筛选（全部 / 闲置 / 求购 / 易物 / 技能） === */
 .type-filter {
   display: flex;
   margin-top: 26rpx;
   background: rgba(255, 255, 255, 0.22);
-  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  border: 1rpx solid var(--hairline-dark);
   border-radius: 999rpx;
   padding: 6rpx;
   backdrop-filter: blur(12rpx);
@@ -104,7 +105,7 @@ page {
   text-align: center;
   padding: 12rpx 0;
   font-size: 25rpx;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--on-dark-strong);
   border-radius: 999rpx;
   transition: all 0.25s ease;
   font-weight: 500;
@@ -114,34 +115,36 @@ page {
   text-overflow: ellipsis;
 }
 
+/* 选中态一律回主色，不再「哪个类型选哪个色」 */
 .type-item.active {
-  background: #fff;
+  background: var(--white);
   color: var(--primary);
   font-weight: 700;
-  box-shadow: 0 6rpx 16rpx rgba(0, 60, 40, 0.18);
+  box-shadow: var(--shadow-card);
 }
 
-.type-item.active.want {
-  color: var(--want);
-}
-
-/* === 分类标签 === */
-.category-scroll {
-  background: #fff;
-  white-space: nowrap;
+/* === 分类标签 + 模式切换 === */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
   position: relative;
   z-index: 2;
   margin-top: -36rpx;
   border-radius: 28rpx 28rpx 0 0;
   flex-shrink: 0;
-  /* 宽度约束在容器内，左右留白移到内层，避免 scroll-view 因 padding 溢出屏幕 */
-  width: 100%;
-  box-sizing: border-box;
+  padding-right: 12rpx;
+}
+
+.category-scroll {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .category-list {
   display: flex;
-  padding: 16rpx 24rpx;
+  padding: 16rpx 12rpx 16rpx 24rpx;
 }
 
 .category-item {
@@ -150,7 +153,7 @@ page {
   margin-right: 16rpx;
   font-size: 26rpx;
   color: var(--text-secondary);
-  background: #f1f5f9;
+  background: var(--fill);
   border-radius: 30rpx;
   transition: all 0.25s ease;
   font-weight: 500;
@@ -170,14 +173,98 @@ page {
   box-shadow: var(--shadow-primary);
 }
 
+/* === 浏览模式切换（列表 / 小球）===
+   位置：分类标签行最右侧，跟筛选同一行，不额外占高度。
+   图标纯 CSS 绘制，不新增图片资源。 */
+.view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 6rpx;
+  background: var(--fill);
+  border-radius: 999rpx;
+  flex-shrink: 0;
+}
+
+.vt-btn {
+  width: 58rpx;
+  height: 58rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.22s ease;
+}
+
+.vt-btn.active {
+  background: var(--primary);
+  box-shadow: var(--shadow-primary);
+}
+
+.vt-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 列表图标：2×2 圆角方块 */
+.vt-icon-list {
+  width: 30rpx;
+  height: 30rpx;
+  flex-wrap: wrap;
+  gap: 4rpx;
+}
+
+.vt-cell {
+  width: 13rpx;
+  height: 13rpx;
+  border-radius: 3rpx;
+  background: var(--text-light);
+}
+
+.vt-btn.active .vt-cell {
+  background: var(--white);
+}
+
+/* 小球图标：一大一小两个圆 */
+.vt-icon-bubble {
+  position: relative;
+  width: 32rpx;
+  height: 30rpx;
+}
+
+.vt-orb {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--text-light);
+}
+
+.vt-orb.big {
+  width: 22rpx;
+  height: 22rpx;
+  left: 0;
+  top: 2rpx;
+}
+
+.vt-orb.small {
+  width: 13rpx;
+  height: 13rpx;
+  right: 0;
+  bottom: 0;
+}
+
+.vt-btn.active .vt-orb {
+  background: var(--white);
+}
+
 /* === 图书专区：二级筛选（学院 → 专业） === */
 .book-filter {
-  background: #fff;
+  background: var(--bg-card);
   padding: 6rpx 0 16rpx;
   position: relative;
   z-index: 2;
   flex-shrink: 0;
-  border-bottom: 1rpx solid #f1f5f9;
+  border-bottom: 1rpx solid var(--border);
   /* 防止胶囊横向溢出，遮挡右侧屏幕 */
   overflow: hidden;
 }
@@ -204,7 +291,7 @@ page {
   margin-right: 14rpx;
   font-size: 24rpx;
   color: var(--text-secondary);
-  background: #f1f5f9;
+  background: var(--fill);
   border-radius: 28rpx;
   transition: all 0.2s ease;
   flex-shrink: 0;
@@ -213,24 +300,262 @@ page {
 
 .book-chip.active {
   background: var(--primary-grad);
-  color: #fff;
+  color: var(--white);
   font-weight: 600;
   box-shadow: var(--shadow-primary);
 }
 
-/* 专业行：用青蓝区分层级 */
+/* 专业行：用求购紫区分层级 */
 .book-chip.major {
   font-size: 23rpx;
   padding: 8rpx 22rpx;
-  background: #f5f7fa;
+  background: var(--bg);
 }
 
 .book-chip.major.active {
-  background: var(--want-grad);
-  box-shadow: 0 8rpx 22rpx rgba(161, 140, 209, 0.26);
+  background: var(--type-wanted-grad);
+  box-shadow: var(--shadow-card);
 }
 
-/* === 画布容器 === */
+/* ===== 列表模式：两列瀑布流 ===== */
+.list-scroll {
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.wf {
+  display: flex;
+  align-items: flex-start;
+  padding: 16rpx 16rpx 0;
+  /* 列间距 16rpx */
+  gap: 16rpx;
+}
+
+.wf-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 卡片：白底 + 上下圆角，图区顶角 12rpx */
+.wf-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  margin-bottom: 16rpx;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.wf-card:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-card);
+}
+
+/* 已预订 / 已完成：整卡降透明度，状态标签浮在图区上 */
+.wf-card.is-closed {
+  opacity: 0.62;
+}
+
+.wf-card.is-closed:active {
+  opacity: 0.75;
+}
+
+.wf-media {
+  position: relative;
+  width: 100%;
+  /* 宽高比 1:1 */
+  padding-top: 100%;
+  overflow: hidden;
+}
+
+.wf-img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.wf-img-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--img-ph-grad);
+}
+
+.wf-img-empty-icon {
+  font-size: 68rpx;
+  opacity: 0.5;
+}
+
+/* 状态角标：盖在图区左上角，与类型角标（在信息区）分工不重叠 */
+.wf-status {
+  position: absolute;
+  left: 12rpx;
+  top: 12rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--scrim);
+}
+
+.wf-body {
+  padding: 16rpx;
+}
+
+/* 标题：最多 2 行，超出省略号 */
+.wf-title {
+  font-size: 28rpx;
+  line-height: 1.4;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 78rpx;
+}
+
+.wf-price-row {
+  display: flex;
+  align-items: baseline;
+  margin-top: 10rpx;
+  min-width: 0;
+}
+
+/* 价格：全站唯一价格色，粗体 */
+.wf-price {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--price);
+  flex-shrink: 0;
+}
+
+/* 无具体金额（面议 / 可换物）：弱化，不跟价格抢视觉位 */
+.wf-price.muted {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.wf-price-extra {
+  margin-left: 8rpx;
+  font-size: 22rpx;
+  color: var(--text-light);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 标签行：类型角标 + 已认证 + 成色 */
+.wf-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8rpx;
+  margin-top: 12rpx;
+  overflow: hidden;
+}
+
+.wf-tag {
+  font-size: 20rpx;
+  line-height: 1.5;
+  padding: 2rpx 12rpx;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 类型角标：与气泡共用同一组类型色 */
+.wf-tag.type-idle {
+  color: var(--type-idle-text);
+  background: var(--type-idle-soft);
+}
+
+.wf-tag.type-exchange {
+  color: var(--type-exchange-text);
+  background: var(--type-exchange-soft);
+}
+
+.wf-tag.type-wanted {
+  color: var(--type-wanted-text);
+  background: var(--type-wanted-soft);
+}
+
+.wf-tag.type-wanted-deep {
+  color: var(--white);
+  background: var(--want-deep);
+}
+
+.wf-tag.type-skill {
+  color: var(--type-skill-text);
+  background: var(--type-skill-soft);
+}
+
+/* 已认证：成功语义 */
+.wf-tag.verified {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+/* 成色：中性弱化 */
+.wf-tag.cond {
+  color: var(--text-light);
+  background: var(--fill);
+}
+
+/* === 列表骨架 === */
+.wf-card.skeleton {
+  box-shadow: none;
+}
+
+.wf-card.skeleton .wf-media.img-skel {
+  position: relative;
+  padding-top: 100%;
+}
+
+.sk-line {
+  height: 24rpx;
+  border-radius: 6rpx;
+  background: var(--fill);
+  animation: skPulse 1.4s ease-in-out infinite;
+}
+
+.sk-line + .sk-line {
+  margin-top: 14rpx;
+}
+
+.sk-line.w80 { width: 80%; }
+.sk-line.w60 { width: 60%; }
+.sk-line.w50 { width: 50%; }
+.sk-line.w40 { width: 40%; }
+
+@keyframes skPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* 加载 / 到底 */
+.list-foot {
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--text-light);
+  padding: 20rpx 0 200rpx;
+}
+
+/* 列表模式空态：正常流式居中（小球模式那份是绝对定位覆盖画布的） */
+.empty-state.list-empty {
+  position: static;
+  transform: none;
+  pointer-events: auto;
+  padding-top: 140rpx;
+}
+
+/* === 画布容器（小球模式） === */
 .canvas-container {
   flex: 1;
   position: relative;
@@ -255,8 +580,8 @@ page {
   pointer-events: none;
 }
 
-/* === 空状态 === */
-.empty-state {
+/* === 空状态（小球模式：覆盖在画布中央） === */
+.canvas-container .empty-state {
   position: absolute;
   top: 50%;
   left: 0;
@@ -269,19 +594,19 @@ page {
   pointer-events: none;
 }
 
-.empty-icon {
+.canvas-container .empty-icon {
   font-size: 120rpx;
   margin-bottom: 24rpx;
   opacity: 0.6;
 }
 
-.empty-text {
+.canvas-container .empty-text {
   font-size: 32rpx;
   color: var(--text-secondary);
   margin-bottom: 12rpx;
 }
 
-.empty-sub {
+.canvas-container .empty-sub {
   font-size: 26rpx;
   color: var(--text-light);
 }
@@ -315,12 +640,12 @@ page {
   background: var(--primary-grad);
   border-radius: 52rpx;
   padding: 22rpx 32rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 193, 126, 0.35);
+  box-shadow: var(--shadow-primary);
 }
 
 .publish-icon {
   font-size: 40rpx;
-  color: #fff;
+  color: var(--white);
   font-weight: bold;
   line-height: 1;
   margin-right: 10rpx;
@@ -329,7 +654,7 @@ page {
 .publish-text {
   font-size: 28rpx;
   font-weight: bold;
-  color: #fff;
+  color: var(--white);
   line-height: 1.3;
 }
 
@@ -352,16 +677,9 @@ page {
   50% { opacity: 0.7; transform: scale(1.05); }
 }
 
-
-/* === 以物易物：类型筛选选中态 === */
-.type-item.active.exchange {
-  color: var(--exchange);
-}
-
-
-/* 技能服务：类型筛选选中态 */
-.type-item.active.skill {
-  color: var(--skill);
+/* 小球模式下发布按钮不上浮动画打断画布交互，保持原有观感 */
+.mode-bubble .publish-float {
+  animation: floatIn 0.4s ease-out;
 }
 
 /* === 图片预热：离屏小图，不参与布局也不可见，仅用于提前把图拉进 image 缓存 === */
