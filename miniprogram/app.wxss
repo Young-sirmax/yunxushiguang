@@ -1,91 +1,6 @@
 /**app.wxss —— 全局设计系统（青春校园风 · 活力青绿）**/
-page {
-  /* 主色：活力青绿（薄荷绿 → 青绿 → 湖水青渐变） */
-  --primary: #00c17e;
-  --primary-dark: #00a76b;
-  --primary-light: #e0f8ef;
-  --primary-grad: linear-gradient(135deg, #3be6ad 0%, #00c17e 48%, #00b3a3 100%);
-  --primary-grad-vivid: linear-gradient(160deg, #3ce8b2 0%, #00c17e 46%, #00a9c4 100%);
-
-  /* ===== 类型主题色（气泡描边 / 卡片角标统一色）=====
-     改色请同步 miniprogram/utils/theme.js 的 TYPE_THEME（canvas 读不到 CSS 变量） */
-  --type-sell-from: #7ee8c7;      /* 闲置：绿青 */
-  --type-sell-to: #4ecdc4;
-  --type-want-from: #c7b9ff;      /* 求购：紫 */
-  --type-want-to: #a18cd1;
-  --type-exchange-from: #ffd194;  /* 以物易物：橙 */
-  --type-exchange-to: #ff9a76;
-  --type-skill-from: #a1c4fd;     /* 技能服务：蓝 */
-  --type-skill-to: #84c1ff;
-
-  /* 求购（紫系） */
-  --want: #a18cd1;
-  --want-grad: linear-gradient(135deg, #c7b9ff 0%, #a18cd1 100%);
-  --want-soft: #f1ecfd;
-
-  /* 求购分区·技能求助（同紫系加深，与「物品求购」做深浅区分） */
-  --want-deep: #7c5cbf;
-  --want-deep-grad: linear-gradient(135deg, #9d7ee0 0%, #7c5cbf 100%);
-  --want-deep-soft: #ece5fa;
-
-  /* 以物易物（橙系）：文字用加深色保证可读，渐变保持低饱和 */
-  --exchange: #e8734a;
-  --exchange-grad: linear-gradient(135deg, #ffd194 0%, #ff9a76 100%);
-  --exchange-soft: #fff3e8;
-
-  /* 技能服务（蓝系） */
-  --skill: #4a90e2;
-  --skill-grad: linear-gradient(135deg, #a1c4fd 0%, #84c1ff 100%);
-  --skill-soft: #eaf3ff;
-
-  /* 强调色：活力珊瑚橙 */
-  --accent: #ff7a59;
-  --accent-grad: linear-gradient(135deg, #ff9a76 0%, #ff7a59 100%);
-
-  /* 点缀色：阳光黄 */
-  --sun: #ffc53d;
-  --sun-grad: linear-gradient(135deg, #ffd968 0%, #ffb020 100%);
-
-  /* 功能色 */
-  --warning: #ffb020;
-  --danger: #f43f5e;
-  --info: #3b82f6;
-  --white: #ffffff;
-
-  /* 浅色功能背景（徽章/标签底） */
-  --primary-soft: #e0f8ef;
-  --accent-soft: #fff1ec;
-  --danger-soft: #fdeef1;
-  --info-soft: #edf4ff;
-  --warning-soft: #fff7e6;
-
-  /* 文字层级（深墨蓝） */
-  --text: #0f1b2d;
-  --text-secondary: #5a6b7f;
-  --text-light: #94a3b8;
-
-  /* 背景与卡片 */
-  --bg: #f5f7fa;
-  --bg-card: #ffffff;
-  --border: #eef1f5;
-
-  /* 圆角体系 */
-  --radius: 20rpx;
-  --radius-lg: 28rpx;
-  --radius-pill: 999rpx;
-
-  /* 分层阴影体系（Material 3 式双层阴影） */
-  --shadow-sm: 0 1rpx 2rpx rgba(15, 27, 45, 0.04), 0 4rpx 12rpx rgba(15, 27, 45, 0.05);
-  --shadow-card: 0 2rpx 4rpx rgba(15, 27, 45, 0.05), 0 12rpx 32rpx rgba(15, 27, 45, 0.08);
-  --shadow-hover: 0 4rpx 8rpx rgba(15, 27, 45, 0.06), 0 24rpx 48rpx rgba(15, 27, 45, 0.12);
-  --shadow-primary: 0 10rpx 30rpx rgba(0, 193, 126, 0.28);
-  --shadow-danger: 0 10rpx 30rpx rgba(244, 63, 94, 0.24);
-
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 28rpx;
-}
+/* 色板全部收敛到 styles/theme.wxss，本文件不再定义任何色值 */
+@import "./styles/theme.wxss";
 
 .container {
   padding: 24rpx;
@@ -148,12 +63,13 @@ page {
 
 .btn-primary:active {
   transform: scale(0.96);
-  box-shadow: 0 5rpx 16rpx rgba(0, 193, 126, 0.22);
+  box-shadow: var(--shadow-primary-active);
 }
 
+/* 禁用态：不再用「褪色绿」，改为中性填充 + 弱文字，与主色体系解耦 */
 .btn-primary[disabled] {
-  background: linear-gradient(135deg, #cde7d8, #c2e2d0);
-  color: rgba(255, 255, 255, 0.9);
+  background: var(--fill-strong);
+  color: var(--text-light);
   box-shadow: none;
 }
 
@@ -166,7 +82,7 @@ page {
 .btn-default {
   background: var(--bg-card);
   color: var(--primary);
-  border: 2rpx solid rgba(0, 193, 126, 0.4);
+  border: 2rpx solid var(--primary);
   border-radius: var(--radius-pill);
   height: 92rpx;
   font-size: 32rpx;
@@ -206,7 +122,7 @@ page {
 
 /* === 危险按钮（红色渐变胶囊） === */
 .btn-danger {
-  background: linear-gradient(135deg, #ff7a8a 0%, #f43f5e 55%, #e11d48 100%);
+  background: var(--error-grad);
   color: var(--white);
   border-radius: var(--radius-pill);
   height: 92rpx;
@@ -229,7 +145,7 @@ page {
 
 .btn-danger:active {
   transform: scale(0.96);
-  box-shadow: 0 5rpx 16rpx rgba(244, 63, 94, 0.2);
+  box-shadow: var(--shadow-danger-active);
 }
 
 /* === 小型按钮 === */
@@ -252,9 +168,10 @@ page {
   flex-shrink: 0;
 }
 
+/* 已认证 = 成功语义（与主色同源，但走语义令牌，语义变了不会被主色误带） */
 .badge-verified {
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: var(--success);
+  background: var(--success-soft);
 }
 
 .badge-pending {
@@ -272,14 +189,23 @@ page {
   background: var(--info-soft);
 }
 
-/* === 价格文本 === */
-.price-text {
-  color: var(--accent);
-  font-weight: 700;
+/* 交易状态标签：已预订 = 警告语义 / 已完成 = 中性弱化（不再抢价格与主色的视觉位） */
+.badge-booked {
+  color: var(--warning);
+  background: var(--warning-soft);
 }
 
+.badge-done {
+  color: var(--text-light);
+  background: var(--fill);
+}
+
+/* === 价格文本 ===
+   全站价格只有 --price 一色：卡片价格、详情价格、求购预算共用下面两个类。
+   .price-want 保留类名（历史用法），颜色与 .price-text 一致，不再另起绿价。 */
+.price-text,
 .price-want {
-  color: var(--primary);
+  color: var(--price);
   font-weight: 700;
 }
 
@@ -300,7 +226,7 @@ page {
   align-items: center;
   justify-content: center;
   margin-bottom: 36rpx;
-  box-shadow: inset 0 2rpx 8rpx rgba(0, 193, 126, 0.08);
+  box-shadow: var(--shadow-inset-primary);
 }
 
 .empty-icon {
@@ -325,7 +251,7 @@ page {
 /* === 通用输入框 === */
 .input-base {
   height: 88rpx;
-  background: #f1f5f9;
+  background: var(--fill);
   border: 2rpx solid transparent;
   border-radius: var(--radius);
   padding: 0 24rpx;
@@ -337,7 +263,7 @@ page {
 .input-base:focus {
   border-color: var(--primary);
   background: var(--white);
-  box-shadow: 0 0 0 6rpx rgba(0, 193, 126, 0.08);
+  box-shadow: var(--ring-primary);
 }
 
 /* === 页面区块标题 === */
@@ -437,8 +363,8 @@ page {
   top: 0;
   right: 0;
   bottom: 0;
-  background-color: #eef2f6;
-  background-image: linear-gradient(100deg, rgba(238, 242, 246, 0) 30%, rgba(255, 255, 255, 0.75) 50%, rgba(238, 242, 246, 0) 70%);
+  background-color: var(--fill-strong);
+  background-image: var(--skel-sweep);
   background-size: 200% 100%;
   animation: imgSkelSweep 1.4s ease-in-out infinite;
 }
@@ -460,5 +386,5 @@ page {
 
 /* 静态占位底色：列表缩略图直接复用（零 JS 成本，也不会出现白块） */
 .img-ph {
-  background-color: #eef2f6;
+  background-color: var(--fill-strong);
 }
