@@ -3,29 +3,33 @@ const API = require('../../api/api.js');
 const { formatDate } = require('../../utils/util.js');
 const { COLLEGE_LIST, getMajorsByCollege, isBookCategoryName } = require('../../utils/majors.js');
 const { buildDisplayKeyword } = require('../../utils/displayKeyword.js');
-const { strokeTypeRing } = require('../../utils/theme.js');
+const { strokeTypeRing, getTypeTheme, TOKENS } = require('../../utils/theme.js');
+const { computeBubbleLayout, packBubbles, latticeSlots } = require('../../utils/bubbleLayout.js');
 const imageView = require('../../utils/imageView.js');
 
-// 颜色调色板
-const COLOR_PALETTE = [
-  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-  '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-  '#F8B500', '#FF69B4', '#00CED1', '#FF7F50', '#9370DB',
-  '#20B2AA', '#FF8C00', '#DA70D6', '#32CD32', '#1E90FF'
-];
+// ===== 浏览模式 =====
+// 列表模式（默认）：两列瀑布流，信息密度高，商品多了也不挤
+// 小球模式：原气泡交互，保留为可切换玩法
+const VIEW_MODE_KEY = 'homeViewMode';
+const VIEW_LIST = 'list';
+const VIEW_BUBBLE = 'bubble';
 
 // 物理常量（七彩正圆泡泡：轻飘飘 · 一点点重力 · 碰撞轻轻反弹）
-const GRAVITY = 0.05;      // 一点点重力（向下）：泡泡有轻微沉坠感
-const DAMPING = 0.965;     // 空气阻尼：动作轻盈，但会自然渐缓不失控
+// 说明：商品变多后原先「重力大 + 回弹弱」会让泡泡在底部堆叠、边缘交叠。
+// 调参方向——重力调小、回锚柔力调大，让泡泡稳定停在自己的锚点上，不再下沉堆挤。
+const GRAVITY = 0.012;     // 一点点重力（向下）：泡泡有轻微沉坠感
+const DAMPING = 0.94;      // 空气阻尼：动作轻盈，但会自然渐缓不失控
 const RESTITUTION = 0.7;   // 泡泡间碰撞弹性：轻轻反弹
-const SPRING_K = 0.0035;   // 回“悬浮点”的柔力：轻盈悬浮，避免沉底/扎堆
+const SPRING_K = 0.012;    // 回“悬浮点”的柔力：稳住锚点，避免沉底/扎堆
+const RELAX_ITER = 2;      // 每帧位置修正迭代次数：手指拨乱后更快分开，不留交叠
 const TOUCH_RADIUS = 90;   // 手指影响的半径
 const WIND_PROB = 0.02;    // 微风触发概率（每帧）
 const WIND_FORCE = 0.18;   // 微风脉冲强度（偶尔上飘，制造轻飘飘感）
 const MAX_SPEED = 2.4;     // 速度软上限（px/帧）
 
-// 泡泡统一尺寸：直径 220rpx（所有商品大小完全一致，不再与价格相关）
-const BUBBLE_DIAMETER_RPX = 220;
+// 泡泡尺寸区间：直径从 220rpx（少）自适应收缩到 104rpx（多），保证都能铺下且不交叠
+const BUBBLE_MAX_RPX = 220;
+const BUBBLE_MIN_RPX = 104;
 
 // 屏幕宽度（px），用于 rpx → px 换算（canvas 绘制使用 CSS px）
 function getWindowWidth() {
@@ -42,6 +46,28 @@ function rpxToPx(rpx) {
   return (getWindowWidth() / 750) * rpx;
 }
 
+// 轻微明度浮动（±amount，0~1）：同一类型色下每颗泡泡略有深浅差，避免一片死板
+// 只动明度不动色相，不引入新颜色
+function shiftLightness(hex, amount) {
+  const num = parseInt(hex.slice(1), 16);
+  const to = amount >= 0 ? 255 : 0;
+  const k = Math.abs(amount);
+  const R = Math.round((num >> 16) + (to - (num >> 16)) * k);
+  const G = Math.round(((num >> 8) & 0x00ff) + (to - ((num >> 8) & 0x00ff)) * k);
+  const B = Math.round((num & 0x0000ff) + (to - (num & 0x0000ff)) * k);
+  return `rgb(${R},${G},${B})`;
+}
+
+// 用 _id 做稳定散列：同一条商品每次进来深浅一致，不会闪
+function stableHash(str) {
+  let h = 0;
+  const s = String(str || '');
+  for (let i = 0; i < s.length; i++) {
+    h = (h * 31 + s.charCodeAt(i)) % 100000;
+  }
+  return h;
+}
+
 // 技能报价文案：按次 / 按小时 / 面议
 function formatSkillPrice(unit, price) {
   const amount = Number(price) || 0;
@@ -49,56 +75,10 @@ function formatSkillPrice(unit, price) {
   return '¥' + amount + (unit === 'per_hour' ? '/小时' : '/次');
 }
 
-// 圆堆积算法 - 生成不重叠的圆形布局
-function computePacking(circles, containerW, containerH) {
-  const placed = [];
-  const padding = 10;
-  const gap = 6;
-  
-  circles.sort((a, b) => b.radius - a.radius);
-  
-  for (let i = 0; i < circles.length; i++) {
-    const circle = circles[i];
-    const maxAttempts = 200;
-    
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const x = circle.radius + padding + Math.random() * (containerW - 2 * (circle.radius + padding));
-      const y = circle.radius + padding + Math.random() * (containerH - 2 * (circle.radius + padding));
-      
-      let overlapping = false;
-      for (let j = 0; j < placed.length; j++) {
-        const other = placed[j];
-        const dx = x - other.x;
-        const dy = y - other.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < circle.radius + other.radius + gap) {
-          overlapping = true;
-          break;
-        }
-      }
-      
-      if (!overlapping) {
-        circle.x = x;
-        circle.y = y;
-        placed.push(circle);
-        break;
-      }
-      
-      if (attempt === maxAttempts - 1) {
-        // 兜底：仍放在容器内，但给每个圆一个分散的锚点。
-        // 若全部叠在正中心同一点，物理悬浮弹簧会互相拉扯导致抖动。
-        const angle = Math.random() * Math.PI * 2;
-        const spread = Math.random() * 0.26;
-        const maxX = Math.max(circle.radius, containerW - circle.radius);
-        const maxY = Math.max(circle.radius, containerH - circle.radius);
-        circle.x = Math.min(Math.max(containerW / 2 + Math.cos(angle) * containerW * spread, circle.radius), maxX);
-        circle.y = Math.min(Math.max(containerH / 2 + Math.sin(angle) * containerH * spread, circle.radius), maxY);
-      }
-    }
-  }
-  
-  return circles;
-}
+// ===== 泡泡排布 =====
+// 排布算法（自适应半径 + 错位网格，几何保证不交叠）在 utils/bubbleLayout.js，
+// 纯函数、可在 Node 里跑回归测试（tests/bubbleLayout.test.js）。
+// 这里只负责把算出来的半径与容量接到页面上。
 
 // 为圆形初始化物理（正圆泡泡：圆心 + 速度 + 悬浮锚点）
 function initPhysics(circle) {
@@ -146,33 +126,41 @@ function physicsUpdate(circles, containerW, containerH) {
   }
 
   // 2) 泡泡两两碰撞：先推开消除重叠，再沿法线方向“轻轻反弹”
-  for (let i = 0; i < circles.length; i++) {
-    for (let j = i + 1; j < circles.length; j++) {
-      const A = circles[i];
-      const B = circles[j];
-      if (!A.center || !B.center) continue;
-      const ax = A.center.x, ay = A.center.y;
-      const bx = B.center.x, by = B.center.y;
-      const dx = bx - ax, dy = by - ay;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const minDist = A.radius + B.radius;
+  //    迭代 RELAX_ITER 次：一次推不完的密集区（手指拨过之后）第二次继续分开，
+  //    保证每帧结束时画面里没有压在一起的泡泡
+  for (let iter = 0; iter < RELAX_ITER; iter++) {
+    // 冲量只在第一轮施加，后续轮次只做位置修正，避免能量被反复注入
+    const applyImpulse = iter === 0;
+    for (let i = 0; i < circles.length; i++) {
+      for (let j = i + 1; j < circles.length; j++) {
+        const A = circles[i];
+        const B = circles[j];
+        if (!A.center || !B.center) continue;
+        const ax = A.center.x, ay = A.center.y;
+        const bx = B.center.x, by = B.center.y;
+        const dx = bx - ax, dy = by - ay;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const minDist = A.radius + B.radius;
 
-      if (dist > 0 && dist < minDist) {
-        const nx = dx / dist, ny = dy / dist;
-        const overlap = minDist - dist;
-        A.center.x -= nx * overlap / 2;
-        A.center.y -= ny * overlap / 2;
-        B.center.x += nx * overlap / 2;
-        B.center.y += ny * overlap / 2;
+        if (dist > 0 && dist < minDist) {
+          const nx = dx / dist, ny = dy / dist;
+          const overlap = minDist - dist;
+          A.center.x -= nx * overlap / 2;
+          A.center.y -= ny * overlap / 2;
+          B.center.x += nx * overlap / 2;
+          B.center.y += ny * overlap / 2;
 
-        // 相对速度沿法线的分量 < 0 表示相互接近，此时才反弹
-        const rel = (B.vx - A.vx) * nx + (B.vy - A.vy) * ny;
-        if (rel < 0) {
-          const impulse = -(1 + RESTITUTION) * rel / 2;
-          A.vx -= impulse * nx;
-          A.vy -= impulse * ny;
-          B.vx += impulse * nx;
-          B.vy += impulse * ny;
+          // 相对速度沿法线的分量 < 0 表示相互接近，此时才反弹
+          if (applyImpulse) {
+            const rel = (B.vx - A.vx) * nx + (B.vy - A.vy) * ny;
+            if (rel < 0) {
+              const impulse = -(1 + RESTITUTION) * rel / 2;
+              A.vx -= impulse * nx;
+              A.vy -= impulse * ny;
+              B.vx += impulse * nx;
+              B.vy += impulse * ny;
+            }
+          }
         }
       }
     }
@@ -204,10 +192,10 @@ function physicsUpdate(circles, containerW, containerH) {
 function renderCircles(ctx, circles, containerW, containerH, expandState, preview) {
   ctx.clearRect(0, 0, containerW, containerH);
 
-  // 绘制背景
+  // 绘制背景（与页面同色，泡泡区不出现第二种底色）
   const gradient = ctx.createLinearGradient(0, 0, 0, containerH);
-  gradient.addColorStop(0, '#f5f7fa');
-  gradient.addColorStop(1, '#e8ecf1');
+  gradient.addColorStop(0, TOKENS.bg);
+  gradient.addColorStop(1, TOKENS.fill);
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, containerW, containerH);
 
@@ -240,7 +228,7 @@ function renderCircles(ctx, circles, containerW, containerH, expandState, previe
 
   // 焦点态：整体压暗 + 焦点泡泡放大 1.1 倍并高亮描边
   if (focusAlpha > 0) {
-    ctx.fillStyle = `rgba(15, 27, 45, ${(0.3 * focusAlpha).toFixed(3)})`;
+    ctx.fillStyle = `rgba(${TOKENS.textRgb}, ${(0.3 * focusAlpha).toFixed(3)})`;
     ctx.fillRect(0, 0, containerW, containerH);
 
     const focused = circles.find(c => c._id === preview.circleId);
@@ -268,9 +256,8 @@ function renderCircles(ctx, circles, containerW, containerH, expandState, previe
   }
 }
 
-// 绘制普通圆形（带物理变形）
+// 绘制普通圆形（正圆泡泡）
 function drawSingleCircle(ctx, circle) {
-  // ===== 绝对正圆的七彩泡泡 =====
   const cx = circle.center.x;
   const cy = circle.center.y;
   const r = circle.radius;
@@ -376,7 +363,7 @@ function drawExpandingCircle(ctx, circle, es, containerW, containerH) {
 
   const label = circle.label || '';
   const fontSize = Math.max(12, r * 0.09);
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = TOKENS.white;
   ctx.font = `bold ${fontSize}px sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -384,8 +371,7 @@ function drawExpandingCircle(ctx, circle, es, containerW, containerH) {
   ctx.fillText(label, cx, cy + contentR * 0.15);
 
   const priceFontSize = Math.max(14, r * 0.12);
-  ctx.fillStyle = circle.type === 'want' ? '#2dd8c0'
-    : (circle.type === 'exchange' ? '#c4b5fd' : (circle.type === 'skill' ? '#ffd166' : '#FFD700'));
+  ctx.fillStyle = TOKENS.onImage;
   ctx.font = `bold ${priceFontSize}px sans-serif`;
   ctx.fillText(
     circle.type === 'want'
@@ -409,20 +395,20 @@ function drawCircleContent(ctx, circle) {
   const cx = circle.center.x;
   const cy = circle.center.y;
   const contentR = r * 0.75;
-  
+
   const isWant = circle.type === 'want';
   const isExchange = circle.type === 'exchange';
   const isSkill = circle.type === 'skill';
   const isVerified = circle.isVerified;
-  
+
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, contentR, 0, Math.PI * 2);
   ctx.clip();
-  
+
   ctx.fillStyle = 'rgba(255,255,255,0.9)';
   ctx.fill();
-  
+
   if (isWant) {
     drawWantFallback(ctx, cx, cy, contentR);
   } else if (circle.imageLoaded && circle.imagePath) {
@@ -437,32 +423,33 @@ function drawCircleContent(ctx, circle) {
   } else {
     drawImageFallback(ctx, cx, cy, contentR);
   }
-  
+
   ctx.restore();
-  
+
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, contentR, 0, Math.PI * 2);
   ctx.clip();
-  
+
+  // 图上文字底衬：统一用深色渐隐（保证任何图片下都读得清）
   const maskGradient = ctx.createLinearGradient(cx, cy + contentR * 0.3, cx, cy + contentR);
   maskGradient.addColorStop(0, 'rgba(0,0,0,0)');
   maskGradient.addColorStop(1, 'rgba(0,0,0,0.5)');
   ctx.fillStyle = maskGradient;
   ctx.fillRect(cx - contentR, cy - contentR, contentR * 2, contentR * 2);
   ctx.restore();
-  
+
   const titleR = r * 0.92;
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, titleR, 0, Math.PI * 2);
   ctx.clip();
-  
+
   // 展示短标题（数据层已算好）：超长时缩字号而不是截断
   const label = circle.label || '';
   const maxTextWidth = contentR * 1.6;
   let titleFontSize = Math.max(13, r * 0.1);
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = TOKENS.white;
   ctx.font = `bold ${titleFontSize}px sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -473,31 +460,27 @@ function drawCircleContent(ctx, circle) {
 
   const titleY = cy + contentR * 0.15;
   ctx.fillText(label, cx, titleY);
-  
+
   const priceY = cy + contentR * 0.5;
   const priceFontSize = Math.max(14, r * 0.12);
   ctx.font = `bold ${priceFontSize}px sans-serif`;
-  
+
+  // 图上文字只有一种「高亮色」：统一暖金，不再按类型各配一色
+  ctx.fillStyle = TOKENS.onImage;
   if (isWant) {
-    ctx.fillStyle = '#00b3a6';
     ctx.fillText('求购中', cx, priceY);
   } else if (isExchange) {
-    // 以物易物：不显示价格，显示类型角标
-    ctx.fillStyle = '#c4b5fd';
     ctx.fillText('🔁 易物', cx, priceY);
   } else if (isSkill) {
-    // 技能服务：显示报价模式（¥xx/次 · ¥xx/小时 · 面议）
-    ctx.fillStyle = '#ffd166';
     ctx.fillText(formatSkillPrice(circle.priceUnit, circle.price), cx, priceY);
   } else {
-    ctx.fillStyle = '#FFD700';
     ctx.fillText('¥' + circle.price, cx, priceY);
   }
-  
+
   const tagY = cy + contentR * 0.75;
   ctx.font = `${Math.max(10, r * 0.07)}px sans-serif`;
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  
+
   let tagText = '';
   if (isWant) {
     tagText = '求购信息';
@@ -511,18 +494,19 @@ function drawCircleContent(ctx, circle) {
   if (isSkill && circle.isExpert) tagText += ' 🎓达人';
   if (isVerified) tagText += ' ✓已认证';
   ctx.fillText(tagText, cx, tagY);
-  
+
   ctx.restore();
 }
 
 function drawWantFallback(ctx, cx, cy, r) {
+  const theme = getTypeTheme('want');
   const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-  gradient.addColorStop(0, '#e0f7f5');
-  gradient.addColorStop(1, '#00a8a0');
+  gradient.addColorStop(0, theme.soft);
+  gradient.addColorStop(1, theme.text);
   ctx.fillStyle = gradient;
   ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-  
-  ctx.fillStyle = '#fff';
+
+  ctx.fillStyle = TOKENS.white;
   ctx.font = `bold ${r * 0.5}px sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -533,15 +517,14 @@ function drawWantFallback(ctx, cx, cy, r) {
 }
 
 function drawImageFallback(ctx, cx, cy, r) {
-  // 绘制占位图
+  // 占位：中性灰，不再用彩色（避免无图商品变成一块“随机色”）
   const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-  gradient.addColorStop(0, '#e0e0e0');
-  gradient.addColorStop(1, '#c0c0c0');
+  gradient.addColorStop(0, TOKENS.fill);
+  gradient.addColorStop(1, TOKENS.fillStrong);
   ctx.fillStyle = gradient;
   ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-  
-  // 占位图标
-  ctx.fillStyle = '#999';
+
+  ctx.fillStyle = TOKENS.textLight;
   ctx.font = `${r * 0.5}px sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -553,8 +536,8 @@ function lightenColor(hex, percent) {
   const num = parseInt(hex.slice(1), 16);
   const amt = Math.round(2.55 * percent);
   const R = Math.min(255, (num >> 16) + amt);
-  const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
-  const B = Math.min(255, (num & 0x0000FF) + amt);
+  const G = Math.min(255, ((num >> 8) & 0x00ff) + amt);
+  const B = Math.min(255, (num & 0x0000ff) + amt);
   return `rgb(${R},${G},${B})`;
 }
 
@@ -562,10 +545,100 @@ function darkenColor(hex, percent) {
   const num = parseInt(hex.slice(1), 16);
   const amt = Math.round(2.55 * percent);
   const R = Math.max(0, (num >> 16) - amt);
-  const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
-  const B = Math.max(0, (num & 0x0000FF) - amt);
+  const G = Math.max(0, ((num >> 8) & 0x00ff) - amt);
+  const B = Math.max(0, (num & 0x0000ff) - amt);
   return `rgb(${R},${G},${B})`;
 }
+
+// ===== 列表模式：卡片展示字段 =====
+// 展示口径（与详情页/发布页一致，不改数据层）：
+//   sell     → ¥xx（有金额用价格色）
+//   want     → 预算 ¥xx（数据层求购不落 price，没有金额就是「预算面议」）
+//   exchange → 可换物（+ 期望交换物）
+//   skill    → ¥xx/次 · ¥xx/小时 · 面议
+const TYPE_LABEL = { sell: '闲置', want: '求购', exchange: '易物', skill: '技能' };
+const TYPE_CLASS = { sell: 'idle', want: 'wanted', exchange: 'exchange', skill: 'skill' };
+
+function buildCardView(item) {
+  const type = item.type || 'sell';
+  const isWant = type === 'want';
+  const isExchange = type === 'exchange';
+  const isSkill = type === 'skill';
+  const amount = Number(item.price) || 0;
+  const unit = item.price_unit || '';
+
+  let priceText = '';
+  let priceMuted = false; // true = 无具体金额（面议/可换物），用弱化色，不抢价格色的视觉位
+
+  if (isWant) {
+    if (amount > 0) {
+      priceText = '预算 ¥' + amount;
+    } else {
+      priceText = '预算面议';
+      priceMuted = true;
+    }
+  } else if (isExchange) {
+    priceText = '可换物';
+    priceMuted = true;
+  } else if (isSkill) {
+    priceText = formatSkillPrice(unit, amount);
+    priceMuted = priceText === '面议';
+  } else {
+    if (amount > 0) {
+      priceText = '¥' + amount;
+    } else {
+      priceText = '面议';
+      priceMuted = true;
+    }
+  }
+
+  const tradeStatus = item.tradeStatus || 'open';
+  // 求购按二级分区区分角标：物品求购 → 「求购」，技能求助 → 「求助」
+  const typeLabel = isWant ? (item.want_category === 'skill' ? '求助' : '求购') : TYPE_LABEL[type];
+  const typeClass = (isWant && item.want_category === 'skill') ? 'wanted-deep' : TYPE_CLASS[type];
+
+  return Object.assign({}, item, {
+    timeText: formatDate(item.createTime),
+    typeLabel: typeLabel || '闲置',
+    typeClass: typeClass || 'idle',
+    priceText: priceText,
+    priceMuted: priceMuted,
+    // 以物易物：价格行后缀显示期望交换物（过长由 CSS 截断）
+    exchangeShort: isExchange ? (item.exchange_want || '') : '',
+    conditionText: isSkill ? '' : (item.condition || ''),
+    isClosed: tradeStatus !== 'open',
+    statusText: tradeStatus === 'matched' ? '已预订' : (tradeStatus === 'completed' ? '已完成' : '')
+  });
+}
+
+// 两列瀑布流分列：按估算高度投放到较矮的一列，长短卡片混排也能两边齐平
+function splitIntoColumns(list) {
+  const left = [];
+  const right = [];
+  let leftH = 0;
+  let rightH = 0;
+  // 列宽 (750 - 左右边距32 - 列间距16) / 2 = 351rpx，图区 1:1 所以图高≈351rpx
+  const COL_W = 351;
+  for (let i = 0; i < list.length; i++) {
+    const item = list[i];
+    const titleLen = (item.title || '').length;
+    const titleLines = Math.min(2, Math.max(1, Math.ceil(titleLen / 10)));
+    // 图区 + 信息区（内边距 32 + 标题行 + 价格行 + 标签行）
+    const h = COL_W + 32 + titleLines * 40 + 40 + 44;
+    if (leftH <= rightH) {
+      left.push(item);
+      leftH += h;
+    } else {
+      right.push(item);
+      rightH += h;
+    }
+  }
+  return { left, right };
+}
+
+// 列表骨架占位：首次加载/切筛选时左右各放几张，与实际卡片同构，减少跳动
+const SKELETON_LEFT = [1, 2, 3];
+const SKELETON_RIGHT = [1, 2, 3];
 
 Page({
   data: {
@@ -585,10 +658,20 @@ Page({
     majorList: [],
     currentMajor: '',
     commodityList: [],
+    // 浏览模式：list 列表（默认）| bubble 小球
+    viewMode: VIEW_LIST,
+    // 列表模式两列数据（与 commodityList 同源，只是换渲染组件）
+    leftColumn: [],
+    rightColumn: [],
+    skeletonLeft: SKELETON_LEFT,
+    skeletonRight: SKELETON_RIGHT,
     page: 1,
     pageSize: 20,
     hasMore: true,
+    isLoading: false,
     isRefreshing: false,
+    // 小球模式下超出容器容量的条数（>0 时提示切列表模式查看全部）
+    cappedCount: 0,
     // 长按预览卡片（居中弹层）：数据驱动
     previewShow: false,
     previewItem: null,
@@ -600,6 +683,7 @@ Page({
   ctx: null,
   canvasCircles: [],
   containerSize: { w: 0, h: 0 },
+  pendingCircleList: null, // 画布未就绪（列表模式 / 尺寸未量到）时暂存的数据
   lastTouchTime: 0,
   lastTouchPos: null,
   touchedCircle: null,
@@ -614,6 +698,14 @@ Page({
   onLoad() {
     // 开启右上角菜单的“转发给朋友 / 分享到朋友圈”，否则微信不会显示分享入口
     wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] });
+    // 浏览模式：记住上次选择，新用户默认列表模式
+    let saved = '';
+    try {
+      saved = wx.getStorageSync(VIEW_MODE_KEY) || '';
+    } catch (err) {
+      saved = '';
+    }
+    this.setData({ viewMode: saved === VIEW_BUBBLE ? VIEW_BUBBLE : VIEW_LIST });
     this.loadCategoryList();
   },
 
@@ -629,13 +721,16 @@ Page({
   },
 
   onReady() {
-    this.initCanvas();
     this.isFirstLoad = true;
+    // 只有小球模式才需要初始化画布：列表模式下 canvas 节点不存在
+    if (this.data.viewMode === VIEW_BUBBLE) {
+      this.initCanvas();
+    }
     this.loadCommodityList(true, true); // 首次加载，允许随机布局
   },
 
   onShow() {
-    if (this.canvas && !this.isFirstLoad) {
+    if (this.data.viewMode === VIEW_BUBBLE && this.canvas && !this.isFirstLoad) {
       // 刷新 Canvas 位置（防止页面布局变化导致偏移）
       wx.createSelectorQuery().select('#commodityCanvas')
         .boundingClientRect((rect) => {
@@ -644,6 +739,41 @@ Page({
       // 从详情页返回，不做任何刷新，保持球形位置和状态完全不变
     }
     this.isFirstLoad = false;
+  },
+
+  // ===== 浏览模式切换 =====
+  // 只切换渲染组件，不重新请求数据：两种模式共用同一份 commodityList / 同一分页游标
+  switchViewMode(e) {
+    const mode = e.currentTarget.dataset.mode;
+    if (!mode || mode === this.data.viewMode) return;
+
+    this.closePreviewCard();
+    try {
+      wx.setStorageSync(VIEW_MODE_KEY, mode);
+    } catch (err) {
+      // 缓存写失败不影响本次切换
+    }
+    wx.vibrateShort({ type: 'light' });
+
+    if (mode === VIEW_BUBBLE) {
+      this.setData({ viewMode: VIEW_BUBBLE }, () => {
+        // 等画布挂载后再量尺寸并补画（数据已在 loadCommodityList 里备好）
+        wx.nextTick(() => {
+          this.initCanvas();
+          this.buildCanvasCircles(this.data.commodityList, true);
+        });
+      });
+    } else {
+      this.stopRenderLoop();
+      this.setData({ viewMode: VIEW_LIST });
+      this.refreshColumns(this.data.commodityList);
+    }
+  },
+
+  // 列表模式分列（数据不变，只重算两列归属）
+  refreshColumns(list) {
+    const cols = splitIntoColumns(list || []);
+    this.setData({ leftColumn: cols.left, rightColumn: cols.right });
   },
 
   initCanvas() {
@@ -665,13 +795,24 @@ Page({
 
         canvas.width = res[0].width * dpr;
         canvas.height = res[0].height * dpr;
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         this.startRenderLoop();
+        this.flushPendingCircles();
       });
   },
 
+  // 画布尺寸就绪后，把之前暂存的列表补画上去（首次进入 / 从小球模式切回都不会漏画）
+  flushPendingCircles() {
+    if (!this.pendingCircleList) return;
+    const pending = this.pendingCircleList;
+    this.pendingCircleList = null;
+    this.buildCanvasCircles(pending.list, pending.rebuildLayout);
+  },
+
   startRenderLoop() {
+    // 防止重复启动：两处 rAF 叠加会让物理以双倍速度跑
+    if (this.animationId) return;
     const render = () => {
       // 焦点态淡入淡出（0 正常 → 1 长按预览）
       const focusTarget = this.isPreviewing ? 1 : 0;
@@ -702,6 +843,18 @@ Page({
     render();
   },
 
+  // 切到列表模式时停掉渲染循环，省电省 CPU（画布节点也会随 wx:if 一起卸载）
+  stopRenderLoop() {
+    if (this.animationId && this.canvas) {
+      try {
+        this.canvas.cancelAnimationFrame(this.animationId);
+      } catch (err) {
+        // 画布节点已随 wx:if 卸载：rAF 自然失效，忽略即可
+      }
+    }
+    this.animationId = null;
+  },
+
   async loadCategoryList() {
     try {
       const res = await API.getCategoryList();
@@ -729,9 +882,7 @@ Page({
       });
 
       if (res.code === 0) {
-        const list = (res.data || []).map(function(item) {
-          return Object.assign({}, item, { timeText: formatDate(item.createTime) });
-        });
+        const list = (res.data || []).map(buildCardView);
 
         if (reset) {
           this.setData({
@@ -739,6 +890,7 @@ Page({
             hasMore: list.length >= this.data.pageSize,
             isRefreshing: false
           });
+          this.refreshColumns(list);
           this.buildCanvasCircles(list, rebuildLayout);
         } else {
           const newList = this.data.commodityList.concat(list);
@@ -746,13 +898,14 @@ Page({
             commodityList: newList,
             hasMore: list.length >= this.data.pageSize
           });
+          this.refreshColumns(newList);
           this.buildCanvasCircles(newList, rebuildLayout);
         }
       }
     } catch (err) {
       console.error('获取商品列表失败:', err);
     } finally {
-      this.setData({ isLoading: false });
+      this.setData({ isLoading: false, isRefreshing: false });
     }
   },
 
@@ -772,22 +925,21 @@ Page({
       });
 
       if (res.code === 0) {
-        const list = (res.data || []).map(function(item) {
-          return Object.assign({}, item, { timeText: formatDate(item.createTime) });
-        });
+        const list = (res.data || []).map(buildCardView);
 
         this.setData({
           commodityList: list,
           hasMore: list.length >= this.data.pageSize,
           isRefreshing: false
         });
+        this.refreshColumns(list);
         // rebuildLayout=false，复用缓存的位置和颜色
         this.buildCanvasCircles(list, false);
       }
     } catch (err) {
       console.error('刷新商品数据失败:', err);
     } finally {
-      this.setData({ isLoading: false });
+      this.setData({ isLoading: false, isRefreshing: false });
     }
   },
 
@@ -795,10 +947,19 @@ Page({
     // 列表重建（切分类/切类型/刷新）时先收起预览卡，避免卡片指向已消失的商品
     this.closePreviewCard();
 
-    if (!this.containerSize.w || !this.containerSize.h || list.length === 0) {
+    if (list.length === 0) {
       this.canvasCircles = [];
+      this.pendingCircleList = null;
+      if (this.data.cappedCount !== 0) this.setData({ cappedCount: 0 });
       return;
     }
+
+    // 列表模式下画布未挂载，或画布尺寸还没量到：先暂存，等 initCanvas 完成后补画
+    if (this.data.viewMode !== VIEW_BUBBLE || !this.containerSize.w || !this.containerSize.h) {
+      this.pendingCircleList = { list: list, rebuildLayout: rebuildLayout };
+      return;
+    }
+    this.pendingCircleList = null;
 
     // 构建缓存Map（复用之前的位置和颜色）
     const oldLayoutMap = {};
@@ -816,15 +977,30 @@ Page({
       Object.assign(oldLayoutMap, this.positionCache);
     }
 
-    // 所有商品泡泡统一大小：直径固定 220rpx，半径与价格无关
-    const bubbleRadius = rpxToPx(BUBBLE_DIAMETER_RPX) / 2;
-    const containerW = this.containerSize.w - 40;
-    const containerH = this.containerSize.h - 40;
+    const containerW = this.containerSize.w;
+    const containerH = this.containerSize.h;
+    // 自适应泡泡尺寸与容量：商品越多直径越小；极小屏装不下时只画 capacity 颗，
+    // 宁可少画也不让泡泡压在一起（交叠正是本次要修的问题）
+    const layout = computeBubbleLayout(
+      containerW, containerH, list.length,
+      rpxToPx(BUBBLE_MAX_RPX) / 2, rpxToPx(BUBBLE_MIN_RPX) / 2
+    );
+    const bubbleRadius = layout.radius;
+    const renderList = list.length > layout.capacity ? list.slice(0, layout.capacity) : list;
+    const cappedCount = list.length - renderList.length;
+    if (this.data.cappedCount !== cappedCount) {
+      this.setData({ cappedCount: cappedCount });
+    }
 
-    const tempCircles = list.map((item) => {
+    const tempCircles = renderList.map((item) => {
+      const theme = getTypeTheme(item.type);
       let color = oldLayoutMap[item._id] ? oldLayoutMap[item._id].color : null;
       if (!color) {
-        color = item.type === 'want' ? '#00a8a0' : COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
+        // 泡泡底色 = 类型色（低饱和），同类型内按 _id 做稳定深浅浮动
+        // 旧版的「随机彩虹调色板」已废弃：颜色不再随商品随机，同类型一个色系
+        const seed = stableHash(item._id);
+        const amount = ((seed % 21) - 10) / 100;  // -0.10 ~ +0.10
+        color = shiftLightness(theme.to, amount);
       }
       let cachedPos = oldLayoutMap[item._id];
       let x = cachedPos ? cachedPos.x : 0;
@@ -877,52 +1053,58 @@ Page({
 
     // 区分有位置缓存和无缓存的圆形
     if (rebuildLayout) {
-      // 完全重新布局
-      const padding = 20;
-      const containerW = this.containerSize.w - padding * 2;
-      const containerH = this.containerSize.h - padding * 2;
-      computePacking(tempCircles, containerW, containerH);
+      // 完全重新布局：错位网格，几何保证不交叠
+      packBubbles(tempCircles, containerW, containerH, bubbleRadius);
     } else {
       // 保留已有位置，只给新增的商品分配新位置
       const newCircles = tempCircles.filter(c => !oldLayoutMap[c._id]);
       const existingCircles = tempCircles.filter(c => oldLayoutMap[c._id]);
 
       if (newCircles.length > 0 && existingCircles.length > 0) {
-        // 给新增圆形找空位（避开已有圆）
+        // 在网格里挑还没被占用的落位点：落位点之间天然不交叠，
+        // 只要再避开已有圆，新增的这批就不会压到任何泡泡上
+        const slots = latticeSlots(containerW, containerH, bubbleRadius);
+        let slotIdx = 0;
+        let placedAll = true;
         for (const newCircle of newCircles) {
           let placed = false;
-          for (let attempt = 0; attempt < 200 && !placed; attempt++) {
-            const x = newCircle.radius + 30 + Math.random() * (containerW - 2 * (newCircle.radius + 30));
-            const y = newCircle.radius + 30 + Math.random() * (containerH - 2 * (newCircle.radius + 30));
-            let overlap = false;
+          for (; slotIdx < slots.length && !placed; slotIdx++) {
+            const slot = slots[slotIdx];
+            let conflict = false;
             for (const ex of existingCircles) {
-              const dx = x - ex.x;
-              const dy = y - ex.y;
-              if (Math.sqrt(dx * dx + dy * dy) < newCircle.radius + ex.radius + 4) {
-                overlap = true;
+              const dx = slot.x - ex.x;
+              const dy = slot.y - ex.y;
+              if (Math.sqrt(dx * dx + dy * dy) < bubbleRadius + ex.radius + 2) {
+                conflict = true;
                 break;
               }
             }
-            if (!overlap) {
-              newCircle.x = x;
-              newCircle.y = y;
+            if (!conflict) {
+              newCircle.x = slot.x;
+              newCircle.y = slot.y;
               placed = true;
             }
           }
           if (!placed) {
-            newCircle.x = containerW / 2;
-            newCircle.y = containerH / 2;
+            placedAll = false;
+            break;
           }
         }
+        // 空位不够（说明整体已超出容量）：整盘重排一次，宁可跳位置也不交叠
+        if (!placedAll) {
+          packBubbles(tempCircles, containerW, containerH, bubbleRadius);
+        }
+      } else if (newCircles.length > 0) {
+        packBubbles(newCircles, containerW, containerH, bubbleRadius);
       }
     }
-    
+
     // 初始化物理
     for (const circle of tempCircles) {
       initPhysics(circle);
       this.loadImage(circle);
     }
-    
+
     this.canvasCircles = tempCircles;
 
     // 保存布局缓存（用于从详情页返回时恢复）
@@ -1016,16 +1198,16 @@ Page({
     const touch = e.touches[0];
     const x = touch.clientX;
     const y = touch.clientY;
-    
+
     if (!this.lastTouchPos) {
       this.lastTouchPos = { x, y };
       return;
     }
-    
+
     const dx = x - this.lastTouchPos.x;
     const dy = y - this.lastTouchPos.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    
+
     // 累计位移超过 10px：取消长按定时器；若预览已打开则同步关闭
     if (this.touchStartPos) {
       const mdx = x - this.touchStartPos.x;
@@ -1047,7 +1229,7 @@ Page({
         const cdx = x - circle.center.x;
         const cdy = y - circle.center.y;
         const cdist = Math.sqrt(cdx * cdx + cdy * cdy);
-        
+
         if (cdist < TOUCH_RADIUS && cdist > 0) {
           const force = (TOUCH_RADIUS - cdist) / TOUCH_RADIUS;
           // 手指掠过时给泡泡一个轻快的速度冲量
@@ -1058,7 +1240,7 @@ Page({
         }
       }
     }
-    
+
     this.lastTouchPos = { x, y };
   },
 
@@ -1240,6 +1422,8 @@ Page({
       majorList: [],
       page: 1,
       commodityList: [],
+      leftColumn: [],
+      rightColumn: [],
       hasMore: true
     });
     this.positionCache = null; // 切换分类时清空位置缓存，重新布局
@@ -1257,6 +1441,8 @@ Page({
       majorList: college ? getMajorsByCollege(college) : [],
       page: 1,
       commodityList: [],
+      leftColumn: [],
+      rightColumn: [],
       hasMore: true
     });
     this.positionCache = null;
@@ -1272,6 +1458,8 @@ Page({
       currentMajor: major,
       page: 1,
       commodityList: [],
+      leftColumn: [],
+      rightColumn: [],
       hasMore: true
     });
     this.positionCache = null;
@@ -1307,6 +1495,7 @@ Page({
         this.canvas.height = height * dpr;
         // 用 setTransform 重置矩阵（不能用 scale，避免多次调用把缩放叠加）
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        this.flushPendingCircles();
       });
   },
 
@@ -1319,6 +1508,8 @@ Page({
       currentWantCategory: type === 'want' ? 'goods' : '',
       page: 1,
       commodityList: [],
+      leftColumn: [],
+      rightColumn: [],
       hasMore: true
     });
     this.positionCache = null; // 切换类型时清空位置缓存，重新布局
@@ -1333,6 +1524,8 @@ Page({
       currentWantCategory: value,
       page: 1,
       commodityList: [],
+      leftColumn: [],
+      rightColumn: [],
       hasMore: true
     });
     this.positionCache = null;
@@ -1340,6 +1533,11 @@ Page({
   },
 
   onRefresh() {
+    // 已有请求在飞：直接收起下拉圈，不排队（避免 refresher 一直转）
+    if (this.data.isRefreshing || this.data.isLoading) {
+      this.setData({ isRefreshing: false });
+      return;
+    }
     this.setData({ page: 1, isRefreshing: true });
     this.positionCache = null; // 下拉刷新时清空位置缓存，重新布局
     this.loadCommodityList(true, true);
@@ -1388,8 +1586,6 @@ Page({
   onUnload() {
     clearTimeout(this._longPressTimer);
     clearTimeout(this._resizeTimer);
-    if (this.animationId && this.canvas) {
-      this.canvas.cancelAnimationFrame(this.animationId);
-    }
+    this.stopRenderLoop();
   }
 });

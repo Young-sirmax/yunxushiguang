@@ -1,5 +1,5 @@
 <!--pages/commodity_list/commodity_list.wxml-->
-<view class="page-container">
+<view class="page-container mode-{{viewMode}}">
   <!-- 渐变头部 + 搜索栏 -->
   <view class="hero-header">
     <view class="hero-bg"></view>
@@ -38,23 +38,51 @@
     </view>
   </view>
 
-  <!-- 分类标签 -->
-  <scroll-view class="category-scroll" scroll-x enhanced show-scrollbar="{{false}}">
-    <view class="category-list">
-      <view class="category-item {{currentCategory === '' ? 'active' : ''}}" bindtap="switchCategory" data-id="">
-        全部
+  <!-- 分类标签 + 浏览模式切换（列表 / 小球） -->
+  <view class="filter-bar">
+    <scroll-view class="category-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="category-list">
+        <view class="category-item {{currentCategory === '' ? 'active' : ''}}" bindtap="switchCategory" data-id="">
+          全部
+        </view>
+        <view
+          class="category-item {{currentCategory === item._id ? 'active' : ''}}"
+          wx:for="{{categoryList}}"
+          wx:key="_id"
+          bindtap="switchCategory"
+          data-id="{{item._id}}"
+        >
+          {{item.name}}
+        </view>
       </view>
-      <view 
-        class="category-item {{currentCategory === item._id ? 'active' : ''}}" 
-        wx:for="{{categoryList}}" 
-        wx:key="_id"
-        bindtap="switchCategory"
-        data-id="{{item._id}}"
+    </scroll-view>
+
+    <!-- 双模式切换：列表（默认）/ 小球。选择写入本地缓存，下次进入按上次选择展示 -->
+    <view class="view-toggle">
+      <view
+        class="vt-btn {{viewMode === 'list' ? 'active' : ''}}"
+        data-mode="list"
+        bindtap="switchViewMode"
+        aria-label="列表模式"
       >
-        {{item.name}}
+        <view class="vt-icon vt-icon-list">
+          <view class="vt-cell"></view><view class="vt-cell"></view>
+          <view class="vt-cell"></view><view class="vt-cell"></view>
+        </view>
+      </view>
+      <view
+        class="vt-btn {{viewMode === 'bubble' ? 'active' : ''}}"
+        data-mode="bubble"
+        bindtap="switchViewMode"
+        aria-label="小球模式"
+      >
+        <view class="vt-icon vt-icon-bubble">
+          <view class="vt-orb big"></view>
+          <view class="vt-orb small"></view>
+        </view>
       </view>
     </view>
-  </scroll-view>
+  </view>
 
   <!-- 图书专区：选中「书籍教材」后展开的二级筛选（学院 → 专业） -->
   <view class="book-filter" wx:if="{{isBookCategory}}">
@@ -93,18 +121,139 @@
     </scroll-view>
   </view>
 
-  <!-- 物理圆形商品画布 -->
-  <view class="canvas-container">
-    <canvas 
-      type="2d" 
-      id="commodityCanvas" 
+  <!-- ===== 列表模式（默认）：两列瀑布流 ===== -->
+  <scroll-view
+    wx:if="{{viewMode === 'list'}}"
+    class="list-scroll"
+    scroll-y
+    enhanced
+    show-scrollbar="{{false}}"
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{isRefreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscrolltolower="onLoadMore"
+    lower-threshold="150"
+  >
+    <!-- 首次加载骨架：与实际卡片同构，避免白屏与跳动 -->
+    <view class="wf" wx:if="{{isLoading && commodityList.length === 0}}">
+      <view class="wf-col">
+        <view class="wf-card skeleton" wx:for="{{skeletonLeft}}" wx:key="*this">
+          <view class="wf-media img-skel"></view>
+          <view class="wf-body">
+            <view class="sk-line w80"></view>
+            <view class="sk-line w50"></view>
+          </view>
+        </view>
+      </view>
+      <view class="wf-col">
+        <view class="wf-card skeleton" wx:for="{{skeletonRight}}" wx:key="*this">
+          <view class="wf-media img-skel"></view>
+          <view class="wf-body">
+            <view class="sk-line w60"></view>
+            <view class="sk-line w40"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 商品卡片 -->
+    <view class="wf" wx:elif="{{commodityList.length > 0}}">
+      <view class="wf-col">
+        <view
+          class="wf-card {{item.isClosed ? 'is-closed' : ''}}"
+          wx:for="{{leftColumn}}"
+          wx:key="_id"
+          data-id="{{item._id}}"
+          bindtap="goDetail"
+        >
+          <view class="wf-media">
+            <image
+              wx:if="{{item.cover}}"
+              class="wf-img img-ph"
+              src="{{item.cover}}"
+              mode="aspectFill"
+              lazy-load
+            />
+            <view wx:else class="wf-img wf-img-empty"><text class="wf-img-empty-icon">📦</text></view>
+            <view class="wf-status" wx:if="{{item.statusText}}">{{item.statusText}}</view>
+          </view>
+          <view class="wf-body">
+            <view class="wf-title">{{item.title}}</view>
+            <view class="wf-price-row">
+              <text class="wf-price {{item.priceMuted ? 'muted' : ''}}">{{item.priceText}}</text>
+              <text class="wf-price-extra" wx:if="{{item.exchangeShort}}">{{item.exchangeShort}}</text>
+            </view>
+            <view class="wf-tags">
+              <text class="wf-tag type-{{item.typeClass}}">{{item.typeLabel}}</text>
+              <text class="wf-tag verified" wx:if="{{item.isStudentVerified}}">已认证</text>
+              <text class="wf-tag cond" wx:if="{{item.conditionText}}">{{item.conditionText}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="wf-col">
+        <view
+          class="wf-card {{item.isClosed ? 'is-closed' : ''}}"
+          wx:for="{{rightColumn}}"
+          wx:key="_id"
+          data-id="{{item._id}}"
+          bindtap="goDetail"
+        >
+          <view class="wf-media">
+            <image
+              wx:if="{{item.cover}}"
+              class="wf-img img-ph"
+              src="{{item.cover}}"
+              mode="aspectFill"
+              lazy-load
+            />
+            <view wx:else class="wf-img wf-img-empty"><text class="wf-img-empty-icon">📦</text></view>
+            <view class="wf-status" wx:if="{{item.statusText}}">{{item.statusText}}</view>
+          </view>
+          <view class="wf-body">
+            <view class="wf-title">{{item.title}}</view>
+            <view class="wf-price-row">
+              <text class="wf-price {{item.priceMuted ? 'muted' : ''}}">{{item.priceText}}</text>
+              <text class="wf-price-extra" wx:if="{{item.exchangeShort}}">{{item.exchangeShort}}</text>
+            </view>
+            <view class="wf-tags">
+              <text class="wf-tag type-{{item.typeClass}}">{{item.typeLabel}}</text>
+              <text class="wf-tag verified" wx:if="{{item.isStudentVerified}}">已认证</text>
+              <text class="wf-tag cond" wx:if="{{item.conditionText}}">{{item.conditionText}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空态 -->
+    <view class="empty-state list-empty" wx:elif="{{!isLoading}}">
+      <view class="empty-icon-wrap"><text class="empty-icon">{{currentType === 'want' ? '🔍' : (currentType === 'sell' ? '📦' : (currentType === 'exchange' ? '🔁' : (currentType === 'skill' ? '🎓' : '📭')))}}</text></view>
+      <text class="empty-text">{{currentType === 'want' ? '暂无求购信息' : (currentType === 'sell' ? '暂无闲置信息' : (currentType === 'exchange' ? '暂无以物易物信息' : (currentType === 'skill' ? '暂无技能服务' : '暂无信息')))}}</text>
+      <text class="empty-hint">{{currentType === 'want' ? '发布一条求购，让闲置主动来找你' : (currentType === 'exchange' ? '发布以物易物，用闲置换你需要的东西' : (currentType === 'skill' ? '成为技能达人，让同学找到你' : '快来发布第一条信息吧！'))}}</text>
+    </view>
+
+    <!-- 加载 / 到底 -->
+    <view class="list-foot" wx:if="{{commodityList.length > 0}}">
+      <text wx:if="{{isLoading}}">加载中...</text>
+      <text wx:elif="{{hasMore}}">上拉加载更多</text>
+      <text wx:else>已经到底啦 ~</text>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 小球模式：物理圆形商品画布 ===== -->
+  <view class="canvas-container" wx:else>
+    <canvas
+      type="2d"
+      id="commodityCanvas"
       class="commodity-canvas"
       bindtouchstart="onTouchStart"
       bindtouchmove="onTouchMove"
       bindtouchend="onTouchEnd"
       bindtouchcancel="onTouchEnd"
     ></canvas>
-    
+
     <!-- 长按预览卡片：居中弹层，脱离手指遮挡 -->
     <preview-card
       show="{{previewShow}}"
@@ -113,9 +262,10 @@
       bind:opencard="onPreviewOpenCard"
     />
 
-    <!-- 加载状态 -->
+    <!-- 加载状态：小球区不滚动，分页请切列表模式（这里如实说明，不给假的上拉提示） -->
     <view class="load-more" wx:if="{{commodityList.length > 0}}">
-      <text wx:if="{{hasMore}}">上拉加载更多...</text>
+      <text wx:if="{{cappedCount > 0}}">还有 {{cappedCount}} 条放不下，切「列表」模式看全部</text>
+      <text wx:elif="{{hasMore}}">切「列表」模式可继续加载更多</text>
       <text wx:else>已经到底啦 ~</text>
     </view>
 
