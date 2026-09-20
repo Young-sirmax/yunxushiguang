@@ -25,14 +25,14 @@
   ],
   "window": {
     "backgroundTextStyle": "dark",
-    "navigationBarBackgroundColor": "#00c17e",
+    "navigationBarBackgroundColor": "#22B07D",
     "navigationBarTitleText": "云叙石光",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#f5f7fa"
+    "backgroundColor": "#F6F7F9"
   },
   "tabBar": {
-    "color": "#94a3b8",
-    "selectedColor": "#00c17e",
+    "color": "#9AA0A6",
+    "selectedColor": "#22B07D",
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [

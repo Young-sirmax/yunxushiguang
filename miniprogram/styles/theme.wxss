@@ -1,0 +1,162 @@
+/* styles/theme.wxss —— 全站唯一色板（设计令牌）
+ *
+ * 本文件是全站颜色的**唯一来源**。任何页面 / 组件都不允许再写十六进制色值、
+ * rgb() / rgba() 硬编码（阴影里的黑色 rgba 例外，见文件末尾说明）。
+ *
+ * 由 app.wxss 首行 @import 引入，挂载在 `page` 选择器上，全站子节点可直接 var() 取用。
+ *
+ * ⚠️ canvas 读不到 CSS 变量：气泡绘制用的类型色同步在
+ *    miniprogram/utils/theme.js 的 TYPE_THEME / TOKENS 里，改色必须两处一起改。
+ *
+ * 色板结构：
+ *   1. 品牌主色（primary 系列）
+ *   2. 价格色（price）
+ *   3. 中性色（文字 / 分割线 / 背景 / 卡片）
+ *   4. 语义色（成功 / 警告 / 错误）
+ *   5. 类型色（气泡渐变 + 卡片角标共用同一组）
+ *   6. 兼容别名（历史变量名 → 新令牌，避免一次性改动 32 个页面）
+ */
+
+page {
+  /* ===== 1. 品牌主色 =====
+     全站只有这一个绿色。顶部导航、按钮、选中态、认证标签一律取 primary 系列，
+     禁止再出现第二档深浅不一的绿。 */
+  --primary: #22b07d;          /* 主色：比旧版 #00c17e 更沉，提质感 */
+  --primary-light: #e9f7f0;    /* 主色浅底：选中底、标签底、图标底 */
+  --primary-dark: #14915f;     /* 主色深：按下态 / 文字强调 */
+  --primary-soft: var(--primary-light);   /* 历史别名，等价于 primary-light */
+  --primary-grad: linear-gradient(135deg, #35c592 0%, #22b07d 50%, #14915f 100%);
+  --primary-grad-vivid: linear-gradient(160deg, #2fc08d 0%, #22b07d 45%, #14915f 100%);
+
+  /* ===== 2. 价格色 =====
+     全站价格（卡片价格、详情价格、求购预算）只能用这一个红橙。 */
+  --price: #f5402f;
+  --price-soft: #fdeceb;       /* 价格浅底（优惠角标 / 预算标签底） */
+  --accent: var(--price);      /* 历史别名：旧的强调色就是价格色 */
+  --accent-soft: var(--price-soft);
+  --accent-grad: linear-gradient(135deg, #ff6a52 0%, #f5402f 100%);
+
+  /* ===== 3. 中性色 ===== */
+  --text: #1f2329;             /* 文字主 */
+  --text-secondary: #646a73;   /* 文字次 */
+  --text-light: #9aa0a6;       /* 文字弱 */
+  --border: #eff0f2;           /* 分割线 */
+  --bg: #f6f7f9;               /* 页面背景 */
+  --bg-card: #ffffff;          /* 卡片白 */
+  --fill: #eff0f2;             /* 控件填充底（chip / 输入框 / 基础占位）—— 与分割线同源 */
+  --fill-strong: #e4e6ea;      /* 骨架屏 / 按压态填充（同中性灰阶，非新色相） */
+  --white: #ffffff;
+
+  /* ===== 4. 语义色 =====
+     成功与主色同源，错误与价格色同源——刻意如此，避免色相数量膨胀。 */
+  --success: #22b07d;
+  --success-soft: var(--primary-light);
+  --warning: #f5a623;
+  --warning-soft: #fff6e6;
+  --error: #f5402f;
+  --error-soft: var(--price-soft);
+  --error-grad: linear-gradient(135deg, #ff6a52 0%, #f5402f 100%);
+  --danger: var(--error);       /* 历史别名 */
+  --danger-soft: var(--error-soft);
+  --info: #4c86d9;              /* 信息蓝：与「技能」类型同色相，不额外造色 */
+  --info-soft: #ebf3ff;
+
+  /* ===== 5. 类型色（气泡渐变 / 卡片角标共用同一组）=====
+     全部低饱和度。四类之外禁止新增色相。 */
+  /* 闲置 */
+  --type-idle-from: #7ee8c7;
+  --type-idle-to: #4ecdc4;
+  --type-idle-text: #12a08e;       /* 浅底上的可读文字色 */
+  --type-idle-soft: #e6f7f2;
+  --type-idle-grad: linear-gradient(135deg, var(--type-idle-from) 0%, var(--type-idle-to) 100%);
+  /* 以物易物 */
+  --type-exchange-from: #ffd194;
+  --type-exchange-to: #ffb37b;
+  --type-exchange-text: #c4763c;
+  --type-exchange-soft: #fff4e9;
+  --type-exchange-grad: linear-gradient(135deg, var(--type-exchange-from) 0%, var(--type-exchange-to) 100%);
+  /* 求购 */
+  --type-wanted-from: #c9beff;
+  --type-wanted-to: #a78bfa;
+  --type-wanted-text: #7b5bd6;
+  --type-wanted-soft: #f1ecfe;
+  --type-wanted-grad: linear-gradient(135deg, var(--type-wanted-from) 0%, var(--type-wanted-to) 100%);
+  /* 技能服务 */
+  --type-skill-from: #a1c4fd;
+  --type-skill-to: #7fb3ff;
+  --type-skill-text: #4c86d9;
+  --type-skill-soft: #ebf3ff;
+  --type-skill-grad: linear-gradient(135deg, var(--type-skill-from) 0%, var(--type-skill-to) 100%);
+
+  /* 求购二级分区·技能求助：求购紫的加深档（同色相，只压明度，不外扩） */
+  --want-deep: #6a4bc4;
+  --want-deep-soft: #ece6fb;
+  --want-deep-grad: linear-gradient(135deg, #9d7ee0 0%, #6a4bc4 100%);
+
+  /* ----- 历史别名：类型色旧名 → 新令牌 -----
+     sell / want / exchange / skill 这套名字在 utils/theme.js 与旧代码里出现过，
+     统一指向同一组类型色，保证不会跑出两套色。 */
+  --type-sell-from: var(--type-idle-from);
+  --type-sell-to: var(--type-idle-to);
+  --type-want-from: var(--type-wanted-from);
+  --type-want-to: var(--type-wanted-to);
+  /* exchange / skill 的新旧名一致，无需再挂别名 */
+
+  --want: var(--type-wanted-text);
+  --want-grad: var(--type-wanted-grad);
+  --want-soft: var(--type-wanted-soft);
+  --exchange: var(--type-exchange-text);
+  --exchange-grad: var(--type-exchange-grad);
+  --exchange-soft: var(--type-exchange-soft);
+  --skill: var(--type-skill-text);
+  --skill-grad: var(--type-skill-grad);
+  --skill-soft: var(--type-skill-soft);
+
+  /* 点缀黄：不再另立色相，直接复用语义警告色 */
+  --sun: var(--warning);
+  --sun-grad: linear-gradient(135deg, #ffc866 0%, var(--warning) 100%);
+
+  /* ===== 6. 圆角 / 阴影（沿用既有体系，本次不动） ===== */
+  --radius: 20rpx;
+  --radius-lg: 28rpx;
+  --radius-pill: 999rpx;
+  --radius-card: 12rpx;        /* 列表卡片图区圆角（闲鱼式卡片：图区顶角 12rpx） */
+
+  /* 阴影里的黑色 / 墨色 rgba 是**唯一允许保留的 rgba 硬编码**：
+     阴影属于「明度叠加」而非品牌色，跟着主色走会串味。
+     每个阴影都注释了用途，改色时只调不透明度即可。 */
+  --shadow-sm: 0 1rpx 2rpx rgba(31, 35, 41, 0.04), 0 4rpx 12rpx rgba(31, 35, 41, 0.05);
+  --shadow-card: 0 2rpx 4rpx rgba(31, 35, 41, 0.05), 0 12rpx 32rpx rgba(31, 35, 41, 0.08);
+  --shadow-hover: 0 4rpx 8rpx rgba(31, 35, 41, 0.06), 0 24rpx 48rpx rgba(31, 35, 41, 0.12);
+  --shadow-primary: 0 10rpx 30rpx rgba(34, 176, 125, 0.28);   /* 主色按钮发光 */
+  --shadow-danger: 0 10rpx 30rpx rgba(245, 64, 47, 0.24);     /* 危险按钮发光 */
+
+  /* ===== 7. RGB 分量令牌 =====
+     需要半透明品牌色时（描边、光晕、遮罩），写 rgba(var(--primary-rgb), 0.2)，
+     不要自己拼 #22b07d 的十进制值——否则改主色会漏改。 */
+  --primary-rgb: 34, 176, 125;
+  --price-rgb: 245, 64, 47;
+  --text-rgb: 31, 35, 41;
+
+  /* ===== 8. 效果令牌（描边光晕 / 遮罩 / 浮层投影）===== */
+  --ring-primary: 0 0 0 6rpx rgba(34, 176, 125, 0.08);            /* 输入框聚焦光晕 */
+  --shadow-inset-primary: inset 0 2rpx 8rpx rgba(34, 176, 125, 0.08);
+  --shadow-primary-active: 0 5rpx 16rpx rgba(34, 176, 125, 0.22); /* 主按钮按下 */
+  --shadow-danger-active: 0 5rpx 16rpx rgba(245, 64, 47, 0.2);
+  --shadow-float: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);               /* 搜索框 / 浮标 */
+  --shadow-modal: 0 24rpx 64rpx rgba(0, 0, 0, 0.35);              /* 长按预览弹卡 */
+  --mask: rgba(0, 0, 0, 0.6);                                     /* 全屏遮罩 */
+  --scrim: rgba(31, 35, 41, 0.65);                                /* 图上角标底 */
+  --scrim-soft: rgba(31, 35, 41, 0.55);                           /* 图上角标底（轻） */
+  --on-dark: rgba(255, 255, 255, 0.8);                            /* 深底上的次级文字 */
+  --on-dark-strong: rgba(255, 255, 255, 0.95);
+  --hairline-dark: rgba(255, 255, 255, 0.3);                      /* 深底上的分隔描边 */
+  --skel-sweep: linear-gradient(100deg, rgba(228, 230, 234, 0) 30%, rgba(255, 255, 255, 0.75) 50%, rgba(228, 230, 234, 0) 70%);
+  --img-ph-grad: linear-gradient(135deg, var(--bg), var(--fill-strong));  /* 图片占位底渐变 */
+
+  /* 页面基础色 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 28rpx;
+}
