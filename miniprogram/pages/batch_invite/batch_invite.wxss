@@ -1,0 +1,53 @@
+/* pages/batch_invite/batch_invite.wxss —— 接受批量上架邀请卡 */
+page {
+  background: var(--bg);
+}
+
+.page {
+  min-height: 100vh;
+  padding: 80rpx 24rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  background: var(--white);
+  border-radius: 26rpx;
+  padding: 56rpx 40rpx;
+  box-shadow: 0 6rpx 26rpx rgba(var(--text-rgb), 0.05);
+  text-align: center;
+}
+
+.hero {
+  font-size: 96rpx;
+  line-height: 1;
+  margin-bottom: 24rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 24rpx;
+}
+
+.desc {
+  font-size: 27rpx;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  text-align: left;
+  margin-bottom: 40rpx;
+}
+
+.err {
+  font-size: 25rpx;
+  color: var(--error);
+  line-height: 1.6;
+  margin-bottom: 24rpx;
+}
+
+.hint {
+  margin-top: 24rpx;
+  font-size: 23rpx;
+  color: var(--text-light);
+  line-height: 1.6;
+}

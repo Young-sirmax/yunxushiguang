@@ -68,12 +68,26 @@ const API = {
   adminListVerify: (status) => callCloudFunction('admin', { action: 'listVerify', status }),
   adminAuditVerify: (id, result, reason) => callCloudFunction('admin', { action: 'auditVerify', id, result, reason }),
 
-  // 管理员 · 批量上架（需 config.admin_openids 白名单）
-  batchUnzipImages: (zipFileID) => callCloudFunction('adminBatch', { action: 'unzipImages', zipFileID }),
-  batchImportRows: (rows, batchId) => callCloudFunction('adminBatch', { action: 'importRows', rows, batchId }),
+  // 管理员 · 批量上架 v2（权限：超管 config.super_admin_openids，被授权人 batch_admin 集合）
+  // 极简模式：只传图片 fileID + 价格，标题留空由服务端自动生成
+  batchImportRows: (rows, batchId, opts) => callCloudFunction('adminBatch',
+    Object.assign({ action: 'importRows', rows, batchId }, opts || {})),
   batchListDrafts: (params) => callCloudFunction('adminBatch', Object.assign({ action: 'listDrafts' }, params)),
   batchPublishDraft: (id) => callCloudFunction('adminBatch', { action: 'publishDraft', id }),
+  batchPublishBatch: (ids) => callCloudFunction('adminBatch', { action: 'publishBatch', ids }),
   batchDeleteDraft: (id) => callCloudFunction('adminBatch', { action: 'deleteDraft', id }),
+  // 高级模式（桌面场景）：CSV + ZIP
+  batchUnzipImages: (zipFileID) => callCloudFunction('adminBatch', { action: 'unzipImages', zipFileID }),
+
+  // 管理员 · 批量上架授权（仅超管可调，被授权人不能转授）
+  batchListAdmins: () => callCloudFunction('adminBatch', { action: 'listAdmins' }),
+  batchSearchUsers: (keyword) => callCloudFunction('adminBatch', { action: 'searchUsers', keyword }),
+  // 授权：优先传 userId（user._id，服务端反查 openid，客户端不持有 openid）
+  batchGrantAdmin: (userId, note) => callCloudFunction('adminBatch', { action: 'grantAdmin', userId, note }),
+  batchRevokeAdmin: (id) => callCloudFunction('adminBatch', { action: 'revokeAdmin', id }),
+  batchCreateInvite: (note) => callCloudFunction('adminBatch', { action: 'createInvite', note }),
+  // 受邀人接受邀请卡（任意登录用户可调，此时尚无权限）
+  batchAcceptInvite: (token) => callCloudFunction('adminBatch', { action: 'acceptInvite', token }),
 
   // 管理员 · 数据管理（用户）
   adminListUsers: (params) => callCloudFunction('admin', Object.assign({ action: 'listUsers' }, params)),

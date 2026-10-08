@@ -46,7 +46,9 @@
         <text class="price skill">🎓 {{skillPriceText}}</text>
       </block>
       <block wx:else>
-        <text class="price">¥{{commodity.price}}</text>
+        <!-- 价格为 0 = 发布者未定价（批量上架极简模式），按「价格面议」展示而不是 ¥0 -->
+        <text class="price" wx:if="{{commodity.price > 0}}">¥{{commodity.price}}</text>
+        <text class="price negotiable" wx:else>价格面议</text>
         <text class="original-price" wx:if="{{commodity.originalPrice}}">原价 ¥{{commodity.originalPrice}}</text>
       </block>
     </view>

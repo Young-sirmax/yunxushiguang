@@ -18,6 +18,7 @@
     "pages/expert_home/expert_home",
     "pages/my_reviews/my_reviews",
     "pages/admin_batch/admin_batch",
+    "pages/batch_invite/batch_invite",
     "pages/bookcorner/index",
     "pages/bookcorner/list",
     "pages/bookcorner/detail",

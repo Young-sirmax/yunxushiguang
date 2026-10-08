@@ -1,9 +1,14 @@
-// cloudfunctions/adminBatch/index.js —— 管理员「批量上架」
+// cloudfunctions/adminBatch/index.js —— 「批量上架」（v2：站内授权 + 极简上传）
 //
-// 权限：config 集合 app 记录的 admin_openids 白名单（数组），不在白名单直接拒绝。
-// 流程：unzipImages（解压图片包→云存储，返回 文件名→fileID 映射）
-//      → importRows（逐行校验 + 内容安全检测 + 写入 status='draft'）
-//      → listDrafts / publishDraft（转 onSale）/ deleteDraft
+// 权限（v2 起为两级）：
+//   超管  isSuperAdmin —— config 集合 app 记录的 super_admin_openids（缺失时回退 admin_openids）
+//   被授权人 isBatchAdmin —— 超管本人，或 batch_admin 集合中 status='active' 的记录
+//   授权/回收/名单查询仅超管可调；被授权人不能转授。
+//
+// 主流程（v2 极简模式）：前端相册直选图片并上传云存储
+//      → importRows{mode:'simple'}（标题可空走自动生成、价格可空走面议，写入 status='draft'）
+//      → publishBatch（一次上架 ≤50 条）/ publishDraft / deleteDraft
+// 高级模式（保留）：unzipImages + importRows（CSV + ZIP），入口已收进折叠区。
 //
 // 说明：规格中的"转为 open"在本项目里映射为既有的 status='onSale'
 //      （公开列表固定过滤 onSale，直接用 open 会导致上架后不可见）。
@@ -19,24 +24,72 @@ const PUBLISHED_STATUS = 'onSale';
 
 const MAX_IMAGES_PER_UNZIP = 120;   // 单次解压上传的图片上限
 const MAX_ROWS_PER_IMPORT = 50;     // 单次导入的行数上限
+const MAX_BATCH_PUBLISH = 50;       // publishBatch 单次上架条数上限
 const MAX_PAGE_SIZE = 20;
 const MAX_IMAGES_PER_POST = 6;      // 与发布页一致
+const MAX_TITLE_LEN = 60;
 const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif|bmp)$/i;
+
+// 极简模式的默认分类（未选分类时落这个；分类集合里若不存在则 categoryId 留空，不影响上架）
+const DEFAULT_CATEGORY_NAME = '其他闲置';
+
+// 邀请卡 token 有效期（指令 4.2：5 分钟、一次性）
+const INVITE_TTL_MS = 5 * 60 * 1000;
+const INVITE_COLLECTION = 'batch_invite';
 
 const VALID_TYPES = ['sell', 'want', 'exchange', 'skill'];
 const VALID_PRICE_UNITS = ['per_time', 'per_hour', 'negotiable'];
 
-// ===================== 权限：白名单 =====================
+// ===================== 权限：超管 + 被授权人（两级） =====================
 
-async function isBatchAdmin(openid) {
-  if (!openid) return false;
+async function readAppConfig() {
   try {
     const res = await db.collection('config').where({ key: 'app' }).limit(1).get();
-    const cfg = res.data[0];
-    const list = (cfg && Array.isArray(cfg.admin_openids)) ? cfg.admin_openids : [];
-    return list.indexOf(openid) > -1;
+    return res.data[0] || null;
   } catch (err) {
-    console.error('[adminBatch] 白名单校验异常:', err.message);
+    console.warn('[adminBatch] 读取 config 失败，按无配置处理:', err.message);
+    return null;
+  }
+}
+
+/** openid 数组规整：去空、去重、去非字符串 */
+function normalizeOpenidList(raw) {
+  if (!Array.isArray(raw)) return [];
+  const list = [];
+  raw.forEach(item => {
+    const v = typeof item === 'string' ? item.trim() : '';
+    if (v && list.indexOf(v) === -1) list.push(v);
+  });
+  return list;
+}
+
+/**
+ * 超管判定：config.app.super_admin_openids 优先；
+ * 该字段缺失或为空时回退到既有 admin_openids —— 保证存量环境升级后不失效。
+ */
+async function isSuperAdmin(openid) {
+  if (!openid) return false;
+  const cfg = await readAppConfig();
+  const supers = normalizeOpenidList(cfg && cfg.super_admin_openids);
+  const list = supers.length > 0 ? supers : normalizeOpenidList(cfg && cfg.admin_openids);
+  return list.indexOf(openid) > -1;
+}
+
+/**
+ * 批量上架权限：超管天然拥有；其余人查 batch_admin 集合的 active 记录。
+ * batch_admin 集合不存在时查询抛错 → 兜底为 false，不影响超管使用。
+ */
+async function isBatchAdmin(openid) {
+  if (!openid) return false;
+  if (await isSuperAdmin(openid)) return true;
+  try {
+    const res = await db.collection('batch_admin')
+      .where({ openid, status: 'active' })
+      .limit(1)
+      .get();
+    return res.data.length > 0;
+  } catch (err) {
+    console.error('[adminBatch] batch_admin 权限校验异常:', err.message);
     return false;
   }
 }
@@ -113,17 +166,307 @@ async function loadOperatorInfo(openid) {
   }
 }
 
+/** 邀请 token：32 位十六进制随机串 */
+function randomToken() {
+  let s = '';
+  for (let i = 0; i < 32; i++) {
+    s += Math.floor(Math.random() * 16).toString(16);
+  }
+  return s;
+}
+
+/**
+ * 北京时间的 月日（MMDD）。
+ * 云函数运行时时区为 UTC，直接用 getMonth() 会在 08:00 前算出前一天，故显式 +8。
+ */
+function beijingMMDD() {
+  const d = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  return `${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;
+}
+
+// 无意义文件名特征：相机/微信/截图默认命名、纯数字、长哈希（微信随机名）
+const MEANINGLESS_NAME = /^(img|image|video|mmexport|wx_camera|wx_camera_|screenshot|photo|pic|dsc|dji|tim|wechatimg)[-_]?\d*$/i;
+const HASH_NAME = /^[a-f0-9]{16,}$/i;
+
+/** 文件名是否为「可读文本」（指令 5.2 规则 1） */
+function isReadableFileName(rawName) {
+  const base = String(rawName || '').replace(/\.[a-z0-9]+$/i, '').trim();
+  if (!base) return false;
+  if (/^\d+$/.test(base)) return false;
+  if (MEANINGLESS_NAME.test(base)) return false;
+  if (HASH_NAME.test(base)) return false;
+  return true;
+}
+
+/**
+ * 标题自动生成（指令 5.2，按优先级，不做自由发挥）：
+ *   1) 图片文件名是可读文本 → 直接用文件名（去扩展名，截断 60 字）
+ *   2) 否则 → 「闲置 MMDD N/M」
+ * 注意：极简模式走 wx.chooseMedia，客户端拿不到相册原始文件名，实际会落到规则 2。
+ */
+function buildAutoTitle(row, index, total) {
+  const fromFile = String(row.fileName || '').replace(/\.[a-z0-9]+$/i, '').trim();
+  if (fromFile && isReadableFileName(fromFile)) {
+    return fromFile.slice(0, MAX_TITLE_LEN);
+  }
+  return `闲置 ${beijingMMDD()} ${index + 1}/${total}`;
+}
+
+/**
+ * 单条上架：draft → onSale。
+ * publishDraft（单条）与 publishBatch（批量）共用，保证校验口径不出现两份。
+ * @returns {{ok: boolean, msg: string}}
+ */
+async function publishDraftDoc(id, openid) {
+  if (!id) return { ok: false, msg: '缺少信息 ID' };
+
+  let doc = null;
+  try {
+    const res = await db.collection('commodity').doc(id).get();
+    doc = res.data;
+  } catch (err) {
+    return { ok: false, msg: '信息不存在' };
+  }
+  if (!doc) return { ok: false, msg: '信息不存在' };
+  if (doc.owner !== openid && doc._openid !== openid) {
+    return { ok: false, msg: '只能上架自己导入的信息' };
+  }
+  if (doc.status !== DRAFT_STATUS) {
+    return { ok: false, msg: '该信息不是待上架状态' };
+  }
+
+  await db.collection('commodity').doc(id).update({
+    data: {
+      status: PUBLISHED_STATUS,
+      reviewTime: db.serverDate(),
+      reviewer: openid,
+      updateTime: db.serverDate()
+    }
+  });
+  return { ok: true, msg: '已上架' };
+}
+
 // ===================== 主流程 =====================
 
 exports.main = async (event) => {
   const openid = cloud.getWXContext().OPENID;
+  const action = event.action;
 
-  // 第一步：白名单校验（所有操作统一拦截）
+  // ===== 0) 受邀人接受邀请卡：此时对方还没有任何权限，故不走下方的权限闸门 =====
+  if (action === 'acceptInvite') {
+    if (!openid) return { code: -1, msg: '请先登录' };
+    const token = String(event.token || '').trim();
+    if (!token) return { code: -1, msg: '邀请卡无效' };
+
+    let inv = null;
+    try {
+      const res = await db.collection(INVITE_COLLECTION).where({ token }).limit(1).get();
+      inv = res.data[0] || null;
+    } catch (err) {
+      console.error('[adminBatch] 读取邀请卡失败:', err.message);
+      return { code: -1, msg: '邀请卡无效或已失效' };
+    }
+    if (!inv) return { code: -1, msg: '邀请卡无效或已失效' };
+    if (inv.used) return { code: -1, msg: '该邀请卡已被使用' };
+    if (new Date(inv.expireAt).getTime() < Date.now()) {
+      return { code: -1, msg: '邀请卡已过期，请让管理员重新生成' };
+    }
+
+    // 一次性消费：先落 used 再授权，避免并发重复使用
+    await db.collection(INVITE_COLLECTION).doc(inv._id).update({
+      data: { used: true, usedBy: openid, usedAt: db.serverDate() }
+    });
+
+    const exist = await db.collection('batch_admin')
+      .where({ openid, status: 'active' }).limit(1).get();
+    if (exist.data.length > 0) {
+      return { code: 0, msg: '你已拥有批量上架权限' };
+    }
+
+    const me = await loadOperatorInfo(openid);
+    await db.collection('batch_admin').add({
+      data: {
+        openid,
+        nickName: me.nickName,
+        avatarUrl: me.avatarUrl,
+        grantedBy: inv.grantedBy || '',
+        grantTime: db.serverDate(),
+        status: 'active',
+        note: inv.note || '',
+        grantedVia: 'invite'
+      }
+    });
+    return { code: 0, msg: '已获得批量上架权限' };
+  }
+
+  // ===== 1) 超管专属：授权 / 回收 / 名单 / 生成邀请卡 =====
+  if (action === 'grantAdmin' || action === 'revokeAdmin' ||
+      action === 'listAdmins' || action === 'createInvite' ||
+      action === 'searchUsers') {
+    if (!(await isSuperAdmin(openid))) {
+      return { code: -1, msg: '仅超级管理员可操作' };
+    }
+
+    // 按昵称/姓名搜索候选用户（指令 4.2 方式 B 的选人来源）
+    if (action === 'searchUsers') {
+      const keyword = String(event.keyword || '').trim();
+      if (!keyword) return { code: 0, data: [], total: 0 };
+      try {
+        const re = db.RegExp({
+          regexp: keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+          options: 'i'
+        });
+        const res = await db.collection('user')
+          .where(db.command.or([{ nickName: re }, { realName: re }]))
+          .limit(20)
+          .get();
+        return {
+          code: 0,
+          data: (res.data || []).map(u => ({
+            _id: u._id,
+            nickName: u.nickName || '',
+            realName: u.realName || '',
+            avatarUrl: u.avatarUrl || '',
+            universityName: u.universityName || ''
+          })),
+          total: (res.data || []).length
+        };
+      } catch (err) {
+        console.error('[adminBatch] 搜索用户失败:', err.message);
+        return { code: -1, msg: '搜索失败，请稍后重试' };
+      }
+    }
+
+    // 生成邀请卡（指令 4.2 方式 A）：5 分钟有效、一次性
+    if (action === 'createInvite') {
+      const note = String(event.note || '').trim().slice(0, 50);
+      const token = randomToken();
+      const expireAt = new Date(Date.now() + INVITE_TTL_MS);
+      try {
+        await db.collection(INVITE_COLLECTION).add({
+          data: {
+            token,
+            grantedBy: openid,
+            note,
+            used: false,
+            usedBy: '',
+            expireAt,
+            createdAt: db.serverDate()
+          }
+        });
+      } catch (err) {
+        console.error('[adminBatch] 生成邀请卡失败:', err.message);
+        return { code: -1, msg: '生成邀请卡失败，请确认已创建 batch_invite 集合' };
+      }
+      return { code: 0, data: { token, expireAt }, msg: '邀请卡已生成，5 分钟内有效' };
+    }
+
+    // 直接授权（指令 4.2 方式 B）：优先用 user._id 反查 openid，也支持直接填 openid
+    if (action === 'grantAdmin') {
+      const userId = String(event.userId || '').trim();
+      let targetOpenid = String(event.openid || '').trim();
+
+      if (!targetOpenid && userId) {
+        try {
+          const u = await db.collection('user').doc(userId).get();
+          targetOpenid = (u.data && u.data._openid) || '';
+        } catch (err) {
+          console.error('[adminBatch] 反查用户 openid 失败:', err.message);
+        }
+      }
+      if (!targetOpenid) return { code: -1, msg: '请选择要授权的用户' };
+
+      try {
+        const exist = await db.collection('batch_admin')
+          .where({ openid: targetOpenid, status: 'active' }).limit(1).get();
+        if (exist.data.length > 0) {
+          return { code: 0, msg: '该用户已拥有批量上架权限' };
+        }
+
+        const target = await loadOperatorInfo(targetOpenid);
+        await db.collection('batch_admin').add({
+          data: {
+            openid: targetOpenid,
+            nickName: target.nickName,
+            avatarUrl: target.avatarUrl,
+            grantedBy: openid,
+            grantTime: db.serverDate(),
+            status: 'active',
+            note: String(event.note || '').trim().slice(0, 50),
+            grantedVia: 'manual'
+          }
+        });
+      } catch (err) {
+        console.error('[adminBatch] 授权失败:', err.message);
+        return { code: -1, msg: '授权失败，请确认已创建 batch_admin 集合' };
+      }
+      return { code: 0, msg: '已授权' };
+    }
+
+    // 回收：优先用 batch_admin 记录 _id（listAdmins 下发的脱敏 id），也兼容传 openid
+    if (action === 'revokeAdmin') {
+      const docId = String(event.id || '').trim();
+      const targetOpenid = String(event.openid || '').trim();
+      if (!docId && !targetOpenid) return { code: -1, msg: '缺少用户标识' };
+
+      const where = docId ? { _id: docId, status: 'active' } : { openid: targetOpenid, status: 'active' };
+      let docs = [];
+      try {
+        const res = await db.collection('batch_admin').where(where).get();
+        docs = res.data || [];
+      } catch (err) {
+        console.error('[adminBatch] 查询授权记录失败:', err.message);
+        return { code: -1, msg: '操作失败，请稍后重试' };
+      }
+      if (docs.length === 0) return { code: -1, msg: '该用户没有可回收的权限' };
+
+      // 回收只改状态，保留历史（指令 4.3：其历史导入的草稿保留，owner 不变）
+      for (const doc of docs) {
+        await db.collection('batch_admin').doc(doc._id).update({
+          data: {
+            status: 'revoked',
+            revokedBy: openid,
+            revokeTime: db.serverDate()
+          }
+        });
+      }
+      return { code: 0, msg: '已回收权限' };
+    }
+
+    // 名单：脱敏，不返回完整 openid
+    if (action === 'listAdmins') {
+      let list = [];
+      try {
+        const res = await db.collection('batch_admin')
+          .orderBy('grantTime', 'desc').limit(100).get();
+        list = res.data || [];
+      } catch (err) {
+        console.error('[adminBatch] 读取授权名单失败:', err.message);
+        return { code: -1, msg: '读取名单失败，请确认已创建 batch_admin 集合' };
+      }
+      return {
+        code: 0,
+        data: list.map(d => ({
+          _id: d._id,
+          nickName: d.nickName || '',
+          avatarUrl: d.avatarUrl || '',
+          note: d.note || '',
+          status: d.status || 'active',
+          grantedVia: d.grantedVia || 'manual',
+          grantTime: d.grantTime || null,
+          revokeTime: d.revokeTime || null,
+          // 仅给尾 4 位便于人工核对，不下发完整 openid
+          openidTail: String(d.openid || '').slice(-4)
+        })),
+        total: list.length
+      };
+    }
+  }
+
+  // ===== 2) 其余操作：批量上架权限闸门 =====
   if (!(await isBatchAdmin(openid))) {
     return { code: -1, msg: '无批量上架权限，请联系管理员开通' };
   }
-
-  const action = event.action;
 
   // ===== 1) 解压图片包 → 云存储，返回文件名映射 =====
   if (action === 'unzipImages') {
@@ -185,6 +528,9 @@ exports.main = async (event) => {
     const rows = Array.isArray(event.rows) ? event.rows.slice(0, MAX_ROWS_PER_IMPORT) : [];
     if (rows.length === 0) return { code: -1, msg: '没有可导入的行' };
 
+    // 极简模式（指令 5）：标题可空自动生成、价格可空走面议、分类可空落默认分类
+    const simple = event.mode === 'simple';
+
     const batchId = event.batchId || `batch_${Date.now()}`;
     const [categoryMap, operator] = await Promise.all([loadCategoryMap(), loadOperatorInfo(openid)]);
     const results = [];
@@ -194,11 +540,14 @@ exports.main = async (event) => {
       const rowNo = row.rowNo || (i + 1);
       try {
         const type = VALID_TYPES.indexOf(row.type) > -1 ? row.type : 'sell';
-        const title = String(row.title || '').trim();
+
+        // 标题：极简模式为空时按 5.2 规则自动生成（fileName 可读则用文件名，否则「闲置 MMDD N/M」）
+        let title = String(row.title || '').trim();
+        if (!title && simple) title = buildAutoTitle(row, i, rows.length);
         const description = String(row.description || '').trim();
 
         if (!title) throw new Error('标题为空');
-        if (title.length > 60) throw new Error('标题超过 60 字');
+        if (title.length > MAX_TITLE_LEN) throw new Error(`标题超过 ${MAX_TITLE_LEN} 字`);
 
         // 文本安全检测
         const titleCheck = await checkTextSecurity(title, '标题');
@@ -215,11 +564,15 @@ exports.main = async (event) => {
           if (!imgCheck.ok) throw new Error(imgCheck.msg);
         }
 
-        // 价格规则
+        // 价格规则（指令 5.3：极简模式允许留空 → price=0 + negotiable，详情页显示「价格面议」）
         let price = toNumber(row.price);
         let priceUnit = '';
         if (type === 'sell') {
-          if (!(price > 0)) throw new Error('价格必须大于 0');
+          if (!(price > 0)) {
+            if (!simple) throw new Error('价格必须大于 0');
+            price = 0;
+            priceUnit = 'negotiable';
+          }
         } else if (type === 'skill') {
           priceUnit = VALID_PRICE_UNITS.indexOf(row.priceUnit) > -1 ? row.priceUnit : 'negotiable';
           if (priceUnit === 'negotiable') price = 0;
@@ -228,7 +581,7 @@ exports.main = async (event) => {
           price = 0;
         }
 
-        const categoryName = String(row.category || '').trim();
+        const categoryName = String(row.category || '').trim() || (simple ? DEFAULT_CATEGORY_NAME : '');
 
         const doc = {
           // 归属：owner 为管理员本人；_openid 同步为 owner，保证现有卖家信息注入/我的发布可用
@@ -319,33 +672,36 @@ exports.main = async (event) => {
 
   // ===== 4) 单条上架（draft → onSale） =====
   if (action === 'publishDraft') {
-    const id = event.id;
-    if (!id) return { code: -1, msg: '缺少信息 ID' };
+    const r = await publishDraftDoc(event.id, openid);
+    return r.ok ? { code: 0, msg: r.msg } : { code: -1, msg: r.msg };
+  }
 
-    let doc = null;
-    try {
-      const res = await db.collection('commodity').doc(id).get();
-      doc = res.data;
-    } catch (err) {
-      return { code: -1, msg: '信息不存在' };
-    }
-    if (!doc) return { code: -1, msg: '信息不存在' };
-    if (doc.owner !== openid && doc._openid !== openid) {
-      return { code: -1, msg: '只能上架自己导入的信息' };
-    }
-    if (doc.status !== DRAFT_STATUS) {
-      return { code: -1, msg: '该信息不是待上架状态' };
-    }
+  // ===== 4') 批量上架（指令 7：ids[] 一次 ≤50 条，内部复用 publishDraft 逻辑） =====
+  if (action === 'publishBatch') {
+    const ids = Array.isArray(event.ids) ? event.ids.slice(0, MAX_BATCH_PUBLISH) : [];
+    if (ids.length === 0) return { code: -1, msg: '没有可上架的信息' };
 
-    await db.collection('commodity').doc(id).update({
-      data: {
-        status: PUBLISHED_STATUS,
-        reviewTime: db.serverDate(),
-        reviewer: openid,
-        updateTime: db.serverDate()
+    const results = [];
+    let okCount = 0;
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      try {
+        const r = await publishDraftDoc(id, openid);
+        if (r.ok) okCount += 1;
+        results.push({ id, ok: r.ok, msg: r.msg });
+      } catch (err) {
+        // 单条失败不阻断整批（与前端「不整批回滚」的约定一致）
+        console.error('[adminBatch] 批量上架单条失败:', id, err.message);
+        results.push({ id, ok: false, msg: '上架失败' });
       }
-    });
-    return { code: 0, msg: '已上架' };
+    }
+
+    const failCount = results.length - okCount;
+    return {
+      code: 0,
+      data: { results, okCount, failCount, truncated: (event.ids || []).length > MAX_BATCH_PUBLISH },
+      msg: `已上架 ${okCount} 条${failCount > 0 ? `，失败 ${failCount} 条` : ''}`
+    };
   }
 
   // ===== 5) 删除待上架（连带清理云存储图片） =====

@@ -6,11 +6,15 @@
 //     "maintenance": false,
 //     "notice": "系统维护中，请稍后再试",
 //     "admin_openids": ["oXXXX-xxxxxxxxxxxxxxxxxxx"],
+//     "super_admin_openids": ["oXXXX-xxxxxxxxxxxxxxxxxxx"],
 //     "skill_categories": ["项目辅导", "科研教学", ...],
 //     "skill_price_ref": { "项目辅导": { "min": 30, "max": 80, "unit": "per_hour" } },
 //     "sensitiveWords": ["加微信", "刷单", ...]
 //   }
-// admin_openids：批量上架白名单（数组，填管理员的 openid）
+// admin_openids：批量上架白名单（数组，填管理员的 openid）——v2 起作为超管的回退来源保留。
+// super_admin_openids：超级管理员名单（数组）。只有超管能在小程序内授权/回收批量上架权限。
+//                      该字段缺失或为空时回退到 admin_openids，存量环境无需改配置即可平滑升级。
+//                      被授权人存 batch_admin 集合，不在本字段里维护。
 // skill_categories：技能分类枚举（数组）。改这里即可增减技能分类，前端与云函数校验都会跟随，
 //                   无需重新提审发版（前端有 1 小时本地缓存）。留空/非法时用下面的默认列表兜底。
 // sensitiveWords：敏感词表（数组），公益图书角评论审核用。同样改这里即生效、无需重新部署。
@@ -84,20 +88,60 @@ async function readAppConfig() {
   }
 }
 
+/** openid 数组规整：去空、去重、去非字符串 */
+function normalizeOpenidList(raw) {
+  if (!Array.isArray(raw)) return [];
+  const list = [];
+  raw.forEach(item => {
+    const v = typeof item === 'string' ? item.trim() : '';
+    if (v && list.indexOf(v) === -1) list.push(v);
+  });
+  return list;
+}
+
+/**
+ * 超管名单：super_admin_openids 优先，缺失/为空时回退 admin_openids。
+ * 回退是为了让存量环境在不改配置的情况下平滑升级到 v2 权限模型。
+ */
+function resolveSuperAdminList(cfg) {
+  const supers = normalizeOpenidList(cfg && cfg.super_admin_openids);
+  return supers.length > 0 ? supers : normalizeOpenidList(cfg && cfg.admin_openids);
+}
+
+/** 是否在 batch_admin 集合里有一条 active 授权记录（集合不存在时兜底 false） */
+async function hasBatchGrant(openid) {
+  if (!openid) return false;
+  try {
+    const res = await db.collection('batch_admin')
+      .where({ openid, status: 'active' })
+      .limit(1)
+      .get();
+    return res.data.length > 0;
+  } catch (err) {
+    console.warn('[config] 读取 batch_admin 失败，按未授权处理:', err.message);
+    return false;
+  }
+}
+
 exports.main = async (event) => {
   const { action } = event;
   const openid = cloud.getWXContext().OPENID;
 
   if (action === 'get') {
     const cfg = await readAppConfig();
-    const whitelist = (cfg && Array.isArray(cfg.admin_openids)) ? cfg.admin_openids : [];
+    const superList = resolveSuperAdminList(cfg);
+    const isSuper = !!openid && superList.indexOf(openid) > -1;
+    // 超管天然拥有批量上架权限；其余人看 batch_admin 集合（指令 4.3：客户端只拿布尔值）
+    const canBatch = isSuper || await hasBatchGrant(openid);
+
     return {
       code: 0,
       data: {
         maintenance: !!(cfg && cfg.maintenance),
         notice: (cfg && cfg.notice) || DEFAULT_NOTICE,
-        // 仅下发"当前调用者是否可用批量上架"，不下发白名单本身（避免泄露）
-        canBatch: !!openid && whitelist.indexOf(openid) > -1,
+        // 仅下发"当前调用者是否可用批量上架 / 是否超管"，白名单与授权名单本身永不下发
+        canBatch,
+        isSuper,
         // 技能参考价区间（公开的引导信息，可在控制台调整；为空时前端用默认表兜底）
         skillPriceRef: (cfg && cfg.skill_price_ref) || null,
         // 技能分类枚举（前端渲染 + 服务端校验共用；在控制台改 config 记录即可增删分类）
@@ -106,12 +150,12 @@ exports.main = async (event) => {
     };
   }
 
-  // 敏感词表：仅批量上架白名单（即管理员）可读。
+  // 敏感词表：仅管理员（超管名单）可读。
   // 普通用户拿不到词表，避免按词表逐条试探绕过审核。
   if (action === 'sensitiveWords') {
     const cfg = await readAppConfig();
-    const whitelist = (cfg && Array.isArray(cfg.admin_openids)) ? cfg.admin_openids : [];
-    if (!openid || whitelist.indexOf(openid) === -1) {
+    const superList = resolveSuperAdminList(cfg);
+    if (!openid || superList.indexOf(openid) === -1) {
       return { code: -1, msg: '无权限' };
     }
     return { code: 0, data: normalizeSensitiveWords(cfg && cfg.sensitiveWords) };
