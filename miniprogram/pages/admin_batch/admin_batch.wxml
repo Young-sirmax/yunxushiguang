@@ -1,5 +1,5 @@
-<!--pages/admin_batch/admin_batch.wxml  管理员批量上架-->
-<view class="page-container">
+<!--pages/admin_batch/admin_batch.wxml  批量上架 v2-->
+<view class="page-container {{tab === 'simple' ? 'has-bottom-bar' : ''}}">
 
   <!-- 维护模式入口说明位（指向现有维护模式配置，无新增逻辑） -->
   <view class="notice-bar" bindtap="goMaintenance">
@@ -8,120 +8,74 @@
   </view>
 
   <!-- 顶部 Tab -->
-  <view class="tab-bar">
-    <view class="tab-item {{tab === 'csv' ? 'active' : ''}}" data-tab="csv" bindtap="switchTab">表格导入</view>
-    <view class="tab-item {{tab === 'manual' ? 'active' : ''}}" data-tab="manual" bindtap="switchTab">手动录入</view>
-    <view class="tab-item {{tab === 'drafts' ? 'active' : ''}}" data-tab="drafts" bindtap="switchTab">
-      待上架<text class="tab-badge" wx:if="{{draftsTotal > 0}}">{{draftsTotal}}</text>
-    </view>
-  </view>
-
-  <!-- ===================== 表格导入 ===================== -->
-  <block wx:if="{{tab === 'csv'}}">
-    <view class="card">
-      <view class="card-title">① 选择表格（CSV，UTF-8）</view>
-      <view class="card-desc">列名：title, description, price, category, type, image_filename1~6</view>
-      <view class="pick-row" bindtap="chooseCSV">
-        <text class="pick-icon">📄</text>
-        <text class="pick-text">{{csvFileName || '选择 CSV 文件'}}</text>
+  <scroll-view class="tab-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="tab-bar">
+      <view class="tab-item {{tab === 'simple' ? 'active' : ''}}" data-tab="simple" bindtap="switchTab">极简上架</view>
+      <view class="tab-item {{tab === 'drafts' ? 'active' : ''}}" data-tab="drafts" bindtap="switchTab">
+        待上架<text class="tab-badge" wx:if="{{draftsTotal > 0}}">{{draftsTotal}}</text>
       </view>
-      <view class="tip">提示：先把 CSV 发到微信「文件传输助手」，再来这里选择</view>
+      <view class="tab-item {{tab === 'advanced' ? 'active' : ''}}" data-tab="advanced" bindtap="switchTab">高级</view>
+      <view class="tab-item {{tab === 'admin' ? 'active' : ''}}" wx:if="{{isSuper}}" data-tab="admin" bindtap="switchTab">授权</view>
     </view>
+  </scroll-view>
 
+  <!-- ===================== 极简上架（默认） ===================== -->
+  <block wx:if="{{tab === 'simple'}}">
     <view class="card">
-      <view class="card-title">② 选择图片压缩包（ZIP）</view>
-      <view class="card-desc">压缩包内的图片文件名需与 CSV 中 image_filename 列一致</view>
-      <view class="pick-row" bindtap="chooseZip">
-        <text class="pick-icon">🗂️</text>
-        <text class="pick-text">{{zipFileName || '选择 ZIP 文件'}}</text>
+      <view class="card-title">① 选图 · ② 填价 · ③ 上架</view>
+      <view class="card-desc">一次可选多张，一张图 = 一件商品；标题自动生成，分类默认「其他闲置」</view>
+      <view class="pick-row big" bindtap="chooseSimpleImages">
+        <text class="pick-icon">🖼️</text>
+        <text class="pick-text">{{simpleItems.length > 0 ? '继续添加图片' : '从相册选择 / 拍照'}}</text>
+        <text class="pick-count" wx:if="{{simpleItems.length > 0}}">{{simpleItems.length}}/{{simpleMax}}</text>
       </view>
-      <view class="tip" wx:if="{{uploadingZip}}">正在上传/解压，请稍候…</view>
+      <view class="tip">已选满 {{simpleMax}} 张后请先导入本批</view>
     </view>
 
-    <view class="card" wx:if="{{totalRows > 0}}">
-      <view class="card-title">③ 预览与导入（共 {{totalRows}} 行）</view>
+    <block wx:if="{{simpleItems.length > 0}}">
+      <view class="card quick-card">
+        <view class="quick-row">
+          <view class="quick-btn" bindtap="batchSetNegotiable">全部设为面议</view>
+          <view class="quick-btn" bindtap="batchFillPrice">批量填充价格</view>
+        </view>
+        <view class="tip">不填价格也可以上架，详情页会显示「价格面议」</view>
+      </view>
 
-      <view class="row-list">
-        <view class="row-item" wx:for="{{rows}}" wx:key="rowNo" wx:if="{{index < 20}}">
-          <view class="row-head">
-            <text class="row-no">第 {{item.rowNo}} 行</text>
-            <text class="row-type">{{item.type}}</text>
-            <text class="row-img ok" wx:if="{{item.skipped && item.imgState !== 'missing'}}">已导入</text>
-            <text class="row-img {{item.imgState}}" wx:elif="{{item.imageNames.length > 0 && item.imgState === 'ok'}}">图片 {{item.images.length}} 张</text>
-            <text class="row-img missing" wx:elif="{{item.imageNames.length > 0}}">图片缺失</text>
-            <text class="row-img none" wx:else>无图</text>
+      <view class="card simple-item" wx:for="{{simpleItems}}" wx:key="uid">
+        <image class="simple-img" src="{{item.fileID || item.path}}" mode="aspectFill"/>
+        <view class="simple-meta">
+          <view class="simple-status {{item.status}}">
+            <block wx:if="{{item.status === 'done'}}">✓ 已上传</block>
+            <block wx:elif="{{item.status === 'uploading'}}">上传中…</block>
+            <block wx:elif="{{item.status === 'fail'}}">上传失败，点击重试</block>
+            <block wx:else>待上传</block>
           </view>
-          <text class="row-title">{{item.title}}</text>
-          <view class="row-skip" wx:if="{{item.imgState === 'missing'}}" data-row="{{item.rowNo}}" bindtap="toggleSkipRow">
-            {{item.skipped ? '已跳过（点击恢复）' : '跳过此行'}}
+          <view class="simple-price-row">
+            <text class="simple-price-label">价格</text>
+            <input
+              class="simple-price-input"
+              type="digit"
+              value="{{item.price}}"
+              placeholder="选填"
+              data-uid="{{item.uid}}"
+              bindinput="onSimplePriceInput"
+              bindblur="onSimplePriceBlur"
+            />
+            <text class="simple-price-unit">元</text>
           </view>
         </view>
-        <view class="row-more" wx:if="{{totalRows > 20}}">仅预览前 20 行，共 {{totalRows}} 行</view>
-      </view>
-
-      <view class="progress" wx:if="{{importing}}">
-        <view class="progress-bar"><view class="progress-inner" style="width: {{importProgress}}%"></view></view>
-        <text class="progress-text">导入中 {{importProgress}}%</text>
-      </view>
-
-      <view class="btn-primary" bindtap="startImport" wx:if="{{!importing}}">开始导入（写入待上架）</view>
-      <view class="btn-ghost" wx:else>导入中，请勿离开…</view>
-
-      <view class="summary" wx:if="{{importSummary}}">{{importSummary}}</view>
-
-      <block wx:if="{{failedRows.length > 0}}">
-        <view class="fail-title">失败明细（{{failedRows.length}}）</view>
-        <view class="fail-item" wx:for="{{failedRows}}" wx:key="rowNo">
-          <text class="fail-no">第 {{item.rowNo}} 行</text>
-          <text class="fail-err">{{item.error}}</text>
+        <view class="simple-ops">
+          <view class="mini-btn warn" wx:if="{{item.status === 'fail'}}" data-uid="{{item.uid}}" bindtap="retrySimpleItem">重试</view>
+          <view class="mini-btn danger" data-uid="{{item.uid}}" bindtap="removeSimpleItem">移除</view>
         </view>
-        <view class="btn-ghost" bindtap="retryFailed">重试失败行</view>
-      </block>
-    </view>
-  </block>
+      </view>
 
-  <!-- ===================== 手动录入 ===================== -->
-  <block wx:if="{{tab === 'manual'}}">
-    <view class="card">
-      <view class="card-title">图片（最多 {{maxImages}} 张，选填）</view>
-      <view class="img-grid">
-        <view class="img-cell" wx:for="{{manualImages}}" wx:key="*this">
-          <image class="img-thumb" src="{{item}}" mode="aspectFill"/>
-          <view class="img-del" catchtap="deleteManualImage" data-index="{{index}}">×</view>
-        </view>
-        <view class="img-cell img-add" wx:if="{{manualImages.length < maxImages}}" bindtap="chooseManualImages">＋</view>
-      </view>
-    </view>
+      <view class="card summary-card" wx:if="{{simpleSummary}}">{{simpleSummary}}</view>
+    </block>
 
-    <view class="card">
-      <view class="field">
-        <text class="label">标题</text>
-        <input class="input" value="{{manualTitle}}" data-field="manualTitle" bindinput="onManualInput" placeholder="必填" maxlength="60"/>
-      </view>
-      <view class="field">
-        <text class="label">类型</text>
-        <picker mode="selector" range="{{typeOptions}}" range-key="label" value="{{manualTypeIndex}}" bindchange="onManualTypeChange">
-          <view class="picker">{{typeOptions[manualTypeIndex].label}} ›</view>
-        </picker>
-      </view>
-      <view class="field">
-        <text class="label">分类</text>
-        <picker mode="selector" range="{{categoryList}}" range-key="name" value="{{manualCategoryIndex}}" bindchange="onManualCategoryChange">
-          <view class="picker">{{categoryList[manualCategoryIndex].name || '选择分类'}} ›</view>
-        </picker>
-      </view>
-      <view class="field">
-        <text class="label">价格</text>
-        <input class="input" type="digit" value="{{manualPrice}}" data-field="manualPrice" bindinput="onManualInput" placeholder="闲置转让必填；求购/易物可留空"/>
-      </view>
-      <view class="field column">
-        <text class="label">描述</text>
-        <textarea class="textarea" value="{{manualDesc}}" data-field="manualDesc" bindinput="onManualInput" maxlength="500" placeholder="选填"/>
-      </view>
+    <view class="card empty" wx:else>
+      <text class="empty-hint">还没有选择图片。从相册选几张，填上价格就能批量上架。</text>
     </view>
-
-    <view class="btn-primary" bindtap="submitManual" wx:if="{{!manualSubmitting}}">提交到待上架</view>
-    <view class="btn-ghost" wx:else>提交中…</view>
   </block>
 
   <!-- ===================== 待上架 ===================== -->
@@ -129,7 +83,8 @@
     <view class="card">
       <view class="card-title">待上架（{{draftsTotal}}）</view>
       <view class="card-desc">确认无误后逐条上架；上架后立即出现在首页</view>
-      <view class="btn-ghost" wx:if="{{drafts.length > 0}}" bindtap="publishAll">全部上架（当前页）</view>
+      <view class="btn-ghost" wx:if="{{drafts.length > 0 && !publishingAll}}" bindtap="publishAll">全部上架（当前页）</view>
+      <view class="btn-ghost" wx:elif="{{publishingAll}}">上架中，请勿离开…</view>
     </view>
 
     <view class="card" wx:if="{{draftsLoading}}">加载中…</view>
@@ -140,11 +95,11 @@
         <image class="draft-img" src="{{item.cover || '/images/default-goods.png'}}" mode="aspectFill" data-url="{{item.cover}}" bindtap="previewDraft"/>
         <view class="draft-meta">
           <text class="draft-title">{{item.title}}</text>
-          <text class="draft-price">{{item.priceText}}</text>
+          <text class="draft-price {{item.price > 0 ? '' : 'muted'}}">{{item.priceText}}</text>
           <view class="draft-tags">
             <text class="tag">{{item.type}}</text>
             <text class="tag">{{item.categoryName || '未分类'}}</text>
-            <text class="tag" wx:if="{{item.importRowNo}}">CSV 第 {{item.importRowNo}} 行</text>
+            <text class="tag" wx:if="{{item.importRowNo}}">第 {{item.importRowNo}} 件</text>
           </view>
         </view>
       </view>
@@ -154,4 +109,186 @@
       </view>
     </view>
   </block>
+
+  <!-- ===================== 高级 ===================== -->
+  <block wx:if="{{tab === 'advanced'}}">
+    <view class="card">
+      <view class="card-desc">桌面场景使用。手机端请回到「极简上架」，不需要 CSV 和 ZIP。</view>
+    </view>
+
+    <view class="sub-bar">
+      <view class="sub-item {{advTab === 'csv' ? 'active' : ''}}" data-tab="csv" bindtap="switchAdvTab">表格导入</view>
+      <view class="sub-item {{advTab === 'manual' ? 'active' : ''}}" data-tab="manual" bindtap="switchAdvTab">手动录入</view>
+    </view>
+
+    <block wx:if="{{advTab === 'csv'}}">
+      <view class="card">
+        <view class="card-title">① 选择表格（CSV，UTF-8）</view>
+        <view class="card-desc">列名：title, description, price, category, type, image_filename1~6</view>
+        <view class="pick-row" bindtap="chooseCSV">
+          <text class="pick-icon">📄</text>
+          <text class="pick-text">{{csvFileName || '选择 CSV 文件'}}</text>
+        </view>
+        <view class="tip">提示：先把 CSV 发到微信「文件传输助手」，再来这里选择</view>
+      </view>
+
+      <view class="card">
+        <view class="card-title">② 选择图片压缩包（ZIP）</view>
+        <view class="card-desc">压缩包内的图片文件名需与 CSV 中 image_filename 列一致</view>
+        <view class="pick-row" bindtap="chooseZip">
+          <text class="pick-icon">🗂️</text>
+          <text class="pick-text">{{zipFileName || '选择 ZIP 文件'}}</text>
+        </view>
+        <view class="tip" wx:if="{{uploadingZip}}">正在上传/解压，请稍候…</view>
+      </view>
+
+      <view class="card" wx:if="{{totalRows > 0}}">
+        <view class="card-title">③ 预览与导入（共 {{totalRows}} 行）</view>
+
+        <view class="row-list">
+          <view class="row-item" wx:for="{{rows}}" wx:key="rowNo" wx:if="{{index < 20}}">
+            <view class="row-head">
+              <text class="row-no">第 {{item.rowNo}} 行</text>
+              <text class="row-type">{{item.type}}</text>
+              <text class="row-img ok" wx:if="{{item.skipped && item.imgState !== 'missing'}}">已导入</text>
+              <text class="row-img {{item.imgState}}" wx:elif="{{item.imageNames.length > 0 && item.imgState === 'ok'}}">图片 {{item.images.length}} 张</text>
+              <text class="row-img missing" wx:elif="{{item.imageNames.length > 0}}">图片缺失</text>
+              <text class="row-img none" wx:else>无图</text>
+            </view>
+            <text class="row-title">{{item.title}}</text>
+            <view class="row-skip" wx:if="{{item.imgState === 'missing'}}" data-row="{{item.rowNo}}" bindtap="toggleSkipRow">
+              {{item.skipped ? '已跳过（点击恢复）' : '跳过此行'}}
+            </view>
+          </view>
+          <view class="row-more" wx:if="{{totalRows > 20}}">仅预览前 20 行，共 {{totalRows}} 行</view>
+        </view>
+
+        <view class="progress" wx:if="{{importing}}">
+          <view class="progress-bar"><view class="progress-inner" style="width: {{importProgress}}%"></view></view>
+          <text class="progress-text">导入中 {{importProgress}}%</text>
+        </view>
+
+        <view class="btn-primary" bindtap="startImport" wx:if="{{!importing}}">开始导入（写入待上架）</view>
+        <view class="btn-ghost" wx:else>导入中，请勿离开…</view>
+
+        <view class="summary" wx:if="{{importSummary}}">{{importSummary}}</view>
+
+        <block wx:if="{{failedRows.length > 0}}">
+          <view class="fail-title">失败明细（{{failedRows.length}}）</view>
+          <view class="fail-item" wx:for="{{failedRows}}" wx:key="rowNo">
+            <text class="fail-no">第 {{item.rowNo}} 行</text>
+            <text class="fail-err">{{item.error}}</text>
+          </view>
+          <view class="btn-ghost" bindtap="retryFailed">重试失败行</view>
+        </block>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="card">
+        <view class="card-title">图片（最多 {{maxImages}} 张，选填）</view>
+        <view class="img-grid">
+          <view class="img-cell" wx:for="{{manualImages}}" wx:key="*this">
+            <image class="img-thumb" src="{{item}}" mode="aspectFill"/>
+            <view class="img-del" catchtap="deleteManualImage" data-index="{{index}}">×</view>
+          </view>
+          <view class="img-cell img-add" wx:if="{{manualImages.length < maxImages}}" bindtap="chooseManualImages">＋</view>
+        </view>
+      </view>
+
+      <view class="card">
+        <view class="field">
+          <text class="label">标题</text>
+          <input class="input" value="{{manualTitle}}" data-field="manualTitle" bindinput="onManualInput" placeholder="必填" maxlength="60"/>
+        </view>
+        <view class="field">
+          <text class="label">类型</text>
+          <picker mode="selector" range="{{typeOptions}}" range-key="label" value="{{manualTypeIndex}}" bindchange="onManualTypeChange">
+            <view class="picker">{{typeOptions[manualTypeIndex].label}} ›</view>
+          </picker>
+        </view>
+        <view class="field">
+          <text class="label">分类</text>
+          <picker mode="selector" range="{{categoryList}}" range-key="name" value="{{manualCategoryIndex}}" bindchange="onManualCategoryChange">
+            <view class="picker">{{categoryList[manualCategoryIndex].name || '选择分类'}} ›</view>
+          </picker>
+        </view>
+        <view class="field">
+          <text class="label">价格</text>
+          <input class="input" type="digit" value="{{manualPrice}}" data-field="manualPrice" bindinput="onManualInput" placeholder="可留空，留空按「价格面议」展示"/>
+        </view>
+        <view class="field column">
+          <text class="label">描述</text>
+          <textarea class="textarea" value="{{manualDesc}}" data-field="manualDesc" bindinput="onManualInput" maxlength="500" placeholder="选填"/>
+        </view>
+      </view>
+
+      <view class="btn-primary" bindtap="submitManual" wx:if="{{!manualSubmitting}}">提交到待上架</view>
+      <view class="btn-ghost" wx:else>提交中…</view>
+    </block>
+  </block>
+
+  <!-- ===================== 授权（仅超管） ===================== -->
+  <block wx:if="{{tab === 'admin' && isSuper}}">
+    <view class="card">
+      <view class="card-title">邀请授权（推荐）</view>
+      <view class="card-desc">生成邀请卡后转发给对方微信，对方点「接受」即可，全程无需输入任何东西。邀请卡 5 分钟内有效、只能用一次。</view>
+      <input class="input" value="{{inviteNote}}" bindinput="onInviteNote" placeholder="备注（选填，如：审核上架-张同学）" maxlength="50"/>
+      <view class="btn-primary" bindtap="createInvite" wx:if="{{!inviteCreating}}">生成邀请卡</view>
+      <view class="btn-ghost" wx:else>生成中…</view>
+      <button class="btn-primary share-invite" wx:if="{{inviteToken}}" open-type="share">转发邀请卡给 TA</button>
+      <view class="tip" wx:if="{{inviteToken}}">已生成，点上方按钮或右上角「···」→「转发」发出</view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">手动选人授权</view>
+      <view class="card-desc">按昵称或姓名搜索，选中后直接授权</view>
+      <view class="search-row">
+        <input class="search-input" value="{{grantKeyword}}" bindinput="onGrantKeyword" placeholder="输入昵称 / 姓名" confirm-type="search" bindconfirm="searchGrantUsers"/>
+        <view class="search-btn" bindtap="searchGrantUsers">搜索</view>
+      </view>
+      <input class="input" value="{{grantNote}}" bindinput="onGrantNote" placeholder="备注（选填）" maxlength="50"/>
+
+      <view class="candidate" wx:for="{{grantCandidates}}" wx:key="_id">
+        <image class="candidate-avatar" src="{{item.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"/>
+        <view class="candidate-meta">
+          <text class="candidate-name">{{item.nickName || item.realName || '未命名用户'}}</text>
+          <text class="candidate-school">{{item.universityName || '未选学校'}}</text>
+        </view>
+        <view class="mini-btn primary" data-id="{{item._id}}" data-name="{{item.nickName || item.realName}}" bindtap="grantTo">授权</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">已授权名单（{{adminList.length}}）</view>
+      <view class="card-desc">回收后对方入口立即消失；其已导入的待上架信息仍保留</view>
+      <view class="admin-loading" wx:if="{{adminLoading}}">加载中…</view>
+      <view class="empty" wx:elif="{{adminList.length === 0}}">还没有授权的用户</view>
+
+      <view class="admin-item" wx:for="{{adminList}}" wx:key="_id">
+        <image class="candidate-avatar" src="{{item.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"/>
+        <view class="candidate-meta">
+          <view class="admin-name-row">
+            <text class="candidate-name">{{item.nickName || '未命名用户'}}</text>
+            <text class="admin-tag revoked" wx:if="{{item.status !== 'active'}}">已回收</text>
+            <text class="admin-tag invite" wx:elif="{{item.grantedVia === 'invite'}}">邀请卡</text>
+          </view>
+          <text class="candidate-school">{{item.grantTimeText || '-'}} · 尾号 {{item.openidTail}}</text>
+          <text class="admin-note" wx:if="{{item.note}}">备注：{{item.note}}</text>
+        </view>
+        <view class="mini-btn danger" wx:if="{{item.status === 'active'}}" data-id="{{item._id}}" data-name="{{item.nickName}}" bindtap="revokeAdmin">回收</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===================== 极简模式底部固定主按钮 ===================== -->
+  <view class="bottom-bar safe-bottom" wx:if="{{tab === 'simple'}}">
+    <block wx:if="{{simpleImportedIds.length > 0}}">
+      <button class="bottom-btn ghost" bindtap="confirmSimpleImport" disabled="{{simpleBusy}}">继续导入下一批</button>
+      <button class="bottom-btn primary" bindtap="publishSimpleAll">一键全部上架（{{simpleImportedIds.length}}）</button>
+    </block>
+    <button class="bottom-btn primary full" wx:else bindtap="confirmSimpleImport" disabled="{{simpleBusy || simpleItems.length === 0}}">
+      {{simpleBusy ? '导入中…' : '确认导入（' + simpleItems.length + '）'}}
+    </button>
+  </view>
 </view>

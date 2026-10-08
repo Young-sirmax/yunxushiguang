@@ -65,6 +65,13 @@
   letter-spacing: 1rpx;
 }
 
+/* 未定价（批量上架极简模式允许价格留空）：用弱化色，不抢价格色的视觉位 */
+.price.negotiable {
+  font-size: 36rpx;
+  color: var(--text-secondary);
+  letter-spacing: 0;
+}
+
 .price.want {
   color: var(--primary);
 }

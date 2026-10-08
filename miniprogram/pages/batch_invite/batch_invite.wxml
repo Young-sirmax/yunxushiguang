@@ -1,0 +1,29 @@
+<!--pages/batch_invite/batch_invite.wxml  接受批量上架邀请卡-->
+<view class="page">
+  <view class="card">
+    <view class="hero">📥</view>
+    <view class="title">批量上架授权邀请</view>
+
+    <block wx:if="{{!done}}">
+      <view class="desc">
+        管理员邀请你成为「云叙石光」的批量上架专员。<br/>
+        接受后，你在「我的」页会看到「批量上架」入口，可以用手机批量给闲置物品上架。
+      </view>
+
+      <view class="err" wx:if="{{errMsg}}">{{errMsg}}</view>
+
+      <button
+        class="btn-primary"
+        bindtap="accept"
+        disabled="{{accepting || !token}}"
+      >{{accepting ? '处理中…' : '接受授权'}}</button>
+
+      <view class="hint">邀请卡 5 分钟内有效，且只能被使用一次。</view>
+    </block>
+
+    <block wx:else>
+      <view class="desc">你已获得批量上架权限。</view>
+      <button class="btn-primary" bindtap="goHome">回到首页</button>
+    </block>
+  </view>
+</view>

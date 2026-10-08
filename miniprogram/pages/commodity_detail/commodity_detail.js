@@ -284,7 +284,8 @@ Page({
     if (c.type === 'skill') {
       return `【技能服务】${c.title}｜${formatSkillPrice(c.price_unit, c.price)}`;
     }
-    const price = c.price > 0 ? `¥${c.price}` : '免费';
+    // 价格为 0 = 未定价（批量上架极简模式允许留空），分享文案按「价格面议」而不是「免费」
+    const price = c.price > 0 ? `¥${c.price}` : '价格面议';
     return `【${c.condition || '闲置'}】${c.title} ${price}`;
   },
 

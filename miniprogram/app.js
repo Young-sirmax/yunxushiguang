@@ -5,7 +5,9 @@ App({
     openid: null,
     university: null,
     editParams: null,
-    // 全局配置缓存（维护模式开关），5 分钟有效
+    // 全局配置缓存（维护模式开关 + 批量上架权限），60 秒有效。
+    // 指令 4.3：授权/回收要"即时生效"，故从 5 分钟降到 60 秒，
+    // 并在授权/回收成功后由调用方 app.clearAppConfigCache() 主动失效。
     appConfig: null,
     // 技能分类缓存（来自 config 集合），1 小时有效
     skillCategories: null
@@ -29,11 +31,11 @@ App({
       this.refreshUserInfo();
     }
   },
-  // 拉取全局配置（维护模式），带 5 分钟本地缓存；失败一律按未开启维护处理
+  // 拉取全局配置（维护模式 + 批量上架权限），带 60 秒本地缓存；失败一律按未开启维护处理
   async getAppConfig(force) {
     const now = Date.now();
     const cached = this.globalData.appConfig;
-    if (!force && cached && (now - cached.time) < 5 * 60 * 1000) {
+    if (!force && cached && (now - cached.time) < 60 * 1000) {
       return cached.data;
     }
     try {
@@ -46,7 +48,12 @@ App({
     } catch (err) {
       console.error('获取全局配置失败:', err);
     }
-    return cached ? cached.data : { maintenance: false, notice: '' };
+    return cached ? cached.data : { maintenance: false, notice: '', canBatch: false, isSuper: false };
+  },
+
+  // 主动作废全局配置缓存（授权/回收成功后调用，让权限变更即时生效）
+  clearAppConfigCache() {
+    this.globalData.appConfig = null;
   },
 
   // 技能分类列表：来源是 config 集合（app.skill_categories），本地缓存 1 小时。

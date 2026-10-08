@@ -35,17 +35,23 @@ page {
   line-height: 1.6;
 }
 
-/* Tab */
+/* Tab（4 个 Tab 起用横向 scroll-view 承载，避免挤压） */
+.tab-scroll {
+  width: 100%;
+  margin-bottom: 24rpx;
+}
+
 .tab-bar {
   display: flex;
   padding: 6rpx;
   background: var(--fill-strong);
   border-radius: 999rpx;
-  margin-bottom: 24rpx;
+  box-sizing: border-box;
 }
 
 .tab-item {
-  flex: 1;
+  flex: 1 0 auto;
+  min-width: 158rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -167,6 +173,12 @@ page {
   font-size: 20rpx;
   padding: 2rpx 12rpx;
   border-radius: 999rpx;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+/* 已导入：与基础 .row-img 同色，此处显式声明，避免依赖隐式继承 */
+.row-img.ok {
   background: var(--primary-light);
   color: var(--primary-dark);
 }
@@ -452,4 +464,333 @@ page {
   color: var(--primary-dark);
   background: var(--primary-light);
   margin-top: 18rpx;
+}
+
+.mini-btn.warn {
+  color: var(--warning-dark);
+  background: var(--warning-soft);
+}
+
+/* ===== 极简上架（默认主流程） ===== */
+
+/* 底部固定主按钮占位，避免内容被遮住 */
+.page-container.has-bottom-bar {
+  padding-bottom: 220rpx;
+}
+
+.pick-row.big {
+  height: 140rpx;
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.pick-row.big .pick-text {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.pick-count {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.quick-card {
+  padding: 20rpx 28rpx;
+}
+
+.quick-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.quick-btn {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--primary-dark);
+  background: var(--primary-light);
+}
+
+.simple-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+}
+
+.simple-img {
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 16rpx;
+  background: var(--fill);
+  flex-shrink: 0;
+}
+
+.simple-meta {
+  flex: 1;
+  min-width: 0;
+  padding: 0 20rpx;
+}
+
+.simple-status {
+  font-size: 22rpx;
+  color: var(--text-light);
+  margin-bottom: 14rpx;
+}
+
+.simple-status.done {
+  color: var(--success-dark);
+}
+
+.simple-status.fail {
+  color: var(--error);
+}
+
+.simple-status.uploading {
+  color: var(--warning-dark);
+}
+
+.simple-price-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  height: 72rpx;
+  padding: 0 20rpx;
+  background: var(--bg);
+  border-radius: 16rpx;
+}
+
+.simple-price-label {
+  font-size: 25rpx;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.simple-price-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 28rpx;
+  color: var(--text);
+}
+
+.simple-price-unit {
+  font-size: 24rpx;
+  color: var(--text-light);
+  flex-shrink: 0;
+}
+
+.simple-ops {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.simple-ops .mini-btn {
+  padding: 10rpx 22rpx;
+  font-size: 24rpx;
+}
+
+.summary-card {
+  font-size: 25rpx;
+  color: var(--text-secondary);
+}
+
+/* 待上架：面议价格用弱化色，不抢价格色的视觉位 */
+.draft-price.muted {
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+/* ===== 高级模式子 Tab ===== */
+.sub-bar {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+}
+
+.sub-item {
+  flex: 1;
+  height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  border-radius: 999rpx;
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--white);
+}
+
+.sub-item.active {
+  color: var(--primary-dark);
+  background: var(--primary-light);
+}
+
+/* ===== 授权（仅超管） ===== */
+.search-row {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+  margin: 16rpx 0;
+}
+
+.search-input {
+  flex: 1;
+  height: 84rpx;
+  padding: 0 24rpx;
+  background: var(--bg);
+  border-radius: 999rpx;
+  font-size: 27rpx;
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.search-btn {
+  flex-shrink: 0;
+  height: 84rpx;
+  padding: 0 36rpx;
+  line-height: 84rpx;
+  border-radius: 999rpx;
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--primary-grad);
+}
+
+.share-invite {
+  margin-top: 18rpx;
+}
+
+.candidate,
+.admin-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid var(--fill);
+}
+
+.candidate:last-child,
+.admin-item:last-child {
+  border-bottom: none;
+}
+
+.candidate-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: var(--fill);
+  flex-shrink: 0;
+}
+
+.candidate-meta {
+  flex: 1;
+  min-width: 0;
+  padding: 0 20rpx;
+}
+
+.admin-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex-wrap: wrap;
+}
+
+.candidate-name {
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.candidate-school {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--text-light);
+}
+
+.admin-note {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--text-secondary);
+}
+
+.admin-tag {
+  font-size: 20rpx;
+  padding: 2rpx 12rpx;
+  border-radius: 999rpx;
+  background: var(--fill);
+  color: var(--text-secondary);
+}
+
+.admin-tag.revoked {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
+.admin-tag.invite {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.admin-loading {
+  padding: 20rpx 0;
+  font-size: 25rpx;
+  color: var(--text-light);
+  text-align: center;
+}
+
+/* ===== 底部固定主按钮（单手可达，热区 ≥ 44px） ===== */
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 16rpx;
+  padding: 20rpx 24rpx;
+  background: var(--white);
+  box-shadow: 0 -6rpx 24rpx rgba(var(--text-rgb), 0.06);
+  z-index: 10;
+}
+
+.bottom-btn {
+  flex: 1;
+  height: 92rpx;
+  line-height: 92rpx;
+  padding: 0;
+  text-align: center;
+  border-radius: 999rpx;
+  font-size: 29rpx;
+  font-weight: 600;
+  border: none;
+}
+
+.bottom-btn::after {
+  border: none;
+}
+
+.bottom-btn.primary {
+  color: var(--white);
+  background: var(--primary-grad);
+  box-shadow: var(--shadow-primary);
+}
+
+.bottom-btn.primary[disabled] {
+  opacity: 0.5;
+  box-shadow: none;
+}
+
+.bottom-btn.ghost {
+  color: var(--primary-dark);
+  background: var(--primary-light);
+}
+
+.bottom-btn.full {
+  flex: 1 0 100%;
 }
