@@ -971,7 +971,7 @@ page {
 
 .contact-readonly.empty {
   font-size: 26rpx;
-  color: var(--warning);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */
 }
 
 /* === 技能服务：类型高亮 / 发布按钮 === */

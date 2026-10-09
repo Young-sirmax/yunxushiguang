@@ -836,7 +836,7 @@
 
 .mini-tag.starred {
   background: var(--warning-grad);
-  color: var(--warning);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */
 }
 
 .mini-tag.rejected {
@@ -847,7 +847,7 @@
 .btn-star {
   flex: 1;
   background: var(--warning-grad);
-  color: var(--warning);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */
   border-radius: 40rpx;
   height: 76rpx;
   font-size: 30rpx;

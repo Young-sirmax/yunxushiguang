@@ -190,7 +190,7 @@
   padding: 4rpx 14rpx;
   border-radius: var(--radius-pill);
   font-weight: 600;
-  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */
   background: var(--warning-soft);
   flex-shrink: 0;
 }

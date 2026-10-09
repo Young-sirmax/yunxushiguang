@@ -373,7 +373,7 @@ page {
 
 .item-status.trade {
   background: var(--warning-soft);
-  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */
   font-weight: 600;
 }
 

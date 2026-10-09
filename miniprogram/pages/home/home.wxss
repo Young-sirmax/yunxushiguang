@@ -180,7 +180,7 @@ page {
 }
 
 .verify-mini-badge.pending {
-  color: var(--warning);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */
 }
 
 .menu-verify-badge {
@@ -545,7 +545,7 @@ page {
 
 .maintenance-text {
   font-size: 24rpx;
-  color: var(--warning);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */
   line-height: 1.5;
 }
 
