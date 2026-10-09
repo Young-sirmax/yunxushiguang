@@ -120,7 +120,7 @@ page {
   top: -12rpx;
   right: 24rpx;
   font-size: 20rpx;
-  color: var(--warning);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */
   background: var(--warning-grad);
   border-radius: var(--radius-pill);
   padding: 2rpx 16rpx;

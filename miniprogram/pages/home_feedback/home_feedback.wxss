@@ -313,7 +313,7 @@ page {
 .urgent-note {
   margin-top: 18rpx;
   background: var(--warning-soft);
-  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */
   font-size: 25rpx;
   line-height: 1.6;
   border-radius: 18rpx;

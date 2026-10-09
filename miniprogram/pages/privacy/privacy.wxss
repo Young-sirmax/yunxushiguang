@@ -119,14 +119,14 @@
 .tip-title {
   font-size: 28rpx;
   font-weight: 600;
-  color: var(--warning);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */
   display: block;
   margin-bottom: 10rpx;
 }
 
 .tip-content {
   font-size: 24rpx;
-  color: var(--warning);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning);   /* 状态/提示语义，不是价格 */
   line-height: 1.7;
 }
 

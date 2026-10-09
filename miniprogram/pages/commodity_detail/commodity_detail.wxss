@@ -360,7 +360,7 @@
 }
 
 .meta-tag.trade-status {
-  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */;
+  color: var(--warning-dark);   /* 状态/提示语义，不是价格 */
   background: var(--warning-soft);
   font-weight: 600;
 }

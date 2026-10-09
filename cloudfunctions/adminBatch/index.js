@@ -12,6 +12,7 @@
 //
 // 说明：规格中的"转为 open"在本项目里映射为既有的 status='onSale'
 //      （公开列表固定过滤 onSale，直接用 open 会导致上架后不可见）。
+const crypto = require('crypto');
 const cloud = require('wx-server-sdk');
 const AdmZip = require('adm-zip');
 const { buildDisplayKeyword } = require('./displayKeyword.js');
@@ -172,7 +173,7 @@ async function loadOperatorInfo(openid) {
  * 猜到 token 就能给自己授权。
  */
 function randomToken() {
-  return require('crypto').randomBytes(16).toString('hex');
+  return crypto.randomBytes(16).toString('hex');
 }
 
 /**
