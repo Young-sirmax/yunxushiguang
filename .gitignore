@@ -13,3 +13,7 @@ Thumbs.db
 
 # 本地密钥环境
 .env
+
+# Python 缓存
+__pycache__/
+*.pyc
