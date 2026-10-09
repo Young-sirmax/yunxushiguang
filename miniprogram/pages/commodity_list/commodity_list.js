@@ -75,6 +75,13 @@ function formatSkillPrice(unit, price) {
   return '¥' + amount + (unit === 'per_hour' ? '/小时' : '/次');
 }
 
+// 闲置报价文案：价格为 0 = 发布者未定价（批量上架极简模式允许留空），显示「面议」而不是「¥0」。
+// 与列表卡片、详情页、分享文案共用同一口径。
+function formatSellPrice(price) {
+  const amount = Number(price) || 0;
+  return amount > 0 ? '¥' + amount : '面议';
+}
+
 // ===== 泡泡排布 =====
 // 排布算法（自适应半径 + 错位网格，几何保证不交叠）在 utils/bubbleLayout.js，
 // 纯函数、可在 Node 里跑回归测试（tests/bubbleLayout.test.js）。
@@ -378,7 +385,7 @@ function drawExpandingCircle(ctx, circle, es, containerW, containerH) {
       ? '求购中'
       : (circle.type === 'exchange'
         ? '🔁 易物'
-        : (circle.type === 'skill' ? formatSkillPrice(circle.priceUnit, circle.price) : '¥' + circle.price)),
+        : (circle.type === 'skill' ? formatSkillPrice(circle.priceUnit, circle.price) : formatSellPrice(circle.price))),
     cx,
     cy + contentR * 0.5
   );
@@ -474,7 +481,7 @@ function drawCircleContent(ctx, circle) {
   } else if (isSkill) {
     ctx.fillText(formatSkillPrice(circle.priceUnit, circle.price), cx, priceY);
   } else {
-    ctx.fillText('¥' + circle.price, cx, priceY);
+    ctx.fillText(formatSellPrice(circle.price), cx, priceY);
   }
 
   const tagY = cy + contentR * 0.75;
@@ -1308,7 +1315,7 @@ Page({
     const isExchange = circle.type === 'exchange';
     const isSkill = circle.type === 'skill';
 
-    let priceText = '¥' + (circle.price || 0);
+    let priceText = formatSellPrice(circle.price);
     if (isWant) priceText = '求购中';
     else if (isExchange) priceText = '想换：' + (circle.exchangeWant || '面议');
     else if (isSkill) priceText = formatSkillPrice(circle.priceUnit, circle.price);

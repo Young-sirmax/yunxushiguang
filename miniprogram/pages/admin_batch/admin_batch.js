@@ -30,9 +30,11 @@ const PRICE_UNIT_OPTIONS = [
 
 const MAX_IMAGES = 6;
 const IMPORT_BATCH = 50;        // 单次导入行数（与云函数上限一致）
+const PUBLISH_BATCH = 50;       // 单次上架条数（与云函数 publishBatch 上限一致）
 const SIMPLE_MAX = 50;          // 极简模式单批图片上限（指令 5.1）
 const SIMPLE_STORAGE_KEY = 'batchSimpleDraft';   // 断点保护（指令 6）
 const SIMPLE_RESTORE_TTL = 24 * 60 * 60 * 1000;  // 恢复的草稿最长保留 24 小时
+const SIMPLE_ID_MAX = 200;      // 落盘的「已导入未上架」id 上限，避免 storage 无限增长
 
 let uidSeed = 0;
 function genUid() {
@@ -88,7 +90,6 @@ Page({
     // item: { uid, path, fileName, fileID, status: pending|uploading|done|fail, price, error }
     simpleItems: [],
     simpleImportedIds: [],
-    simpleImportedCount: 0,
     simpleBusy: false,
     simpleSummary: '',
 
@@ -146,7 +147,22 @@ Page({
 
   async checkPermission() {
     const cfg = await app.getAppConfig(true);
-    if (!cfg || !cfg.canBatch) {
+
+    // 拉取失败 ≠ 无权限：网络抖动时不能把合法管理员挡在门外，给一次重试机会
+    if (!cfg || cfg.configUnavailable) {
+      wx.showModal({
+        title: '网络异常',
+        content: '权限校验失败，请检查网络后重试。',
+        confirmText: '重试',
+        success: (res) => {
+          if (res.confirm) this.checkPermission();
+          else wx.navigateBack();
+        }
+      });
+      return;
+    }
+
+    if (!cfg.canBatch) {
       wx.showModal({
         title: '无权限',
         content: '当前账号没有批量上架权限。请联系管理员在小程序「批量上架 → 授权」中开通。',
@@ -155,6 +171,7 @@ Page({
       });
       return;
     }
+
     this.setData({ isSuper: !!cfg.isSuper });
     if (cfg.isSuper) this.loadAdmins();
   },
@@ -181,7 +198,7 @@ Page({
 
   // ===================== 极简上架（默认主流程） =====================
 
-  // 断点保护：已上传的图片 fileID 与已填价格写入本地 storage（指令 6）
+  // 断点保护：已上传的图片 fileID、已填价格、已导入但未上架的 draft id 一并写入本地 storage（指令 6）
   persistSimple() {
     try {
       const items = this.data.simpleItems
@@ -192,7 +209,12 @@ Page({
           fileName: it.fileName || '',
           price: this.priceOf(it)
         }));
-      wx.setStorageSync(SIMPLE_STORAGE_KEY, { time: Date.now(), items });
+      wx.setStorageSync(SIMPLE_STORAGE_KEY, {
+        time: Date.now(),
+        items,
+        // 已导入未上架的草稿 id 也要落盘，否则重进小程序后「一键全部上架」入口会消失
+        importedIds: this.data.simpleImportedIds.slice(0, SIMPLE_ID_MAX)
+      });
     } catch (err) {
       // 存储失败不影响上架主流程
       console.warn('保存极简草稿失败:', err);
@@ -206,12 +228,17 @@ Page({
     } catch (err) {
       return;
     }
-    if (!saved || !Array.isArray(saved.items) || saved.items.length === 0) return;
+    if (!saved) return;
     if (Date.now() - (saved.time || 0) > SIMPLE_RESTORE_TTL) {
       wx.removeStorageSync(SIMPLE_STORAGE_KEY);
       return;
     }
-    const items = saved.items.map(it => ({
+
+    const savedItems = Array.isArray(saved.items) ? saved.items : [];
+    const savedIds = Array.isArray(saved.importedIds) ? saved.importedIds : [];
+    if (savedItems.length === 0 && savedIds.length === 0) return;
+
+    const items = savedItems.map(it => ({
       uid: it.uid || genUid(),
       path: '',
       fileName: it.fileName || '',
@@ -221,8 +248,9 @@ Page({
       error: ''
     }));
     items.forEach(it => { this._simplePrices[it.uid] = it.price; });
-    this.setData({ simpleItems: items });
-    showToast(`已恢复上次未完成的 ${items.length} 件`);
+
+    this.setData({ simpleItems: items, simpleImportedIds: savedIds });
+    showToast(`已恢复上次未完成的 ${items.length} 件${savedIds.length ? `、${savedIds.length} 条待上架` : ''}`);
   },
 
   /** 取某条的当前价格：以内存里的实时输入为准，其次用 data 上的值 */
@@ -395,31 +423,38 @@ Page({
 
     this.setData({ simpleBusy: true, simpleSummary: '' });
     showLoading('导入中...');
-    let okIds = [];
+    const okIds = [];
+    const okSet = {};
     let failList = [];
     try {
       const res = await API.batchImportRows(rows, batchId, { mode: 'simple' });
       const results = (res.data && res.data.results) || [];
       results.forEach(r => {
-        if (r.ok) okIds.push(r.id);
-        else failList.push({ rowNo: r.rowNo, error: r.error || '导入失败' });
+        // 服务端 results 按行序返回，rowNo 即 ready 中的第几件（1 起）。
+        // 必须用 rowNo 反查 uid —— 若改用「okIds 的下标」反查，一旦有失败项穿插，
+        // 下标就会错位：失败项被当成功移除（无法重试），成功项反而留下被重复导入。
+        const idx = (r.rowNo || 0) - 1;
+        if (r.ok) {
+          okIds.push(r.id);
+          if (ready[idx]) okSet[ready[idx].uid] = true;
+        } else {
+          failList.push({ rowNo: r.rowNo, error: r.error || '导入失败' });
+        }
       });
     } catch (err) {
+      // 请求级失败：无法判断服务端是否已写入，全部保留在原地由用户决定是否重试
       failList = rows.map(r => ({ rowNo: r.rowNo, error: err.message || '请求失败' }));
     }
     hideLoading();
 
     // 成功的从列表移除（已进待上架，id 留在 simpleImportedIds 供一键上架）；
     // 失败的保留在原地，可单击重试
-    const okSet = {};
-    okIds.forEach((id, i) => { okSet[ready[i].uid] = true; });
     const remain = this.data.simpleItems.filter(it => !okSet[it.uid]);
 
     this.setData({
       simpleBusy: false,
       simpleItems: remain,
       simpleImportedIds: this.data.simpleImportedIds.concat(okIds),
-      simpleImportedCount: this.data.simpleImportedIds.length + okIds.length,
       simpleSummary: `成功 ${okIds.length} 条，失败 ${failList.length} 条`
     }, () => this.persistSimple());
 
@@ -449,16 +484,25 @@ Page({
       success: async (res) => {
         if (!res.confirm) return;
         showLoading('上架中...');
-        let msg = '';
-        try {
-          const r = await API.batchPublishBatch(ids);
-          msg = r.msg || `已上架 ${ids.length} 条`;
-        } catch (err) {
-          msg = err.message || '上架失败';
+        // 服务端 publishBatch 单次上限 50 条，超出会被静默截断。
+        // 这里按 50 分批发完，避免「按钮显示 60 条、实际只上架 50 条」。
+        let okTotal = 0;
+        let failTotal = 0;
+        let firstErr = '';
+        for (let i = 0; i < ids.length; i += PUBLISH_BATCH) {
+          try {
+            const r = await API.batchPublishBatch(ids.slice(i, i + PUBLISH_BATCH));
+            const d = r.data || {};
+            okTotal += d.okCount || 0;
+            failTotal += d.failCount || 0;
+          } catch (err) {
+            failTotal += Math.min(PUBLISH_BATCH, ids.length - i);
+            if (!firstErr) firstErr = err.message || '上架失败';
+          }
         }
         hideLoading();
-        showToast(msg);
-        this.setData({ simpleImportedIds: [], simpleImportedCount: 0, simpleSummary: '' });
+        showToast(`已上架 ${okTotal} 条${failTotal > 0 ? `，失败 ${failTotal} 条` : ''}${firstErr ? `（${firstErr}）` : ''}`);
+        this.setData({ simpleImportedIds: [], simpleSummary: '' });
         try { wx.removeStorageSync(SIMPLE_STORAGE_KEY); } catch (err) { /* 忽略 */ }
         this.loadDrafts();
       }
