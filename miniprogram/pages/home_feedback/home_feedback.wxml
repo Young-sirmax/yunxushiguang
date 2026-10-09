@@ -25,6 +25,18 @@
     />
     <view class="qr-tip">▲ 长按二维码可「识别图中二维码」或保存到相册</view>
     <view class="qr-btn" bindtap="saveQr">📥 保存二维码到相册</view>
+
+    <!-- 二维码过期兜底：直接加我微信 -->
+    <view class="qr-divider"></view>
+    <view class="wx-block">
+      <view class="wx-title">群二维码过期了？加我微信，我拉你进群</view>
+      <view class="wx-row" bindtap="copyWechat">
+        <text class="wx-label">微信号</text>
+        <text class="wx-id">{{wechatId}}</text>
+        <view class="wx-copy" catchtap="copyWechat">复制</view>
+      </view>
+      <view class="wx-tip">扫码进群 · 或加我微信由我拉你进群，两种方式都可以～</view>
+    </view>
   </view>
 
   <!-- 反馈模板 -->
@@ -78,7 +90,7 @@
         <text class="rule-txt">大家友善讨论、互相尊重，一起给产品出谋划策</text>
       </view>
     </view>
-    <view class="urgent-note">⚠️ 遇到紧急、影响使用的重大问题，请直接私信群主！</view>
+    <view class="urgent-note">⚠️ 遇到紧急、影响使用的重大问题，请直接私信群主（微信号见上方，点击即可复制）！</view>
   </view>
 
   <view class="thanks">
