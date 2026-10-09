@@ -166,13 +166,13 @@ async function loadOperatorInfo(openid) {
   }
 }
 
-/** 邀请 token：32 位十六进制随机串 */
+/**
+ * 邀请 token：32 位十六进制随机串。
+ * 用 crypto 而不是 Math.random —— 这个 token 等价于一次授权，Math.random 可预测，
+ * 猜到 token 就能给自己授权。
+ */
 function randomToken() {
-  let s = '';
-  for (let i = 0; i < 32; i++) {
-    s += Math.floor(Math.random() * 16).toString(16);
-  }
-  return s;
+  return require('crypto').randomBytes(16).toString('hex');
 }
 
 /**
@@ -272,16 +272,28 @@ exports.main = async (event) => {
       return { code: -1, msg: '邀请卡已过期，请让管理员重新生成' };
     }
 
-    // 一次性消费：先落 used 再授权，避免并发重复使用
-    await db.collection(INVITE_COLLECTION).doc(inv._id).update({
-      data: { used: true, usedBy: openid, usedAt: db.serverDate() }
-    });
-
+    // 已有权限的人不该把这张卡消耗掉，否则真正需要的人就用不了了。
+    // 放在消费之前判断，且此时不动 used。
     const exist = await db.collection('batch_admin')
       .where({ openid, status: 'active' }).limit(1).get();
     if (exist.data.length > 0) {
       return { code: 0, msg: '你已拥有批量上架权限' };
     }
+
+    // 一次性消费：用「条件更新」抢占（where 里带 used:false），
+    // 两个并发请求只有一个能把 used 从 false 改成 true，另一个 updated=0 即被判为已被使用。
+    // 不能用「先查 used 再写 used」——那中间有窗口，同一张卡会授权给两个人。
+    let claimed = 0;
+    try {
+      const upd = await db.collection(INVITE_COLLECTION)
+        .where({ token, used: false })
+        .update({ data: { used: true, usedBy: openid, usedAt: db.serverDate() } });
+      claimed = (upd && upd.stats && upd.stats.updated) || 0;
+    } catch (err) {
+      console.error('[adminBatch] 消费邀请卡失败:', err.message);
+      return { code: -1, msg: '接受邀请失败，请稍后重试' };
+    }
+    if (claimed === 0) return { code: -1, msg: '该邀请卡已被使用' };
 
     const me = await loadOperatorInfo(openid);
     await db.collection('batch_admin').add({

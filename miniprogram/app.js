@@ -48,7 +48,15 @@ App({
     } catch (err) {
       console.error('获取全局配置失败:', err);
     }
-    return cached ? cached.data : { maintenance: false, notice: '', canBatch: false, isSuper: false };
+    // 完全没拿到过配置时的兜底：标记 configUnavailable，
+    // 让调用方能区分「拉取失败」和「确实没有权限」——否则网络抖动会被误报成无权限。
+    return cached ? cached.data : {
+      maintenance: false,
+      notice: '',
+      canBatch: false,
+      isSuper: false,
+      configUnavailable: true
+    };
   },
 
   // 主动作废全局配置缓存（授权/回收成功后调用，让权限变更即时生效）
